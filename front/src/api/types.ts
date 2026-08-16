@@ -83,3 +83,31 @@ export interface DockerVolume {
 }
 
 export type ContainerAction = 'start' | 'stop' | 'restart' | 'pause' | 'unpause' | 'kill'
+
+export type PruneTarget = 'containers' | 'images' | 'volumes' | 'networks' | 'builder'
+
+export interface PruneCandidate {
+  id: string
+  name: string
+  size: number
+  createdAt: number
+  image?: string
+  status?: string
+  driver?: string
+  mountpoint?: string
+}
+
+export interface PrunePreview {
+  containers: PruneCandidate[]
+  images: PruneCandidate[]
+  volumes: PruneCandidate[]
+  networks: PruneCandidate[]
+  builder: PruneCandidate[]
+  /** Кеш сборки поштучно не разбираем — Docker отдаёт только суммарный размер. */
+  builderSize: number
+}
+
+export interface PruneResult {
+  deleted: number
+  reclaimed: number
+}

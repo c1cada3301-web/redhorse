@@ -9,6 +9,9 @@ import type {
   DockerNetwork,
   DockerVolume,
   JobStatus,
+  PrunePreview,
+  PruneResult,
+  PruneTarget,
   SystemInfo,
 } from './types'
 
@@ -21,17 +24,19 @@ export const keys = {
   df: ['system', 'df'] as const,
   networks: ['system', 'networks'] as const,
   volumes: ['system', 'volumes'] as const,
+  prunePreview: ['cleanup', 'preview'] as const,
 }
 
-/** Список контейнеров переспрашиваем: состояние меняется и снаружи Redhorse. */
+/** Список контейнеров переспрашиваем: состояние меняется и снаружи RedHorse. */
 const CONTAINERS_POLL_MS = 4000
 
-export function useContainersQuery() {
+export function useContainersQuery(pollMs: number = CONTAINERS_POLL_MS) {
   return useQuery({
     queryKey: keys.containers,
     queryFn: () => request<ApiContainer[]>('/containers', { query: { all: true } }),
-    refetchInterval: CONTAINERS_POLL_MS,
-    staleTime: CONTAINERS_POLL_MS,
+    // 0 в настройках означает «обновлять только вручную».
+    refetchInterval: pollMs > 0 ? pollMs : false,
+    staleTime: pollMs > 0 ? pollMs : Infinity,
   })
 }
 
@@ -132,4 +137,23 @@ export function useNetworksQuery() {
 
 export function useVolumesQuery() {
   return useQuery({ queryKey: keys.volumes, queryFn: () => request<DockerVolume[]>('/system/volumes') })
+}
+
+export function usePrunePreview() {
+  return useQuery({
+    queryKey: keys.prunePreview,
+    queryFn: () => request<PrunePreview>('/cleanup/preview'),
+    staleTime: 10_000,
+  })
+}
+
+export function usePrune() {
+  const client = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ target, allUnused = false }: { target: PruneTarget; allUnused?: boolean }) =>
+      request<PruneResult>(`/cleanup/${target}`, { method: 'POST', query: { all_unused: allUnused } }),
+    // Очистка задевает всё сразу: списки, размеры на диске, предпросмотр.
+    onSettled: () => client.invalidateQueries(),
+  })
 }

@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Boxes, Gauge, HardDrive, LayoutDashboard, Network, Settings, Trash2 } from 'lucide-react'
 import { useQueryClient, useIsFetching } from '@tanstack/react-query'
 import { useDocker } from './state/useDocker'
 import { useSystemInfo } from './api/queries'
@@ -9,11 +8,13 @@ import { useLogSessions } from './state/useLogSessions'
 import { Sidebar } from './components/shell/Sidebar'
 import type { NavKey } from './components/shell/Sidebar'
 import { TopBar } from './components/shell/TopBar'
-import { Placeholder } from './components/shell/Placeholder'
 import { ContainersPage } from './components/containers/ContainersPage'
 import { DashboardPage } from './components/dashboard/DashboardPage'
 import { ImagesPage } from './components/images/ImagesPage'
+import { CleanupPage } from './components/cleanup/CleanupPage'
+import { MonitoringPage } from './components/monitoring/MonitoringPage'
 import { NetworksPage } from './components/networks/NetworksPage'
+import { SettingsPage } from './components/settings/SettingsPage'
 import { VolumesPage } from './components/volumes/VolumesPage'
 import { LogDock } from './components/logview/LogDock'
 import { FloatingLogWindow } from './components/logview/FloatingLogWindow'
@@ -28,56 +29,6 @@ const PAGE_META: Record<NavKey, { title: string; subtitle: string }> = {
   monitoring: { title: 'Мониторинг', subtitle: 'CPU, память, диск и сеть по контейнерам' },
   cleanup: { title: 'Очистка', subtitle: 'Prune, политики хранения и таймеры' },
   settings: { title: 'Настройки', subtitle: 'Хосты, доступ, внешний вид' },
-}
-
-const PLACEHOLDERS: Partial<Record<NavKey, { icon: React.ReactNode; description: string; points: string[] }>> = {
-  dashboard: {
-    icon: <LayoutDashboard className="h-6 w-6" />,
-    description: 'Сводный экран: состояние хоста, стеки, последние события и алерты.',
-    points: ['Плитки стеков с агрегированной нагрузкой', 'Лента событий Docker', 'Быстрые действия по стеку'],
-  },
-  images: {
-    icon: <Boxes className="h-6 w-6" />,
-    description: 'Ручная сборка образов из Dockerfile и управление тегами.',
-    points: [
-      'Сборка из Dockerfile с живым выводом build-лога',
-      'Дерево слоёв и размер каждого слоя',
-      'Поиск неиспользуемых (dangling) образов',
-    ],
-  },
-  volumes: {
-    icon: <HardDrive className="h-6 w-6" />,
-    description: 'Тома, их размер и кто их занимает.',
-    points: ['Реальный размер тома на диске', 'Кто из контейнеров смонтировал том', 'Осиротевшие тома'],
-  },
-  networks: {
-    icon: <Network className="h-6 w-6" />,
-    description: 'Сети и подключённые к ним контейнеры.',
-    points: ['Схема связей контейнеров', 'Занятые порты хоста', 'Конфликты подсетей'],
-  },
-  monitoring: {
-    icon: <Gauge className="h-6 w-6" />,
-    description: 'То, чего нет в Portainer: полноценная история нагрузки по каждому контейнеру.',
-    points: [
-      'Графики CPU, RAM, диска и сети с историей',
-      'Размер контейнеров, образов и логов на диске',
-      'Пороговые алерты по нагрузке',
-    ],
-  },
-  cleanup: {
-    icon: <Trash2 className="h-6 w-6" />,
-    description: 'Очистка старых образов и контейнеров по расписанию.',
-    points: [
-      'Правила: старше N дней, без тега, не используется',
-      'Таймеры автоочистки с предпросмотром «что удалится»',
-      'История очисток и освобождённое место',
-    ],
-  },
-  settings: {
-    icon: <Settings className="h-6 w-6" />,
-    description: 'Подключение к удалённым хостам и настройки интерфейса.',
-    points: ['Несколько Docker-хостов', 'Доступ по TLS и SSH', 'Темы и раскладка панелей'],
-  },
 }
 
 function App() {
@@ -116,8 +67,6 @@ function App() {
     return () => window.removeEventListener('keydown', handleKey)
   }, [logs])
 
-  const placeholder = PLACEHOLDERS[nav]
-
   return (
     <div className="relative flex h-screen overflow-hidden bg-[var(--color-ink-950)]">
       {/* Тёплое свечение в углу — фирменный акцент Redhorse */}
@@ -153,19 +102,16 @@ function App() {
             <DashboardPage docker={docker} onOpenLogs={logs.open} />
           ) : nav === 'images' ? (
             <ImagesPage search={search} />
+          ) : nav === 'monitoring' ? (
+            <MonitoringPage docker={docker} search={search} />
+          ) : nav === 'cleanup' ? (
+            <CleanupPage />
+          ) : nav === 'settings' ? (
+            <SettingsPage />
           ) : nav === 'networks' ? (
             <NetworksPage search={search} />
-          ) : nav === 'volumes' ? (
-            <VolumesPage search={search} />
           ) : (
-            placeholder !== undefined && (
-              <Placeholder
-                title={PAGE_META[nav].title}
-                description={placeholder.description}
-                points={placeholder.points}
-                icon={placeholder.icon}
-              />
-            )
+            <VolumesPage search={search} />
           )}
         </main>
 

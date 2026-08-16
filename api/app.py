@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import get_settings
-from routers import containers, images, system
+from routers import cleanup, containers, images, system
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s %(message)s")
 
@@ -29,6 +29,7 @@ app.add_middleware(
 app.include_router(containers.router)
 app.include_router(images.router)
 app.include_router(system.router)
+app.include_router(cleanup.router)
 
 
 @app.get("/api/health", tags=["system"])

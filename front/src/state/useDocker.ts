@@ -3,6 +3,7 @@ import { useContainerAction, useContainersQuery, useRemoveContainer } from '../a
 import type { ContainerAction } from '../api/types'
 import type { Container, ContainerHistory, ContainerStats } from '../types'
 import { useLiveStats } from './useLiveStats'
+import { useSettings } from './settings'
 
 const EMPTY_STATS: ContainerStats = {
   cpu: 0,
@@ -45,7 +46,8 @@ interface UseDockerOptions {
 }
 
 export function useDocker({ onError }: UseDockerOptions = {}): DockerApi {
-  const query = useContainersQuery()
+  const { settings } = useSettings()
+  const query = useContainersQuery(settings.pollInterval)
   const live = useLiveStats()
   const action = useContainerAction()
   const removal = useRemoveContainer()

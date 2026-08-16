@@ -2,9 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { request, wsUrl } from '../api/client'
 import type { Container, DockLayout, LogLine, LogSession, LogViewOptions } from '../types'
 import { DEFAULT_RANGE, isLive, toQuery, type TimeRange } from '../lib/timeRange'
+import { useSettings } from './settings'
 
-/** Кольцевой буфер строк на сессию. */
-const MAX_LINES = 20_000
+/** Запас буфера на случай, если настройки не прочитались. */
+const FALLBACK_MAX_LINES = 20_000
 
 /** Логи приходят пачками по несколько сотен строк в секунду — копим и рисуем реже. */
 const FLUSH_MS = 200
@@ -12,7 +13,7 @@ const FLUSH_MS = 200
 const RETRY_BASE_MS = 800
 const RETRY_MAX_MS = 15_000
 
-const DEFAULT_OPTIONS: LogViewOptions = {
+const BASE_OPTIONS: LogViewOptions = {
   search: '',
   levels: { debug: true, info: true, warn: true, error: true },
   wrap: false,
@@ -66,12 +67,16 @@ interface Connection {
 }
 
 export function useLogSessions(): LogSessionsApi {
+  const { settings } = useSettings()
   const [sessions, setSessions] = useState<LogSession[]>([])
   const [activeId, setActiveId] = useState<string | null>(null)
   const [layout, setLayout] = useState<DockLayout>('tabs')
   const [dockHeight, setDockHeight] = useState(360)
   const [collapsed, setCollapsed] = useState(false)
   const [maximizedId, setMaximizedId] = useState<string | null>(null)
+
+  const prefs = useRef(settings)
+  prefs.current = settings
 
   const connections = useRef(new Map<string, Connection>())
   const inbox = useRef(new Map<string, LogLine[]>())
@@ -118,7 +123,9 @@ export function useLogSessions(): LogSessionsApi {
           if (fresh === undefined || fresh.length === 0) return session
           if (session.options.paused) return session
 
-          return { ...session, lines: [...session.lines, ...fresh].slice(-MAX_LINES) }
+          const limit = prefs.current.logBufferSize || FALLBACK_MAX_LINES
+
+          return { ...session, lines: [...session.lines, ...fresh].slice(-limit) }
         }),
       )
     }, FLUSH_MS)
@@ -151,7 +158,7 @@ export function useLogSessions(): LogSessionsApi {
       patchSession(session.id, (item) => ({ ...item, lines: [], loading: true }))
 
       if (!isLive(session.range)) {
-        void loadWindow(session, patchSession)
+        void loadWindow(session, patchSession, prefs.current.logBufferSize || FALLBACK_MAX_LINES)
         return
       }
 
@@ -240,7 +247,13 @@ export function useLogSessions(): LogSessionsApi {
         containerId: container.id,
         containerName: container.name,
         lines: [],
-        options: { ...DEFAULT_OPTIONS, levels: { ...DEFAULT_OPTIONS.levels } },
+        options: {
+          ...BASE_OPTIONS,
+          levels: { ...BASE_OPTIONS.levels },
+          masked: prefs.current.maskSecrets,
+          showTimestamps: prefs.current.logTimestamps,
+          fontSize: prefs.current.logFontSize,
+        },
         range: DEFAULT_RANGE,
         connection: 'connecting',
         loading: true,
@@ -351,11 +364,12 @@ export function useLogSessions(): LogSessionsApi {
 async function loadWindow(
   session: LogSession,
   patchSession: (sessionId: string, patch: (session: LogSession) => LogSession) => void,
+  limit: number,
 ): Promise<void> {
   try {
     const { since, until } = toQuery(session.range)
     const page = await request<LogPage>(`/containers/${session.containerId}/logs`, {
-      query: { since, until, tail: MAX_LINES },
+      query: { since, until, tail: limit },
     })
 
     patchSession(session.id, (item) => ({
