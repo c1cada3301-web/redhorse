@@ -1,4 +1,5 @@
 import type { LogLevel, LogLine, LogViewOptions } from '../types'
+import { visibleText } from './maskCache'
 
 export function filterLines(lines: LogLine[], options: LogViewOptions): LogLine[] {
   const needle = options.search.trim().toLowerCase()
@@ -10,7 +11,8 @@ export function filterLines(lines: LogLine[], options: LogViewOptions): LogLine[
     if (!options.levels[line.level]) return false
     if (needle === '') return true
 
-    return line.text.toLowerCase().includes(needle)
+    // Ищем по тому, что видно на экране: под маской секрет искать бессмысленно.
+    return visibleText(line, options.masked).toLowerCase().includes(needle)
   })
 }
 
@@ -24,8 +26,11 @@ export function countByLevel(lines: LogLine[]): Record<LogLevel, number> {
   return counts
 }
 
-export function linesToText(lines: LogLine[], withTimestamps: boolean): string {
+export function linesToText(lines: LogLine[], withTimestamps: boolean, masked = false): string {
   return lines
-    .map((line) => (withTimestamps ? `${new Date(line.ts).toISOString()} ${line.text}` : line.text))
+    .map((line) => {
+      const text = visibleText(line, masked)
+      return withTimestamps ? `${new Date(line.ts).toISOString()} ${text}` : text
+    })
     .join('\n')
 }

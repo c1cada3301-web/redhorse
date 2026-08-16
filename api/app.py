@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s %(message
 settings = get_settings()
 
 app = FastAPI(
-    title="Redhorse",
+    title="RedHorse",
     description="Управление Docker: контейнеры, логи, образы.",
     version="0.1.0",
 )

@@ -18,7 +18,6 @@ import type { LogLevel, LogLine, LogViewOptions } from '../../types'
 import type { TimeRange } from '../../lib/timeRange'
 import { IconButton } from '../ui/IconButton'
 import { countByLevel, linesToText } from '../../lib/logFilter'
-import { maskText } from '../../lib/mask'
 import { TimeRangePicker } from './TimeRangePicker'
 
 const LEVELS: { key: LogLevel; label: string; className: string }[] = [
@@ -52,10 +51,7 @@ export function LogToolbar({
   const counts = countByLevel(allLines)
 
   // Выгружаем ровно то, что видно на экране: под маской — с маской.
-  const exportText = () => {
-    const text = linesToText(allLines, options.showTimestamps)
-    return options.masked ? maskText(text) : text
-  }
+  const exportText = () => linesToText(allLines, options.showTimestamps, options.masked)
 
   const handleDownload = () => {
     const blob = new Blob([exportText()], { type: 'text/plain;charset=utf-8' })

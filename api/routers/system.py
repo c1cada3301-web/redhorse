@@ -92,7 +92,8 @@ async def list_networks() -> list[dict]:
                     if cfg.get("Subnet")
                 ],
             }
-            for net in get_client().networks.list()
+            # greedy=True — иначе docker-py не заполняет поле Containers.
+            for net in get_client().networks.list(greedy=True)
         ]
 
     return await asyncio.to_thread(fetch)

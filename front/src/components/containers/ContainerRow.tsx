@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { Pause, Play, RotateCw, ScrollText, Square, Trash2 } from 'lucide-react'
 import type { Container } from '../../types'
 import { formatBytes, formatPercent, formatRate, formatUptime, shortId } from '../../lib/format'
 import { Sparkline } from '../ui/Sparkline'
 import { IconButton } from '../ui/IconButton'
+import { ConfirmDialog } from '../ui/ConfirmDialog'
 import { StateBadge } from './StateBadge'
 
 export const ROW_GRID =
@@ -29,6 +31,7 @@ export function ContainerRow({
   onPause,
   onRemove,
 }: ContainerRowProps) {
+  const [confirming, setConfirming] = useState(false)
   const running = container.state === 'running'
   const memPercent = container.stats.memLimit > 0 ? (container.stats.mem / container.stats.memLimit) * 100 : 0
 
@@ -138,10 +141,23 @@ export function ContainerRow({
           <RotateCw className="h-4 w-4" />
         </IconButton>
 
-        <IconButton label="Удалить" tone="danger" onClick={onRemove}>
+        <IconButton label="Удалить" tone="danger" onClick={() => setConfirming(true)}>
           <Trash2 className="h-4 w-4" />
         </IconButton>
       </div>
+
+      <ConfirmDialog
+        open={confirming}
+        onOpenChange={setConfirming}
+        title="Удалить контейнер?"
+        description={
+          running
+            ? 'Контейнер запущен — он будет остановлен принудительно. Данные в анонимных томах не удаляются.'
+            : 'Контейнер будет удалён. Данные в анонимных томах не удаляются.'
+        }
+        subject={`${container.name} · ${container.image}`}
+        onConfirm={onRemove}
+      />
     </div>
   )
 }

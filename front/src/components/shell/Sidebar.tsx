@@ -28,11 +28,11 @@ interface NavItem {
 }
 
 const NAV: NavItem[] = [
-  { key: 'dashboard', label: 'Обзор', icon: LayoutDashboard, ready: false },
+  { key: 'dashboard', label: 'Обзор', icon: LayoutDashboard, ready: true },
   { key: 'containers', label: 'Контейнеры', icon: ContainerIcon, ready: true },
-  { key: 'images', label: 'Образы', icon: Boxes, ready: false },
-  { key: 'volumes', label: 'Тома', icon: HardDrive, ready: false },
-  { key: 'networks', label: 'Сети', icon: Network, ready: false },
+  { key: 'images', label: 'Образы', icon: Boxes, ready: true },
+  { key: 'volumes', label: 'Тома', icon: HardDrive, ready: true },
+  { key: 'networks', label: 'Сети', icon: Network, ready: true },
   { key: 'monitoring', label: 'Мониторинг', icon: Gauge, ready: false },
   { key: 'cleanup', label: 'Очистка', icon: Trash2, ready: false },
   { key: 'settings', label: 'Настройки', icon: Settings, ready: false },
@@ -49,11 +49,15 @@ export function Sidebar({ current, onNavigate, runningCount, totalCount }: Sideb
   return (
     <aside className="flex w-[212px] shrink-0 flex-col border-r border-white/6 bg-[var(--color-ink-900)]/60">
       <div className="flex h-14 items-center gap-2.5 px-4">
-        <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-[var(--color-ember-400)] to-[var(--color-ember-600)] text-sm font-black text-white shadow-lg shadow-[var(--color-ember-600)]/30">
-          R
-        </div>
+        <img
+          src="/logo-192.png"
+          alt=""
+          width={32}
+          height={32}
+          className="h-8 w-8 shrink-0 object-contain"
+        />
         <div className="leading-tight">
-          <div className="text-sm font-semibold tracking-tight text-white">Redhorse</div>
+          <div className="text-sm font-semibold tracking-tight text-white">RedHorse</div>
           <div className="text-[10px] text-white/35">docker control</div>
         </div>
       </div>

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import type { LogLine, LogViewOptions } from '../../types'
 import { formatTime } from '../../lib/format'
-import { maskText } from '../../lib/mask'
+import { visibleText } from '../../lib/maskCache'
 
 /** Межстрочный интервал списка — должен совпадать с lineHeight контейнера. */
 const LINE_HEIGHT = 1.55
@@ -199,7 +199,7 @@ export function LogLines({ lines, options, onUserScroll }: LogLinesProps) {
                   'flex-1',
                 ].join(' ')}
               >
-                {highlight(options.masked ? maskText(line.text) : line.text, options.search)}
+                {highlight(visibleText(line, options.masked), options.search)}
               </span>
 
               {line.stream === 'stderr' && (

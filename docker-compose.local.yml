@@ -1,0 +1,44 @@
+# Локальный контур разработки: исходники смонтированы, пересборка образов не нужна.
+# Фронт — vite dev server с горячей заменой модулей, API — uvicorn с автоперезапуском.
+#
+#   docker compose -f docker-compose.local.yml up --build
+#
+# Фронт: http://localhost:3000   API: http://localhost:8000/docs
+
+services:
+  api:
+    build:
+      context: ./api
+    env_file:
+      - ./api/.env
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - RH_ENV=development
+    # Код монтируется поверх образа, --reload следит за изменениями.
+    volumes:
+      - ./api:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    user: "0:0"
+    command: uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+
+  web:
+    build:
+      context: ./front
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_PROXY_TARGET=http://api:8000
+      - CHOKIDAR_USEPOLLING=true
+    # node_modules — в именованном томе, иначе bind-mount затрёт их пустой папкой с хоста.
+    volumes:
+      - ./front:/app
+      - front-node-modules:/app/node_modules
+    depends_on:
+      - api
+
+volumes:
+  front-node-modules:

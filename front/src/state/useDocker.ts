@@ -16,6 +16,15 @@ const EMPTY_STATS: ContainerStats = {
 
 const EMPTY_HISTORY: ContainerHistory = { cpu: [], mem: [], net: [], blk: [] }
 
+const ACTION_LABELS: Record<ContainerAction, string> = {
+  start: 'Не удалось запустить контейнер',
+  stop: 'Не удалось остановить контейнер',
+  restart: 'Не удалось перезапустить контейнер',
+  pause: 'Не удалось поставить на паузу',
+  unpause: 'Не удалось снять с паузы',
+  kill: 'Не удалось убить контейнер',
+}
+
 export interface DockerApi {
   containers: Container[]
   loading: boolean
@@ -30,7 +39,12 @@ export interface DockerApi {
   remove: (id: string) => void
 }
 
-export function useDocker(): DockerApi {
+interface UseDockerOptions {
+  /** Куда сообщать о неудачных действиях — Docker часто отвечает осмысленной причиной. */
+  onError?: (error: unknown, action: string) => void
+}
+
+export function useDocker({ onError }: UseDockerOptions = {}): DockerApi {
   const query = useContainersQuery()
   const live = useLiveStats()
   const action = useContainerAction()
@@ -47,8 +61,13 @@ export function useDocker(): DockerApi {
   }, [query.data, live.stats, live.history])
 
   const run = useCallback(
-    (id: string, name: ContainerAction) => action.mutate({ id, action: name }),
-    [action],
+    (id: string, name: ContainerAction) => {
+      action.mutate(
+        { id, action: name },
+        { onError: (error) => onError?.(error, ACTION_LABELS[name]) },
+      )
+    },
+    [action, onError],
   )
 
   const pause = useCallback(
@@ -68,6 +87,11 @@ export function useDocker(): DockerApi {
     stop: useCallback((id: string) => run(id, 'stop'), [run]),
     restart: useCallback((id: string) => run(id, 'restart'), [run]),
     pause,
-    remove: useCallback((id: string) => removal.mutate({ id }), [removal]),
+    remove: useCallback(
+      (id: string) => {
+        removal.mutate({ id }, { onError: (error) => onError?.(error, 'Не удалось удалить контейнер') })
+      },
+      [removal, onError],
+    ),
   }
 }

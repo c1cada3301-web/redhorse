@@ -1,12 +1,20 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Boxes, Gauge, HardDrive, LayoutDashboard, Network, Settings, Trash2 } from 'lucide-react'
+import { useQueryClient, useIsFetching } from '@tanstack/react-query'
 import { useDocker } from './state/useDocker'
+import { useSystemInfo } from './api/queries'
+import { useToasts } from './state/useToasts'
+import { Toasts } from './components/ui/Toasts'
 import { useLogSessions } from './state/useLogSessions'
 import { Sidebar } from './components/shell/Sidebar'
 import type { NavKey } from './components/shell/Sidebar'
 import { TopBar } from './components/shell/TopBar'
 import { Placeholder } from './components/shell/Placeholder'
 import { ContainersPage } from './components/containers/ContainersPage'
+import { DashboardPage } from './components/dashboard/DashboardPage'
+import { ImagesPage } from './components/images/ImagesPage'
+import { NetworksPage } from './components/networks/NetworksPage'
+import { VolumesPage } from './components/volumes/VolumesPage'
 import { LogDock } from './components/logview/LogDock'
 import { FloatingLogWindow } from './components/logview/FloatingLogWindow'
 import { LogPane } from './components/logview/LogPane'
@@ -73,8 +81,12 @@ const PLACEHOLDERS: Partial<Record<NavKey, { icon: React.ReactNode; description:
 }
 
 function App() {
-  const docker = useDocker()
+  const toasts = useToasts()
+  const docker = useDocker({ onError: toasts.pushError })
   const logs = useLogSessions()
+  const queryClient = useQueryClient()
+  const fetching = useIsFetching()
+  const systemInfo = useSystemInfo()
   const [nav, setNav] = useState<NavKey>('containers')
   const [search, setSearch] = useState('')
 
@@ -128,11 +140,23 @@ function App() {
           totalCpu={totals.cpu}
           totalMem={totals.mem}
           totalNet={totals.net}
+          connected={docker.connected}
+          hostName={systemInfo.data?.name ?? 'docker'}
+          refreshing={fetching > 0}
+          onRefresh={() => void queryClient.invalidateQueries()}
         />
 
         <main className="min-h-0 flex-1">
           {nav === 'containers' ? (
             <ContainersPage docker={docker} logs={logs} search={search} />
+          ) : nav === 'dashboard' ? (
+            <DashboardPage docker={docker} onOpenLogs={logs.open} />
+          ) : nav === 'images' ? (
+            <ImagesPage search={search} />
+          ) : nav === 'networks' ? (
+            <NetworksPage search={search} />
+          ) : nav === 'volumes' ? (
+            <VolumesPage search={search} />
           ) : (
             placeholder !== undefined && (
               <Placeholder
@@ -164,6 +188,8 @@ function App() {
           onMaximize={() => logs.maximize(session.id)}
         />
       ))}
+
+      <Toasts items={toasts.items} onDismiss={toasts.dismiss} />
 
       {maximized !== null && (
         <div className="rh-fade-in fixed inset-0 z-100 bg-[var(--color-ink-950)]/92 p-3 backdrop-blur-sm">

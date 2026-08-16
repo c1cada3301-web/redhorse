@@ -1,4 +1,4 @@
-import { Activity, ChevronDown, RefreshCw, Search, Server } from 'lucide-react'
+import { Activity, RefreshCw, Search, Server } from 'lucide-react'
 import { formatBytes, formatPercent } from '../../lib/format'
 
 interface TopBarProps {
@@ -9,6 +9,11 @@ interface TopBarProps {
   totalCpu: number
   totalMem: number
   totalNet: number
+  /** Жив ли поток метрик от Docker Engine. */
+  connected: boolean
+  hostName: string
+  refreshing: boolean
+  onRefresh: () => void
 }
 
 export function TopBar({
@@ -19,6 +24,10 @@ export function TopBar({
   totalCpu,
   totalMem,
   totalNet,
+  connected,
+  hostName,
+  refreshing,
+  onRefresh,
 }: TopBarProps) {
   return (
     <header className="flex h-14 shrink-0 items-center gap-3 border-b border-white/6 px-4">
@@ -27,7 +36,7 @@ export function TopBar({
         <p className="truncate text-[11px] text-white/35">{subtitle}</p>
       </div>
 
-      <div className="relative ml-4 w-72">
+      <div className="relative ml-4 min-w-0 flex-1">
         <Search className="pointer-events-none absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-white/30" />
         <input
           value={search}
@@ -37,27 +46,33 @@ export function TopBar({
         />
       </div>
 
-      <div className="ml-auto flex items-center gap-2">
+      <div className="flex shrink-0 items-center gap-2">
         <Metric icon={<Activity className="h-3.5 w-3.5" />} label="CPU" value={formatPercent(totalCpu, 0)} />
         <Metric label="RAM" value={formatBytes(totalMem, 1)} />
         <Metric label="NET" value={`${formatBytes(totalNet, 0)}/s`} />
 
         <button
           type="button"
+          onClick={onRefresh}
           className="grid h-9 w-9 place-items-center rounded-lg border border-white/8 bg-black/25 text-white/50 transition-colors hover:text-white"
           aria-label="Обновить"
         >
-          <RefreshCw className="h-4 w-4" />
+          <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
         </button>
 
-        <button
-          type="button"
-          className="flex h-9 items-center gap-2 rounded-lg border border-white/8 bg-black/25 px-3 text-[13px] text-white/70 transition-colors hover:text-white"
+        <div
+          title={connected ? 'Поток метрик активен' : 'Нет связи с Docker Engine'}
+          className="flex h-9 items-center gap-2 rounded-lg border border-white/8 bg-black/25 px-3 text-[13px] text-white/70"
         >
           <Server className="h-4 w-4 text-[var(--color-ember-400)]" />
-          local
-          <ChevronDown className="h-3.5 w-3.5 text-white/35" />
-        </button>
+          <span className="max-w-40 truncate">{hostName}</span>
+          <span
+            className={[
+              'h-1.5 w-1.5 rounded-full',
+              connected ? 'rh-pulse bg-[var(--color-mint-400)]' : 'bg-[var(--color-danger)]',
+            ].join(' ')}
+          />
+        </div>
       </div>
     </header>
   )
