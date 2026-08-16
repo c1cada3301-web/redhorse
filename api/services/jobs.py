@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import io
+import posixpath
 import tarfile
 import time
 import uuid
@@ -18,6 +20,12 @@ from services.streaming import iter_in_thread
 JobKind = Literal["build", "pull"]
 
 _SENTINEL = object()
+
+# Сколько сборок и pull'ов крутим одновременно: остальные ждут очереди.
+_MAX_PARALLEL_JOBS = 2
+
+# Потолок очереди подписчика — залипший вебсокет не должен раздувать память.
+_SUBSCRIBER_QUEUE = 512
 
 
 class Job:
@@ -38,6 +46,10 @@ class Job:
         self.events.append(event)
 
         for queue in self._subscribers:
+            if queue.full():
+                # Клиент не читает — теряем самое старое, но не растём в памяти.
+                with contextlib.suppress(asyncio.QueueEmpty):
+                    queue.get_nowait()
             queue.put_nowait(event)
 
     def finish(self, error: str | None = None) -> None:
@@ -46,17 +58,32 @@ class Job:
         self.finished_at = time.time() * 1000
 
         for queue in self._subscribers:
+            if queue.full():
+                with contextlib.suppress(asyncio.QueueEmpty):
+                    queue.get_nowait()
             queue.put_nowait(_SENTINEL)
 
     async def subscribe(self) -> AsyncIterator[JobEvent]:
         """Отдаёт уже накопленное, затем — живой хвост."""
-        queue: asyncio.Queue[Any] = asyncio.Queue()
+        queue: asyncio.Queue[Any] = asyncio.Queue(maxsize=_SUBSCRIBER_QUEUE)
         backlog = list(self.events)
         self._subscribers.add(queue)
 
         try:
             for event in backlog:
                 yield event
+
+            # Пока отдавали backlog, задача могла дописать события и завершиться:
+            # каждый yield — точка переключения. Раньше здесь стоял ранний выход
+            # по состоянию, и финал сборки терялся. Теперь дочерпываем очередь.
+            while True:
+                try:
+                    item = queue.get_nowait()
+                except asyncio.QueueEmpty:
+                    break
+                if item is _SENTINEL:
+                    return
+                yield item
 
             if self.state != "running":
                 return
@@ -85,6 +112,7 @@ class JobRegistry:
     def __init__(self) -> None:
         self._jobs: OrderedDict[str, Job] = OrderedDict()
         self._tasks: dict[str, asyncio.Task[None]] = {}
+        self._slots = asyncio.Semaphore(_MAX_PARALLEL_JOBS)
 
     def get(self, job_id: str) -> Job | None:
         return self._jobs.get(job_id)
@@ -104,6 +132,11 @@ class JobRegistry:
         return job
 
     async def _run(self, job: Job, make_iterator: Callable[[], Iterable[dict]]) -> None:
+        # Параллельные сборки забивают диск слоями и CPU — держим очередь.
+        async with self._slots:
+            await self._drain(job, make_iterator)
+
+    async def _drain(self, job: Job, make_iterator: Callable[[], Iterable[dict]]) -> None:
         try:
             async for chunk in iter_in_thread(make_iterator, queue_size=256):
                 for text, stream in _render(chunk):
@@ -120,12 +153,17 @@ class JobRegistry:
         job.finish()
 
     def _prune(self) -> None:
+        """Убирает самые старые завершённые задачи.
+
+        Раньше проход останавливался на первой незавершённой — из-за одной долгой
+        сборки реестр переставал чиститься совсем и рос без предела.
+        """
         limit = get_settings().build_history
 
-        while len(self._jobs) > limit:
-            job_id, job = next(iter(self._jobs.items()))
-            if job.state == "running":
-                break
+        finished = [job_id for job_id, job in self._jobs.items() if job.state != "running"]
+        excess = len(self._jobs) - limit
+
+        for job_id in finished[:max(0, excess)]:
             self._jobs.pop(job_id, None)
 
 
@@ -162,8 +200,8 @@ def make_context_tar(dockerfile: str, files: dict[str, str]) -> io.BytesIO:
         _add(tar, "Dockerfile", dockerfile)
 
         for name, content in files.items():
-            safe = name.lstrip("/").replace("..", "")
-            if safe == "" or safe == "Dockerfile":
+            safe = safe_context_path(name)
+            if safe is None or safe == "Dockerfile":
                 continue
             _add(tar, safe, content)
 
@@ -171,9 +209,32 @@ def make_context_tar(dockerfile: str, files: dict[str, str]) -> io.BytesIO:
     return buffer
 
 
+def safe_context_path(name: str) -> str | None:
+    """Нормализует путь внутри контекста; None — если он ведёт наружу.
+
+    Раньше здесь просто вырезалась подстрока `..`. Обход это закрывало, но такой
+    чёрный список хрупок: достаточно однажды поменять логику рядом, и дыра
+    вернётся. Нормализуем путь и проверяем результат явно.
+    """
+    candidate = name.strip().replace("\\", "/")
+
+    if candidate == "" or candidate.startswith("/"):
+        return None
+
+    normalized = posixpath.normpath(candidate)
+
+    if normalized in {".", ".."} or normalized.startswith("../") or normalized.startswith("/"):
+        return None
+
+    return normalized
+
+
 def _add(tar: tarfile.TarFile, name: str, content: str) -> None:
     payload = content.encode("utf-8")
     info = tarfile.TarInfo(name=name)
+    # Тип фиксируем явно: обычный файл, никаких симлинков и устройств.
+    info.type = tarfile.REGTYPE
+    info.mode = 0o644
     info.size = len(payload)
     info.mtime = int(time.time())
     tar.addfile(info, io.BytesIO(payload))

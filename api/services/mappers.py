@@ -136,11 +136,23 @@ def _cpu_percent(sample: dict) -> float:
 
 
 def _mem_usage(sample: dict) -> int:
+    """Повторяет calculateMemUsageUnixNoCache из docker CLI.
+
+    Ключ кеша разный: cgroup v1 отдаёт total_inactive_file, v2 — inactive_file.
+    И вычитать кеш можно только если он меньше usage, иначе на части хостов
+    память показывалась бы нулём.
+    """
     memory = sample.get("memory_stats") or {}
-    usage = memory.get("usage") or 0
-    # cgroup v2 кладёт кеш в inactive_file — Docker CLI его вычитает, делаем так же.
-    cache = (memory.get("stats") or {}).get("inactive_file") or 0
-    return max(0, int(usage) - int(cache))
+    usage = int(memory.get("usage") or 0)
+    stats = memory.get("stats") or {}
+
+    cache = stats.get("total_inactive_file")
+    if cache is None:
+        cache = stats.get("inactive_file")
+
+    cache = int(cache or 0)
+
+    return usage - cache if 0 < cache < usage else usage
 
 
 def _sum_net(sample: dict, key: str) -> float:

@@ -12,8 +12,9 @@ services:
     env_file:
       - ./api/.env
     restart: unless-stopped
+    # Только localhost: иначе API управления Docker виден всей Wi-Fi-сети.
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     environment:
       - RH_ENV=development
     # Код монтируется поверх образа, --reload следит за изменениями.
@@ -29,7 +30,7 @@ services:
       dockerfile: Dockerfile.dev
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     environment:
       - VITE_API_PROXY_TARGET=http://api:8000
       - CHOKIDAR_USEPOLLING=true

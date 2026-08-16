@@ -105,6 +105,11 @@ class StatsHub:
             logger.info("Поток статистики %s остановлен: %s", container_id[:12], exc)
         finally:
             self._workers.pop(container_id, None)
+            # Поток мог оборваться и без остановки контейнера (например, при
+            # restart). Не помечая это сразу, фронт до следующего скана показывал
+            # бы замёрзшие цифры как живые.
+            if self._latest.pop(container_id, None) is not None:
+                self._broadcast({"id": container_id, "gone": True})
 
     def _broadcast(self, message: dict) -> None:
         for queue in self._subscribers:

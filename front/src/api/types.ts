@@ -1,7 +1,7 @@
 import type { Container, ContainerStats } from '../types'
 
 /** Контейнер, как его отдаёт бэкенд: без метрик — те приходят отдельным потоком. */
-export type ApiContainer = Omit<Container, 'stats' | 'history' | 'logProfile'>
+export type ApiContainer = Omit<Container, 'stats' | 'history'>
 
 export interface StatsMessage extends Partial<ContainerStats> {
   id: string

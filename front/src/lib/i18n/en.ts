@@ -11,7 +11,6 @@ export const en: Dictionary = {
   'nav.monitoring': 'Monitoring',
   'nav.cleanup': 'Cleanup',
   'nav.settings': 'Settings',
-  'nav.soon': 'soon',
   'nav.tagline': 'docker control',
   'nav.collapse': 'Collapse menu',
   'nav.expand': 'Expand menu',
@@ -56,7 +55,6 @@ export const en: Dictionary = {
   'common.on': 'On',
   'common.off': 'Off',
   'common.unknown': 'Unknown',
-  'common.soon': 'Soon',
   'common.dash': '—',
 
   // Settings: language

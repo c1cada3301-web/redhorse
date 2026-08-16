@@ -31,10 +31,25 @@ const STYLES: Record<ContainerState, { label: string; dot: string; text: string;
     text: 'text-white/50',
     bg: 'bg-white/6',
   },
+  dead: {
+    label: 'dead',
+    dot: 'bg-[var(--color-danger)]',
+    text: 'text-[var(--color-danger)]',
+    bg: 'bg-[var(--color-danger)]/10',
+  },
+  removing: {
+    label: 'removing',
+    dot: 'bg-[var(--color-amber-ok)]',
+    text: 'text-[var(--color-amber-ok)]',
+    bg: 'bg-[var(--color-amber-ok)]/10',
+  },
 }
 
+/** Если Docker пришлёт состояние, которого мы не знаем, бейдж не должен ронять страницу. */
+const FALLBACK = { label: 'unknown', dot: 'bg-white/30', text: 'text-white/40', bg: 'bg-white/5' }
+
 export function StateBadge({ state }: { state: ContainerState }) {
-  const style = STYLES[state]
+  const style = STYLES[state] ?? { ...FALLBACK, label: String(state) }
 
   return (
     <span

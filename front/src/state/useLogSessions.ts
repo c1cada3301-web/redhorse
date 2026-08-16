@@ -117,13 +117,20 @@ export function useLogSessions(): LogSessionsApi {
       const batches = inbox.current
       inbox.current = new Map()
 
+      const limit = prefs.current.logBufferSize || FALLBACK_MAX_LINES
+
       setSessions((prev) =>
         prev.map((session) => {
           const fresh = batches.get(session.id)
           if (fresh === undefined || fresh.length === 0) return session
-          if (session.options.paused) return session
 
-          const limit = prefs.current.logBufferSize || FALLBACK_MAX_LINES
+          // На паузе строки не выбрасываем: возвращаем в накопитель, чтобы после
+          // «Возобновить» пользователь увидел, что происходило, пока он смотрел.
+          if (session.options.paused) {
+            const held = inbox.current.get(session.id) ?? []
+            inbox.current.set(session.id, [...fresh, ...held].slice(-limit))
+            return session
+          }
 
           return { ...session, lines: [...session.lines, ...fresh].slice(-limit) }
         }),
@@ -143,6 +150,16 @@ export function useLogSessions(): LogSessionsApi {
     connections.current.delete(sessionId)
   }, [])
 
+  /** Полное освобождение сессии: соединение плюс накопители строк. */
+  const release = useCallback(
+    (sessionId: string) => {
+      disconnect(sessionId)
+      inbox.current.delete(sessionId)
+      nextLineId.current.delete(sessionId)
+    },
+    [disconnect],
+  )
+
   /** Открывает живой поток либо подтягивает исторический срез — по режиму диапазона. */
   const connect = useCallback(
     (session: LogSession) => {
@@ -157,13 +174,20 @@ export function useLogSessions(): LogSessionsApi {
 
       patchSession(session.id, (item) => ({ ...item, lines: [], loading: true }))
 
-      if (!isLive(session.range)) {
-        void loadWindow(session, patchSession, prefs.current.logBufferSize || FALLBACK_MAX_LINES)
-        return
-      }
-
       const connection: Connection = { socket: null, retryTimer: undefined, attempt: 0, key, disposed: false }
       connections.current.set(session.id, connection)
+
+      // У среза сокета нет, но запись в пуле нужна: без неё guard по ключу выше
+      // не срабатывал и любое изменение сессии заново обнуляло и перезагружало лог.
+      if (!isLive(session.range)) {
+        void loadWindow(
+          session,
+          patchSession,
+          prefs.current.logBufferSize || FALLBACK_MAX_LINES,
+          connection,
+        )
+        return
+      }
 
       const openSocket = () => {
         if (connection.disposed) return
@@ -216,12 +240,12 @@ export function useLogSessions(): LogSessionsApi {
       connect(session)
     }
 
-    for (const sessionId of connections.current.keys()) {
+    for (const sessionId of [...connections.current.keys()]) {
       if (!sessions.some((session) => session.id === sessionId)) {
-        disconnect(sessionId)
+        release(sessionId)
       }
     }
-  }, [sessions, connect, disconnect])
+  }, [sessions, connect, release])
 
   useEffect(() => {
     const active = connections.current
@@ -270,19 +294,19 @@ export function useLogSessions(): LogSessionsApi {
 
   const close = useCallback(
     (sessionId: string) => {
-      disconnect(sessionId)
+      release(sessionId)
       setSessions((prev) => prev.filter((session) => session.id !== sessionId))
       setMaximizedId((current) => (current === sessionId ? null : current))
     },
-    [disconnect],
+    [release],
   )
 
   const closeAll = useCallback(() => {
-    for (const sessionId of [...connections.current.keys()]) disconnect(sessionId)
+    for (const sessionId of [...connections.current.keys()]) release(sessionId)
     setSessions([])
     setActiveId(null)
     setMaximizedId(null)
-  }, [disconnect])
+  }, [release])
 
   const updateOptions = useCallback(
     (sessionId: string, patch: Partial<LogViewOptions>) => {
@@ -365,12 +389,16 @@ async function loadWindow(
   session: LogSession,
   patchSession: (sessionId: string, patch: (session: LogSession) => LogSession) => void,
   limit: number,
+  connection: Connection,
 ): Promise<void> {
   try {
     const { since, until } = toQuery(session.range)
     const page = await request<LogPage>(`/containers/${session.containerId}/logs`, {
       query: { since, until, tail: limit },
     })
+
+    // Пока ходили за данными, диапазон могли сменить — старый ответ выбрасываем.
+    if (connection.disposed) return
 
     patchSession(session.id, (item) => ({
       ...item,
@@ -379,6 +407,8 @@ async function loadWindow(
       connection: 'closed',
     }))
   } catch {
+    if (connection.disposed) return
+
     patchSession(session.id, (item) => ({ ...item, loading: false, connection: 'closed' }))
   }
 }

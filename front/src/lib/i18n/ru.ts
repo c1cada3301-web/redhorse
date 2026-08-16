@@ -11,7 +11,6 @@ export const ru: Dictionary = {
   'nav.monitoring': 'Мониторинг',
   'nav.cleanup': 'Очистка',
   'nav.settings': 'Настройки',
-  'nav.soon': 'скоро',
   'nav.tagline': 'docker control',
   'nav.collapse': 'Свернуть меню',
   'nav.expand': 'Развернуть меню',
@@ -56,7 +55,6 @@ export const ru: Dictionary = {
   'common.on': 'Вкл',
   'common.off': 'Выкл',
   'common.unknown': 'Неизвестно',
-  'common.soon': 'Скоро',
   'common.dash': '—',
 
   // Настройки: язык

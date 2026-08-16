@@ -1,6 +1,13 @@
 import type { TimeRange } from './lib/timeRange'
 
-export type ContainerState = 'running' | 'exited' | 'paused' | 'restarting' | 'created'
+export type ContainerState =
+  | 'running'
+  | 'exited'
+  | 'paused'
+  | 'restarting'
+  | 'created'
+  | 'dead'
+  | 'removing'
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error'
 

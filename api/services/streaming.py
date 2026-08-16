@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
 import logging
 import threading
 from collections.abc import AsyncIterator, Callable, Iterable
@@ -21,12 +22,20 @@ async def iter_in_thread(
     """Крутит блокирующий генератор в отдельном потоке и отдаёт элементы в asyncio.
 
     Генератор создаётся уже внутри потока: у docker-py открытие потока логов само
-    по себе блокирующее. При отмене потребителя поток помечается на остановку и
-    докачивает очередь в пустоту, не мешая event loop.
+    по себе блокирующее. При отмене потребителя поток помечается на остановку.
+
+    Одной пометки мало: `stop` проверяется только между элементами, а поток логов
+    молчаливого контейнера может блокироваться на чтении часами. Поэтому у объекта
+    потока дополнительно вызывается `close()` — docker-py отдаёт для логов
+    CancellableStream, закрытие которого разрывает соединение и будит чтение.
+    Обычные генераторы (stats, build, pull) не трогаем: закрыть исполняющийся
+    генератор из чужого потока нельзя, но данные там идут часто и остановка
+    замечается сразу.
     """
     loop = asyncio.get_running_loop()
     queue: asyncio.Queue[Any] = asyncio.Queue(maxsize=queue_size)
     stop = threading.Event()
+    holder: dict[str, Any] = {"stream": None}
 
     def put(item: Any) -> None:
         future = asyncio.run_coroutine_threadsafe(queue.put(item), loop)
@@ -37,11 +46,22 @@ async def iter_in_thread(
                 return
             except TimeoutError:
                 continue
+            except RuntimeError:
+                # Event loop уже закрыт — потребителя нет, уходим молча.
+                return
         future.cancel()
 
     def worker() -> None:
         try:
-            for item in make_iterator():
+            stream = make_iterator()
+            holder["stream"] = stream
+
+            # Отмена могла прийти, пока открывали поток.
+            if stop.is_set():
+                close_stream(stream)
+                return
+
+            for item in stream:
                 if stop.is_set():
                     return
                 put(item)
@@ -68,3 +88,19 @@ async def iter_in_thread(
             yield item
     finally:
         stop.set()
+        close_stream(holder["stream"])
+
+
+def close_stream(stream: Any) -> None:
+    """Закрывает поток docker-py, если он это умеет. Генераторы пропускаем."""
+    if stream is None or inspect.isgenerator(stream):
+        return
+
+    close = getattr(stream, "close", None)
+    if close is None:
+        return
+
+    try:
+        close()
+    except Exception as exc:
+        logger.debug("Не удалось закрыть поток docker: %s", exc)

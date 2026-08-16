@@ -34,8 +34,10 @@ async def list_images(all: bool = Query(False, description="Включая пр�
 @router.post("/build", response_model=JobStatus, status_code=202)
 async def build_image(request: BuildRequest) -> JobStatus:
     """Стартует сборку и сразу возвращает задачу — лог читается по WebSocket."""
-    context = make_context_tar(request.dockerfile, request.files)
-    client = get_client()
+    # Оба вызова блокирующие: упаковка контекста в память и первое подключение
+    # к сокету Docker. В event loop они держали бы все остальные запросы и потоки.
+    context = await asyncio.to_thread(make_context_tar, request.dockerfile, request.files)
+    client = await asyncio.to_thread(get_client)
 
     def make_stream():
         context.seek(0)
@@ -58,7 +60,7 @@ async def build_image(request: BuildRequest) -> JobStatus:
 
 @router.post("/pull", response_model=JobStatus, status_code=202)
 async def pull_image(request: PullRequest) -> JobStatus:
-    client = get_client()
+    client = await asyncio.to_thread(get_client)
 
     def make_stream():
         return client.api.pull(request.repository, tag=request.tag, stream=True, decode=True)

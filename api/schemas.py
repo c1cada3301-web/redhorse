@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 ContainerState = Literal["running", "exited", "paused", "restarting", "created", "dead", "removing"]
 LogLevel = Literal["debug", "info", "warn", "error"]
@@ -65,16 +65,35 @@ class Image(BaseModel):
     model_config = {"populate_by_name": True}
 
 
+# Потолки на контекст сборки: без них один запрос с гигабайтным телом
+# кладёт процесс API по памяти ещё до валидации.
+MAX_DOCKERFILE_CHARS = 256 * 1024
+MAX_CONTEXT_FILES = 64
+MAX_CONTEXT_CHARS = 8 * 1024 * 1024
+
+
 class BuildRequest(BaseModel):
     tag: str = Field(min_length=1, max_length=200)
-    dockerfile: str = Field(min_length=1)
+    dockerfile: str = Field(min_length=1, max_length=MAX_DOCKERFILE_CHARS)
     # Дополнительные файлы контекста: путь -> содержимое (для COPY в Dockerfile).
-    files: dict[str, str] = {}
+    files: dict[str, str] = Field(default_factory=dict, max_length=MAX_CONTEXT_FILES)
     build_args: dict[str, str] = Field(default_factory=dict, alias="buildArgs")
     no_cache: bool = Field(False, alias="noCache")
     pull: bool = False
 
     model_config = {"populate_by_name": True}
+
+    @field_validator("files")
+    @classmethod
+    def _limit_total_size(cls, value: dict[str, str]) -> dict[str, str]:
+        total = sum(len(content) for content in value.values())
+
+        if total > MAX_CONTEXT_CHARS:
+            raise ValueError(
+                f"Контекст сборки слишком большой: {total} символов, лимит {MAX_CONTEXT_CHARS}"
+            )
+
+        return value
 
 
 class PullRequest(BaseModel):

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import time
 from itertools import count
 
@@ -13,6 +14,8 @@ from services.docker_client import get_client, get_container
 from services.logs import iter_log_lines, renumber, to_docker_time
 from services.mappers import to_container, to_stats
 from services.streaming import iter_in_thread
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/containers", tags=["containers"])
 
@@ -173,6 +176,12 @@ async def stream_logs(
                 batch = [line.model_dump() for line in iter_log_lines([chunk], label, ids=ids, now_ms=now_ms)]
                 if batch:
                     await queue.put(batch)
+        except asyncio.CancelledError:
+            raise
+        except Exception as exc:
+            # Иначе исключение уходило в никуда: клиент просто переставал видеть
+            # один из потоков, а вебсокет выглядел исправным.
+            logger.warning("Поток %s логов %s оборван: %s", label, container_id[:12], exc)
         finally:
             await queue.put(None)
 
@@ -200,6 +209,7 @@ async def stream_logs(
     except WebSocketDisconnect:
         return
     except Exception as exc:
+        logger.warning("Вебсокет логов %s закрыт с ошибкой: %s", container_id[:12], exc)
         await _safe_close(websocket, 4500, str(exc))
         return
     finally:
@@ -235,6 +245,7 @@ async def stream_stats(websocket: WebSocket, container_id: str) -> None:
     except WebSocketDisconnect:
         return
     except Exception as exc:
+        logger.warning("Вебсокет статистики %s закрыт с ошибкой: %s", container_id[:12], exc)
         await _safe_close(websocket, 4500, str(exc))
 
 

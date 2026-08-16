@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from services.docker_client import get_client
 from services.stats_hub import hub
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/system", tags=["system"])
 
@@ -20,7 +23,8 @@ async def stream_all_stats(websocket: WebSocket) -> None:
             await websocket.send_json(message)
     except WebSocketDisconnect:
         return
-    except Exception:
+    except Exception as exc:
+        logger.warning("Вебсокет агрегированной статистики закрыт с ошибкой: %s", exc)
         try:
             await websocket.close(code=4500)
         except RuntimeError:
