@@ -13,6 +13,8 @@ export const ru: Dictionary = {
   'nav.settings': 'Настройки',
   'nav.soon': 'скоро',
   'nav.tagline': 'docker control',
+  'nav.collapse': 'Свернуть меню',
+  'nav.expand': 'Развернуть меню',
   'nav.socket': 'local · unix socket',
   'nav.runningOf': '{running}/{total} контейнеров запущено',
 

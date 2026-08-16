@@ -3,6 +3,7 @@ import { useQueryClient, useIsFetching } from '@tanstack/react-query'
 import { useDocker } from './state/useDocker'
 import { useSystemInfo } from './api/queries'
 import { useToasts } from './state/useToasts'
+import { useT } from './state/settings'
 import { Toasts } from './components/ui/Toasts'
 import { useLogSessions } from './state/useLogSessions'
 import { Sidebar } from './components/shell/Sidebar'
@@ -20,16 +21,6 @@ import { LogDock } from './components/logview/LogDock'
 import { FloatingLogWindow } from './components/logview/FloatingLogWindow'
 import { LogPane } from './components/logview/LogPane'
 
-const PAGE_META: Record<NavKey, { title: string; subtitle: string }> = {
-  dashboard: { title: 'Обзор', subtitle: 'Сводка по хосту и стекам' },
-  containers: { title: 'Контейнеры', subtitle: 'Локальный Docker Engine · unix:///var/run/docker.sock' },
-  images: { title: 'Образы', subtitle: 'Сборка, теги, слои и размеры' },
-  volumes: { title: 'Тома', subtitle: 'Хранилище и точки монтирования' },
-  networks: { title: 'Сети', subtitle: 'Bridge, overlay и подключённые контейнеры' },
-  monitoring: { title: 'Мониторинг', subtitle: 'CPU, память, диск и сеть по контейнерам' },
-  cleanup: { title: 'Очистка', subtitle: 'Prune, политики хранения и таймеры' },
-  settings: { title: 'Настройки', subtitle: 'Хосты, доступ, внешний вид' },
-}
 
 function App() {
   const toasts = useToasts()
@@ -38,6 +29,7 @@ function App() {
   const queryClient = useQueryClient()
   const fetching = useIsFetching()
   const systemInfo = useSystemInfo()
+  const t = useT()
   const [nav, setNav] = useState<NavKey>('containers')
   const [search, setSearch] = useState('')
 
@@ -82,8 +74,8 @@ function App() {
 
       <div className="relative flex min-w-0 flex-1 flex-col">
         <TopBar
-          title={PAGE_META[nav].title}
-          subtitle={PAGE_META[nav].subtitle}
+          title={t(`page.${nav}.title`)}
+          subtitle={t(`page.${nav}.subtitle`)}
           search={search}
           onSearch={setSearch}
           totalCpu={totals.cpu}

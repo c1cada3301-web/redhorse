@@ -17,6 +17,8 @@ export interface Settings {
   logTimestamps: boolean
   /** Размер шрифта логов по умолчанию. */
   logFontSize: number
+  /** Боковое меню свёрнуто до иконок. */
+  sidebarCollapsed: boolean
 }
 
 /** Допустимые значения полей — заодно границы валидации при чтении из localStorage. */
@@ -54,6 +56,7 @@ function defaultSettings(): Settings {
     pollInterval: 4_000,
     logTimestamps: true,
     logFontSize: 12,
+    sidebarCollapsed: false,
   }
 }
 
@@ -102,6 +105,7 @@ function loadSettings(): Settings {
       pollInterval: pickChoice(raw, 'pollInterval', POLL_OPTIONS, fallback.pollInterval),
       logTimestamps: pickBoolean(raw, 'logTimestamps', fallback.logTimestamps),
       logFontSize: pickRange(raw, 'logFontSize', LOG_FONT_MIN, LOG_FONT_MAX, fallback.logFontSize),
+      sidebarCollapsed: pickBoolean(raw, 'sidebarCollapsed', fallback.sidebarCollapsed),
     }
   } catch {
     // Приватный режим или повреждённая запись — работаем на значениях по умолчанию.

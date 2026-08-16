@@ -13,6 +13,8 @@ export const en: Dictionary = {
   'nav.settings': 'Settings',
   'nav.soon': 'soon',
   'nav.tagline': 'docker control',
+  'nav.collapse': 'Collapse menu',
+  'nav.expand': 'Expand menu',
   'nav.socket': 'local · unix socket',
   'nav.runningOf': '{running}/{total} containers running',
 
