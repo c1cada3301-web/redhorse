@@ -1,0 +1,104 @@
+@import 'tailwindcss';
+
+@theme {
+  /* Фирменная палитра Redhorse: тёмная база + «раскалённый» акцент */
+  --color-ink-950: #07080b;
+  --color-ink-900: #0b0d12;
+  --color-ink-850: #10131a;
+  --color-ink-800: #151922;
+
+  --color-ember-300: #ff9b7a;
+  --color-ember-400: #ff7a55;
+  --color-ember-500: #f4552b;
+  --color-ember-600: #d93d16;
+
+  --color-mint-400: #35d6a4;
+  --color-amber-ok: #f5b544;
+  --color-danger: #ff5a5a;
+  --color-sky-400: #4aa8ff;
+
+  --font-mono: 'SFMono-Regular', 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-ink-950);
+    color: #e6e9f0;
+    font-family: ui-sans-serif, -apple-system, 'Segoe UI', Roboto, Inter, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+
+  ::selection {
+    background: var(--color-ember-500);
+    color: #fff;
+  }
+}
+
+/* Тонкие скроллбары — логов на экране много */
+.rh-scroll::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.rh-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.rh-scroll::-webkit-scrollbar-thumb {
+  background: rgb(255 255 255 / 0.09);
+  border-radius: 99px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.rh-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgb(255 255 255 / 0.2);
+  background-clip: content-box;
+}
+
+.rh-panel {
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.035), rgb(255 255 255 / 0.012));
+  border: 1px solid rgb(255 255 255 / 0.07);
+  border-radius: 14px;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+@keyframes rh-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(1.35);
+  }
+}
+
+.rh-pulse {
+  animation: rh-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes rh-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rh-fade-in {
+  animation: rh-fade-in 0.18s ease-out;
+}

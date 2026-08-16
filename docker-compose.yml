@@ -1,0 +1,26 @@
+services:
+  web:
+    build:
+      context: ./front
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+
+  api:
+    build:
+      context: ./api
+    env_file:
+      - ./api/.env
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - RH_ENV=production
+    # Доступ к Docker Engine. Только чтение сокета нам не подходит — нужны
+    # start/stop и сборка образов, поэтому монтируем на запись.
+    # Это фактически root на хосте: наружу порт 8000 не публикуй.
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    user: "0:0"

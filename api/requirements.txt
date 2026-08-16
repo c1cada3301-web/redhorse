@@ -1,0 +1,20 @@
+# nowibe-core @ file:./shared
+# отключено: папка shared/ пуста и лежит вне контекста сборки (./api)
+
+fastapi
+uvicorn[standard]
+docker
+sqlalchemy[asyncio]
+asyncpg
+python-dotenv
+httpx[socks]
+bcrypt
+pywebpush
+pydantic
+pydantic-settings
+redis
+pillow
+openpyxl
+python-multipart
+python-jose[cryptography]
+python-Levenshtein
