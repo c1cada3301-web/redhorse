@@ -9,10 +9,10 @@ from docker.errors import APIError
 from fastapi import APIRouter, HTTPException, Query, WebSocket, WebSocketDisconnect
 
 from config import get_settings
-from schemas import Container, ContainerStats, LogPage
+from schemas import Container, ContainerDetails, ContainerStats, LogPage
 from services.docker_client import get_client, get_container
 from services.logs import iter_log_lines, renumber, to_docker_time
-from services.mappers import to_container, to_stats
+from services.mappers import to_container, to_details, to_stats
 from services.streaming import iter_in_thread
 
 logger = logging.getLogger(__name__)
@@ -57,6 +57,13 @@ async def list_containers(
 async def inspect_container(container_id: str) -> Container:
     raw = await asyncio.to_thread(get_container, container_id)
     return to_container(raw)
+
+
+@router.get("/{container_id}/details", response_model=ContainerDetails)
+async def inspect_details(container_id: str) -> ContainerDetails:
+    """Полный инспект: окружение, монтирования, сети, лимиты, политика перезапуска."""
+    raw = await asyncio.to_thread(get_container, container_id)
+    return to_details(raw)
 
 
 @router.post("/{container_id}/{action}", status_code=204)

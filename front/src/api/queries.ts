@@ -5,6 +5,7 @@ import type {
   ApiImage,
   BuildRequest,
   ContainerAction,
+  ContainerDetails,
   DiskUsage,
   DockerNetwork,
   DockerVolume,
@@ -18,6 +19,7 @@ import type {
 export const keys = {
   containers: ['containers'] as const,
   container: (id: string) => ['containers', id] as const,
+  containerDetails: (id: string) => ['containers', id, 'details'] as const,
   images: ['images'] as const,
   jobs: ['images', 'jobs'] as const,
   info: ['system', 'info'] as const,
@@ -44,6 +46,15 @@ export function useContainerQuery(id: string | null) {
   return useQuery({
     queryKey: keys.container(id ?? ''),
     queryFn: () => request<ApiContainer>(`/containers/${id}`),
+    enabled: id !== null,
+    refetchInterval: CONTAINERS_POLL_MS,
+  })
+}
+
+export function useContainerDetails(id: string | null) {
+  return useQuery({
+    queryKey: keys.containerDetails(id ?? ''),
+    queryFn: () => request<ContainerDetails>(`/containers/${id}/details`),
     enabled: id !== null,
     refetchInterval: CONTAINERS_POLL_MS,
   })

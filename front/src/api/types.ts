@@ -82,6 +82,57 @@ export interface DockerVolume {
   labels: Record<string, string>
 }
 
+export interface EnvVar {
+  key: string
+  value: string
+}
+
+export interface MountPoint {
+  type: string
+  source: string
+  destination: string
+  mode: string
+  rw: boolean
+}
+
+export interface NetworkAttachment {
+  name: string
+  ipAddress: string
+  gateway: string
+  macAddress: string
+  aliases: string[]
+}
+
+export interface ResourceLimits {
+  memory: number
+  nanoCpus: number
+  cpuShares: number
+}
+
+/** Полный инспект контейнера — то, что показывает детальная страница. */
+export interface ContainerDetails extends ApiContainer {
+  entrypoint: string[]
+  workingDir: string
+  user: string
+  platform: string
+  driver: string
+  logPath: string
+  env: EnvVar[]
+  mounts: MountPoint[]
+  labels: Record<string, string>
+  networkDetails: NetworkAttachment[]
+  restartPolicy: string
+  restartPolicyRetries: number
+  limits: ResourceLimits
+  privileged: boolean
+  exitCode: number
+  error: string
+  oomKilled: boolean
+  pid: number
+  finishedAt: number | null
+  healthLog: string[]
+}
+
 export type ContainerAction = 'start' | 'stop' | 'restart' | 'pause' | 'unpause' | 'kill'
 
 export type PruneTarget = 'containers' | 'images' | 'volumes' | 'networks' | 'builder'

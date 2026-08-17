@@ -10,6 +10,7 @@ import { Sidebar } from './components/shell/Sidebar'
 import type { NavKey } from './components/shell/Sidebar'
 import { TopBar } from './components/shell/TopBar'
 import { ContainersPage } from './components/containers/ContainersPage'
+import { ContainerDetailPage } from './components/containers/ContainerDetailPage'
 import { DashboardPage } from './components/dashboard/DashboardPage'
 import { ImagesPage } from './components/images/ImagesPage'
 import { CleanupPage } from './components/cleanup/CleanupPage'
@@ -31,6 +32,9 @@ function App() {
   const systemInfo = useSystemInfo()
   const t = useT()
   const [nav, setNav] = useState<NavKey>('containers')
+  // Открытый контейнер живёт рядом с разделом: React Router появится позже,
+  // до тех пор адрес в строке браузера не меняется.
+  const [detailId, setDetailId] = useState<string | null>(null)
   const [search, setSearch] = useState('')
 
   const totals = useMemo(() => {
@@ -67,7 +71,10 @@ function App() {
 
       <Sidebar
         current={nav}
-        onNavigate={setNav}
+        onNavigate={(key) => {
+            setDetailId(null)
+            setNav(key)
+          }}
         runningCount={runningCount}
         totalCount={docker.containers.length}
       />
@@ -89,7 +96,34 @@ function App() {
 
         <main className="min-h-0 flex-1">
           {nav === 'containers' ? (
-            <ContainersPage docker={docker} logs={logs} search={search} />
+            detailId !== null ? (
+              <ContainerDetailPage
+                containerId={detailId}
+                onBack={() => setDetailId(null)}
+                onOpenLogs={(containerId) => {
+                  const target = docker.containers.find((item) => item.id === containerId)
+                  if (target !== undefined) logs.open(target)
+                }}
+                onAction={(id, action) => {
+                  if (action === 'start') docker.start(id)
+                  else if (action === 'stop') docker.stop(id)
+                  else if (action === 'restart') docker.restart(id)
+                  else if (action === 'pause') docker.pause(id)
+                  else docker.kill(id)
+                }}
+                onRemove={(id) => {
+                  docker.remove(id)
+                  setDetailId(null)
+                }}
+              />
+            ) : (
+              <ContainersPage
+                docker={docker}
+                logs={logs}
+                search={search}
+                onOpenDetails={setDetailId}
+              />
+            )
           ) : nav === 'dashboard' ? (
             <DashboardPage docker={docker} onOpenLogs={logs.open} />
           ) : nav === 'images' ? (

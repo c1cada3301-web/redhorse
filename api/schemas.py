@@ -41,6 +41,64 @@ class Container(BaseModel):
     model_config = {"populate_by_name": True}
 
 
+class EnvVar(BaseModel):
+    key: str
+    value: str
+
+
+class MountPoint(BaseModel):
+    type: str
+    source: str
+    destination: str
+    mode: str = ""
+    rw: bool = True
+
+
+class NetworkAttachment(BaseModel):
+    name: str
+    ip_address: str = Field("", alias="ipAddress")
+    gateway: str = ""
+    mac_address: str = Field("", alias="macAddress")
+    aliases: list[str] = []
+
+    model_config = {"populate_by_name": True}
+
+
+class ResourceLimits(BaseModel):
+    memory: int = 0
+    nano_cpus: int = Field(0, alias="nanoCpus")
+    cpu_shares: int = Field(0, alias="cpuShares")
+
+    model_config = {"populate_by_name": True}
+
+
+class ContainerDetails(Container):
+    """Полный инспект: то, что нужно на детальной странице."""
+
+    entrypoint: list[str] = []
+    working_dir: str = Field("", alias="workingDir")
+    user: str = ""
+    platform: str = ""
+    driver: str = ""
+    log_path: str = Field("", alias="logPath")
+    env: list[EnvVar] = []
+    mounts: list[MountPoint] = []
+    labels: dict[str, str] = {}
+    network_details: list[NetworkAttachment] = Field(default_factory=list, alias="networkDetails")
+    restart_policy: str = Field("", alias="restartPolicy")
+    restart_policy_retries: int = Field(0, alias="restartPolicyRetries")
+    limits: ResourceLimits = Field(default_factory=ResourceLimits)
+    privileged: bool = False
+    exit_code: int = Field(0, alias="exitCode")
+    error: str = ""
+    oom_killed: bool = Field(False, alias="oomKilled")
+    pid: int = 0
+    finished_at: float | None = Field(None, alias="finishedAt")
+    health_log: list[str] = Field(default_factory=list, alias="healthLog")
+
+    model_config = {"populate_by_name": True}
+
+
 class LogLine(BaseModel):
     id: int
     ts: float

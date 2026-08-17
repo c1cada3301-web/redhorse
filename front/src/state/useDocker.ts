@@ -37,6 +37,7 @@ export interface DockerApi {
   restart: (id: string) => void
   /** На запущенном — пауза, на приостановленном — снятие паузы. */
   pause: (id: string) => void
+  kill: (id: string) => void
   remove: (id: string) => void
 }
 
@@ -89,6 +90,7 @@ export function useDocker({ onError }: UseDockerOptions = {}): DockerApi {
     stop: useCallback((id: string) => run(id, 'stop'), [run]),
     restart: useCallback((id: string) => run(id, 'restart'), [run]),
     pause,
+    kill: useCallback((id: string) => run(id, 'kill'), [run]),
     remove: useCallback(
       (id: string) => {
         removal.mutate({ id }, { onError: (error) => onError?.(error, 'Не удалось удалить контейнер') })

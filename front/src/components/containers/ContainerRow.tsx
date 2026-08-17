@@ -14,6 +14,7 @@ interface ContainerRowProps {
   container: Container
   logsOpen: boolean
   onOpenLogs: () => void
+  onOpenDetails: () => void
   onStart: () => void
   onStop: () => void
   onRestart: () => void
@@ -25,6 +26,7 @@ export function ContainerRow({
   container,
   logsOpen,
   onOpenLogs,
+  onOpenDetails,
   onStart,
   onStop,
   onRestart,
@@ -37,17 +39,21 @@ export function ContainerRow({
 
   return (
     <div
-      className={`${ROW_GRID} rounded-xl border border-white/6 bg-white/[0.015] px-3 py-2.5 transition-colors hover:border-white/12 hover:bg-white/[0.035]`}
+      role="button"
+      tabIndex={0}
+      onClick={onOpenDetails}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onOpenDetails()
+        }
+      }}
+      title="Открыть детали контейнера"
+      className={`${ROW_GRID} cursor-pointer rounded-xl border border-white/6 bg-white/[0.015] px-3 py-2.5 text-left transition-colors hover:border-white/12 hover:bg-white/[0.035] focus-visible:border-[var(--color-ember-500)]/45 focus-visible:outline-none`}
     >
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={onOpenLogs}
-            className="truncate text-[13px] font-medium text-white hover:text-[var(--color-ember-300)]"
-          >
-            {container.name}
-          </button>
+          <span className="truncate text-[13px] font-medium text-white">{container.name}</span>
           {container.health === 'unhealthy' && (
             <span className="rounded bg-[var(--color-danger)]/12 px-1 text-[9px] text-[var(--color-danger)]">
               unhealthy
@@ -108,7 +114,11 @@ export function ContainerRow({
         {formatUptime(container.startedAt)}
       </div>
 
-      <div className="flex items-center justify-end gap-0.5">
+      <div
+        className="flex items-center justify-end gap-0.5"
+        onClick={(event) => event.stopPropagation()}
+        onKeyDown={(event) => event.stopPropagation()}
+      >
         <button
           type="button"
           onClick={onOpenLogs}

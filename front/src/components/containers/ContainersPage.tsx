@@ -20,6 +20,7 @@ interface ContainersPageProps {
   docker: DockerApi
   logs: LogSessionsApi
   search: string
+  onOpenDetails: (containerId: string) => void
 }
 
 function matches(container: Container, needle: string): boolean {
@@ -39,7 +40,7 @@ function matches(container: Container, needle: string): boolean {
   return haystack.includes(needle.toLowerCase())
 }
 
-export function ContainersPage({ docker, logs, search }: ContainersPageProps) {
+export function ContainersPage({ docker, logs, search, onOpenDetails }: ContainersPageProps) {
   const [filter, setFilter] = useState<ContainerState | 'all'>('all')
 
   const visible = useMemo(
@@ -130,6 +131,7 @@ export function ContainersPage({ docker, logs, search }: ContainersPageProps) {
               container={container}
               logsOpen={logs.isOpen(container.id)}
               onOpenLogs={() => logs.open(container)}
+              onOpenDetails={() => onOpenDetails(container.id)}
               onStart={() => docker.start(container.id)}
               onStop={() => docker.stop(container.id)}
               onRestart={() => docker.restart(container.id)}

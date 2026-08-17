@@ -4,7 +4,16 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from schemas import Container, ContainerStats, Image
+from schemas import (
+    Container,
+    ContainerDetails,
+    ContainerStats,
+    EnvVar,
+    Image,
+    MountPoint,
+    NetworkAttachment,
+    ResourceLimits,
+)
 
 _STATE_FALLBACK = "created"
 _KNOWN_STATES = {"running", "exited", "paused", "restarting", "created", "dead", "removing"}
@@ -78,6 +87,75 @@ def to_container(raw) -> Container:
         restarts=int(state.get("RestartCount") or 0),
         stack=labels.get("com.docker.compose.project"),
         command=command,
+    )
+
+
+def to_details(raw) -> ContainerDetails:
+    """Полный инспект для детальной страницы."""
+    attrs = raw.attrs
+    config = attrs.get("Config") or {}
+    host = attrs.get("HostConfig") or {}
+    state = attrs.get("State") or {}
+    policy = host.get("RestartPolicy") or {}
+    networks = (attrs.get("NetworkSettings") or {}).get("Networks") or {}
+
+    base = to_container(raw)
+
+    return ContainerDetails(
+        **base.model_dump(by_alias=True),
+        entrypoint=list(config.get("Entrypoint") or []),
+        workingDir=config.get("WorkingDir") or "",
+        user=config.get("User") or "",
+        platform=attrs.get("Platform") or "",
+        driver=attrs.get("Driver") or "",
+        logPath=attrs.get("LogPath") or "",
+        env=[_split_env(item) for item in (config.get("Env") or [])],
+        mounts=[_to_mount(item) for item in (attrs.get("Mounts") or [])],
+        labels=config.get("Labels") or {},
+        networkDetails=[_to_attachment(name, data) for name, data in networks.items()],
+        restartPolicy=policy.get("Name") or "no",
+        restartPolicyRetries=int(policy.get("MaximumRetryCount") or 0),
+        limits=ResourceLimits(
+            memory=int(host.get("Memory") or 0),
+            nanoCpus=int(host.get("NanoCpus") or 0),
+            cpuShares=int(host.get("CpuShares") or 0),
+        ),
+        privileged=bool(host.get("Privileged")),
+        exitCode=int(state.get("ExitCode") or 0),
+        error=state.get("Error") or "",
+        oomKilled=bool(state.get("OOMKilled")),
+        pid=int(state.get("Pid") or 0),
+        finishedAt=parse_docker_time(state.get("FinishedAt")),
+        healthLog=[
+            str(entry.get("Output") or "").strip()
+            for entry in ((state.get("Health") or {}).get("Log") or [])
+        ][-5:],
+    )
+
+
+def _split_env(item: str) -> EnvVar:
+    key, _, value = item.partition("=")
+    return EnvVar(key=key, value=value)
+
+
+def _to_mount(item: dict) -> MountPoint:
+    return MountPoint(
+        type=item.get("Type") or "",
+        # У анонимных томов источник — имя тома, у bind — путь на хосте.
+        source=item.get("Source") or item.get("Name") or "",
+        destination=item.get("Destination") or "",
+        mode=item.get("Mode") or "",
+        rw=bool(item.get("RW", True)),
+    )
+
+
+def _to_attachment(name: str, data: dict) -> NetworkAttachment:
+    return NetworkAttachment(
+        name=name,
+        ipAddress=data.get("IPAddress") or "",
+        gateway=data.get("Gateway") or "",
+        macAddress=data.get("MacAddress") or "",
+        aliases=[alias for alias in (data.get("Aliases") or []) if alias],
     )
 
 

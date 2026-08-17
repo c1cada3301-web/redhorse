@@ -11,6 +11,16 @@ export default defineConfig({
   server: {
     host: true,
     port: 3000,
+    // Vite режет запросы с незнакомым Host (защита от DNS-rebinding).
+    // Разрешаем то, откуда стенд реально открывают: сам хост из контейнера
+    // и домены туннелей, если понадобится показать панель снаружи.
+    allowedHosts: [
+      'host.docker.internal',
+      '.devtunnels.ms',
+      '.ngrok-free.app',
+      '.ngrok.io',
+      '.trycloudflare.com',
+    ],
     // В bind-mount с macOS в контейнер inotify-события не долетают — нужен опрос.
     watch: process.env.CHOKIDAR_USEPOLLING === 'true' ? { usePolling: true, interval: 300 } : undefined,
     proxy: {
