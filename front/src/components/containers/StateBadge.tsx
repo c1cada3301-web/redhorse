@@ -53,7 +53,7 @@ export function StateBadge({ state }: { state: ContainerState }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[11px] ${style.bg} ${style.text}`}
+      className={`inline-flex w-fit items-center gap-1.5 rounded-md px-2 py-0.5 text-[11px] whitespace-nowrap ${style.bg} ${style.text}`}
     >
       <span
         className={`h-1.5 w-1.5 rounded-full ${style.dot} ${state === 'running' ? 'rh-pulse' : ''}`}

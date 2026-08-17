@@ -84,7 +84,7 @@ export function AreaChart({ series, height = 148, format, max }: AreaChartProps)
                 x2="0"
                 y2="1"
               >
-                <stop offset="0%" stopColor={item.color} stopOpacity="0.32" />
+                <stop offset="0%" stopColor={item.color} style={{ stopOpacity: 'var(--rh-area-fill, 0.32)' }} />
                 <stop offset="100%" stopColor={item.color} stopOpacity="0" />
               </linearGradient>
             ))}

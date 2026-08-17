@@ -26,6 +26,9 @@
 
   --font-mono: 'SFMono-Regular', 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
 
+  /* Прозрачность заливки под линией графика. */
+  --rh-area-fill: 0.32;
+
   /* Текст основного уровня и подложка страницы. */
   --color-body: #e6e9f0;
 }
@@ -46,10 +49,13 @@
   --color-ember-500: #d93d16;
   --color-ember-600: #b02f0f;
 
-  --color-mint-400: #0f9c6e;
-  --color-amber-ok: #a9700a;
-  --color-danger: #cf2b2b;
-  --color-sky-400: #1668c4;
+  --color-mint-400: #07784f;
+  --color-amber-ok: #8a5a06;
+  --color-danger: #c62222;
+  --color-sky-400: #0f5aad;
+
+  /* На белом наложение двух полупрозрачных заливок даёт грязный оттенок. */
+  --rh-area-fill: 0.14;
 }
 
 @layer base {
