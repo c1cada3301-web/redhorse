@@ -1,3 +1,5 @@
+import { useId } from 'react'
+
 interface SparklineProps {
   values: number[]
   color?: string
@@ -14,6 +16,13 @@ export function Sparkline({
   height = 28,
   max,
 }: SparklineProps) {
+  // id обязан быть уникальным: раньше он собирался из пика и длины ряда,
+  // и два спарклайна с одинаковыми данными делили градиент — второй
+  // подхватывал цвет первого.
+  // useId отдаёт значение со спецсимволами, а на него ссылается url(#…) —
+  // оставляем только буквы и цифры.
+  const gradientId = `spark-${useId().replace(/[^a-zA-Z0-9]/g, '')}`
+
   if (values.length < 2) {
     return <div style={{ width, height }} />
   }
@@ -23,13 +32,12 @@ export function Sparkline({
   const toY = (value: number) => height - (value / peak) * (height - 2) - 1
 
   const points = values.map((value, index) => `${(index * step).toFixed(2)},${toY(value).toFixed(2)}`)
-  const gradientId = `spark-${Math.abs(peak).toFixed(0)}-${values.length}`
 
   return (
     <svg width={width} height={height} className="overflow-visible">
       <defs>
         <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.35" />
+          <stop offset="0%" stopColor={color} style={{ stopOpacity: 'var(--rh-area-fill, 0.35)' }} />
           <stop offset="100%" stopColor={color} stopOpacity="0" />
         </linearGradient>
       </defs>
