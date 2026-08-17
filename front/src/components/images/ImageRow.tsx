@@ -32,16 +32,16 @@ export function ImageRow({ image, onRemove }: ImageRowProps) {
 
   return (
     <div
-      className={`${IMAGE_GRID} rounded-xl border border-white/6 bg-white/[0.015] px-3 py-2.5 transition-colors hover:border-white/12 hover:bg-white/[0.035]`}
+      className={`${IMAGE_GRID} rounded-xl border border-fg/6 bg-fg/[0.015] px-3 py-2.5 transition-colors hover:border-fg/12 hover:bg-fg/[0.035]`}
     >
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           {primaryTag === undefined ? (
-            <span className="truncate font-[family-name:var(--font-mono)] text-[13px] text-white/35">
+            <span className="truncate font-[family-name:var(--font-mono)] text-[13px] text-fg/35">
               &lt;без тега&gt;
             </span>
           ) : (
-            <span className="truncate font-[family-name:var(--font-mono)] text-[13px] font-medium text-white">
+            <span className="truncate font-[family-name:var(--font-mono)] text-[13px] font-medium text-fg">
               {primaryTag}
             </span>
           )}
@@ -49,7 +49,7 @@ export function ImageRow({ image, onRemove }: ImageRowProps) {
           {restTags.length > 0 && (
             <span
               title={restTags.join(', ')}
-              className="shrink-0 rounded bg-white/8 px-1 text-[10px] text-white/45"
+              className="shrink-0 rounded bg-fg/8 px-1 text-[10px] text-fg/45"
             >
               +{restTags.length}
             </span>
@@ -62,22 +62,22 @@ export function ImageRow({ image, onRemove }: ImageRowProps) {
           )}
         </div>
 
-        <div className="mt-0.5 truncate font-[family-name:var(--font-mono)] text-[11px] text-white/35">
+        <div className="mt-0.5 truncate font-[family-name:var(--font-mono)] text-[11px] text-fg/35">
           {imageShortId(image.id)}
         </div>
       </div>
 
-      <div className="font-[family-name:var(--font-mono)] text-[11px] text-white/55">
+      <div className="font-[family-name:var(--font-mono)] text-[11px] text-fg/55">
         {formatBytes(image.size)}
       </div>
 
       <div className="font-[family-name:var(--font-mono)] text-[11px]">
-        <span className={used ? 'text-[var(--color-mint-400)]' : 'text-white/30'}>
+        <span className={used ? 'text-[var(--color-mint-400)]' : 'text-fg/30'}>
           {used ? image.containers : '—'}
         </span>
       </div>
 
-      <div className="truncate text-[11px] text-white/40">{formatCreated(image.createdAt)}</div>
+      <div className="truncate text-[11px] text-fg/40">{formatCreated(image.createdAt)}</div>
 
       <div className="flex items-center justify-end">
         <IconButton label="Удалить образ" tone="danger" onClick={() => setConfirming(true)}>

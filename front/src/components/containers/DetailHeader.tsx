@@ -35,7 +35,7 @@ export function BackButton({ onBack, label = 'К списку контейнер
       onClick={onBack}
       title={label}
       aria-label={label}
-      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-white/60 transition-colors hover:border-[var(--color-ember-500)]/40 hover:text-[var(--color-ember-300)]"
+      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-fg/10 bg-fg/5 text-fg/60 transition-colors hover:border-[var(--color-ember-500)]/40 hover:text-[var(--color-ember-300)]"
     >
       <ArrowLeft className="h-4 w-4" />
     </button>
@@ -60,16 +60,16 @@ export function DetailHeader({ container, onBack, onOpenLogs, onAction, onRemove
         <BackButton onBack={onBack} />
 
         <div className="min-w-0 flex-1">
-          <nav className="flex items-center gap-1 text-[11px] text-white/35">
+          <nav className="flex items-center gap-1 text-[11px] text-fg/35">
             <button type="button" onClick={onBack} className="transition-colors hover:text-[var(--color-ember-300)]">
               Контейнеры
             </button>
-            <ChevronRight className="h-3 w-3 text-white/20" />
-            <span className="truncate text-white/55">{container.name}</span>
+            <ChevronRight className="h-3 w-3 text-fg/20" />
+            <span className="truncate text-fg/55">{container.name}</span>
           </nav>
 
           <div className="mt-1 flex flex-wrap items-center gap-2">
-            <h1 className="truncate text-[17px] font-medium text-white" title={container.name}>
+            <h1 className="truncate text-[17px] font-medium text-fg" title={container.name}>
               {container.name}
             </h1>
             <StateBadge state={state} />
@@ -130,7 +130,7 @@ export function DetailHeader({ container, onBack, onOpenLogs, onAction, onRemove
           onClick={() => setConfirmRemove(true)}
         />
 
-        <span className="mx-1 h-5 w-px bg-white/8" />
+        <span className="mx-1 h-5 w-px bg-fg/8" />
 
         <ActionButton
           icon={<ScrollText className="h-3.5 w-3.5" />}
@@ -175,7 +175,7 @@ interface ActionButtonProps {
 }
 
 const ACTION_TONES: Record<NonNullable<ActionButtonProps['tone']>, string> = {
-  default: 'hover:border-white/20 hover:text-white',
+  default: 'hover:border-fg/20 hover:text-fg',
   accent: 'hover:border-[var(--color-ember-500)]/45 hover:text-[var(--color-ember-300)]',
   danger: 'hover:border-[var(--color-danger)]/45 hover:text-[var(--color-danger)]',
 }
@@ -188,8 +188,8 @@ function ActionButton({ icon, label, tone = 'default', disabled = false, onClick
       disabled={disabled}
       title={label}
       className={[
-        'inline-flex h-8 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 text-[12px] text-white/65',
-        'transition-colors disabled:cursor-not-allowed disabled:opacity-25 disabled:hover:border-white/10 disabled:hover:text-white/65',
+        'inline-flex h-8 items-center gap-1.5 rounded-lg border border-fg/10 bg-fg/5 px-2.5 text-[12px] text-fg/65',
+        'transition-colors disabled:cursor-not-allowed disabled:opacity-25 disabled:hover:border-fg/10 disabled:hover:text-fg/65',
         ACTION_TONES[tone],
       ].join(' ')}
     >

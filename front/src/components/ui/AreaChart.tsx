@@ -212,10 +212,10 @@ function Tooltip({ series, points, index, x, width, format }: TooltipProps) {
 
   return (
     <div
-      className="pointer-events-none absolute top-1 z-10 rounded-lg border border-white/10 bg-[var(--color-ink-900)]/95 px-2 py-1.5 shadow-lg"
+      className="pointer-events-none absolute top-1 z-10 rounded-lg border border-fg/10 bg-[var(--color-ink-900)]/95 px-2 py-1.5 shadow-lg"
       style={{ left: x, transform: flip ? 'translateX(calc(-100% - 10px))' : 'translateX(10px)' }}
     >
-      <div className="mb-1 font-[family-name:var(--font-mono)] text-[10px] text-white/30">
+      <div className="mb-1 font-[family-name:var(--font-mono)] text-[10px] text-fg/30">
         {behind === 0 ? 'сейчас' : `−${behind} с`}
       </div>
       {series.map((item) => {
@@ -224,8 +224,8 @@ function Tooltip({ series, points, index, x, width, format }: TooltipProps) {
         return (
           <div key={item.label} className="flex items-center gap-2 whitespace-nowrap">
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: item.color }} />
-            <span className="text-[11px] text-white/45">{item.label}</span>
-            <span className="ml-auto font-[family-name:var(--font-mono)] text-[11px] text-white/85">
+            <span className="text-[11px] text-fg/45">{item.label}</span>
+            <span className="ml-auto font-[family-name:var(--font-mono)] text-[11px] text-fg/85">
               {value === null ? '—' : format(value)}
             </span>
           </div>

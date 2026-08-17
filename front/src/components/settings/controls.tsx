@@ -1,7 +1,7 @@
 import { Check } from 'lucide-react'
 import type { ReactNode } from 'react'
 
-const ROW = 'rounded-lg border border-white/6 bg-white/[0.015] px-3 py-2.5'
+const ROW = 'rounded-lg border border-fg/6 bg-fg/[0.015] px-3 py-2.5'
 
 export function Section({
   title,
@@ -18,8 +18,8 @@ export function Section({
     <section className="rh-panel p-3">
       <header className="mb-2.5 flex items-baseline gap-2">
         <span className="self-center text-[var(--color-ember-400)]">{icon}</span>
-        <h2 className="text-[12px] tracking-wide text-white/60">{title}</h2>
-        {hint !== undefined && <p className="truncate text-[11px] text-white/25">{hint}</p>}
+        <h2 className="text-[12px] tracking-wide text-fg/60">{title}</h2>
+        {hint !== undefined && <p className="truncate text-[11px] text-fg/25">{hint}</p>}
       </header>
       <div className="space-y-1.5">{children}</div>
     </section>
@@ -48,8 +48,8 @@ export function ChoiceRow({
   return (
     <div className={`${ROW} flex flex-wrap items-center gap-3`}>
       <div className="min-w-0 flex-1">
-        <div className="text-[13px] text-white/85">{label}</div>
-        <div className="text-[11px] text-white/30">{hint}</div>
+        <div className="text-[13px] text-fg/85">{label}</div>
+        <div className="text-[11px] text-fg/30">{hint}</div>
       </div>
 
       <div className="flex flex-wrap gap-1">
@@ -66,7 +66,7 @@ export function ChoiceRow({
                 'h-8 rounded-lg border px-2.5 font-[family-name:var(--font-mono)] text-[11px] transition-colors',
                 active
                   ? 'border-[var(--color-ember-500)]/55 bg-[var(--color-ember-500)]/15 text-[var(--color-ember-300)]'
-                  : 'border-white/8 bg-black/25 text-white/50 hover:text-white/85',
+                  : 'border-fg/8 bg-bg/25 text-fg/50 hover:text-fg/85',
               ].join(' ')}
             >
               {choice.label}
@@ -92,8 +92,8 @@ export function ToggleRow({
   return (
     <div className={`${ROW} flex items-center gap-3`}>
       <div className="min-w-0 flex-1">
-        <div className="text-[13px] text-white/85">{label}</div>
-        <div className="text-[11px] text-white/30">{hint}</div>
+        <div className="text-[13px] text-fg/85">{label}</div>
+        <div className="text-[11px] text-fg/30">{hint}</div>
       </div>
 
       <button
@@ -106,13 +106,13 @@ export function ToggleRow({
           'relative h-5 w-9 shrink-0 rounded-full border transition-colors',
           checked
             ? 'border-[var(--color-ember-500)]/60 bg-[var(--color-ember-500)]/35'
-            : 'border-white/10 bg-black/35',
+            : 'border-fg/10 bg-bg/35',
         ].join(' ')}
       >
         <span
           className={[
             'absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full transition-all',
-            checked ? 'left-[18px] bg-[var(--color-ember-300)]' : 'left-[3px] bg-white/40',
+            checked ? 'left-[18px] bg-[var(--color-ember-300)]' : 'left-[3px] bg-fg/40',
           ].join(' ')}
         />
       </button>
@@ -140,8 +140,8 @@ export function SliderRow({
   return (
     <div className={`${ROW} flex flex-wrap items-center gap-3`}>
       <div className="min-w-0 flex-1">
-        <div className="text-[13px] text-white/85">{label}</div>
-        <div className="text-[11px] text-white/30">{hint}</div>
+        <div className="text-[13px] text-fg/85">{label}</div>
+        <div className="text-[11px] text-fg/30">{hint}</div>
       </div>
 
       <input
@@ -152,10 +152,10 @@ export function SliderRow({
         value={value}
         aria-label={label}
         onChange={(event) => onChange(Number(event.target.value))}
-        className="h-1 w-40 cursor-pointer appearance-none rounded-full bg-white/12 accent-[var(--color-ember-500)]"
+        className="h-1 w-40 cursor-pointer appearance-none rounded-full bg-fg/12 accent-[var(--color-ember-500)]"
       />
 
-      <span className="w-14 text-right font-[family-name:var(--font-mono)] text-[12px] text-white/80">
+      <span className="w-14 text-right font-[family-name:var(--font-mono)] text-[12px] text-fg/80">
         {valueLabel}
       </span>
     </div>
@@ -166,8 +166,8 @@ export function SliderRow({
 export function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className={`${ROW} flex items-center justify-between gap-3 py-2`}>
-      <span className="shrink-0 text-[12px] text-white/50">{label}</span>
-      <span className="truncate font-[family-name:var(--font-mono)] text-[12px] text-white/80">
+      <span className="shrink-0 text-[12px] text-fg/50">{label}</span>
+      <span className="truncate font-[family-name:var(--font-mono)] text-[12px] text-fg/80">
         {value}
       </span>
     </div>
@@ -194,14 +194,14 @@ export function LanguageCard({
         'flex items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors',
         active
           ? 'border-[var(--color-ember-500)]/55 bg-[var(--color-ember-500)]/12'
-          : 'border-white/8 bg-white/[0.015] hover:border-white/16',
+          : 'border-fg/8 bg-fg/[0.015] hover:border-fg/16',
       ].join(' ')}
     >
       <div className="min-w-0 flex-1">
-        <div className={`truncate text-[13px] ${active ? 'text-[var(--color-ember-300)]' : 'text-white/85'}`}>
+        <div className={`truncate text-[13px] ${active ? 'text-[var(--color-ember-300)]' : 'text-fg/85'}`}>
           {nativeLabel}
         </div>
-        <div className="truncate text-[11px] text-white/30">{label}</div>
+        <div className="truncate text-[11px] text-fg/30">{label}</div>
       </div>
 
       {active && <Check className="h-4 w-4 shrink-0 text-[var(--color-ember-400)]" />}

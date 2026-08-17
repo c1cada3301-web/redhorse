@@ -43,7 +43,7 @@ export function Toasts({ items, onDismiss }: ToastsProps) {
             <AlertTriangle className="mt-0.5 h-4 w-4" />
           </span>
 
-          <p className="min-w-0 flex-1 text-[12px] leading-relaxed break-words text-white/75">
+          <p className="min-w-0 flex-1 text-[12px] leading-relaxed break-words text-fg/75">
             {item.text}
           </p>
 
@@ -51,7 +51,7 @@ export function Toasts({ items, onDismiss }: ToastsProps) {
             type="button"
             onClick={() => onDismiss(item.id)}
             aria-label="Скрыть"
-            className="text-white/30 transition-colors hover:text-white"
+            className="text-fg/30 transition-colors hover:text-fg"
           >
             <X className="h-3.5 w-3.5" />
           </button>

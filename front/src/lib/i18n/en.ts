@@ -58,6 +58,11 @@ export const en: Dictionary = {
   'common.dash': '—',
 
   // Settings: language
+  'settings.theme.title': 'Appearance',
+  'settings.theme.hint': 'Dark is easier at night, light reads better in bright rooms',
+  'settings.theme.dark': 'Dark',
+  'settings.theme.light': 'Light',
+  'settings.theme.system': 'Follow system',
   'settings.language.title': 'Interface language',
   'settings.language.hint': 'Applied instantly, no page reload needed.',
 

@@ -23,7 +23,7 @@ export function DetailMounts({ mounts }: { mounts: MountPoint[] }) {
           {mounts.map((mount) => (
             <div
               key={`${mount.destination}-${mount.source}`}
-              className="rounded-lg border border-white/6 bg-white/[0.015] px-3 py-2"
+              className="rounded-lg border border-fg/6 bg-fg/[0.015] px-3 py-2"
             >
               <div className="flex items-center gap-2">
                 <Chip tone={mount.type === 'bind' ? 'warn' : 'sky'}>
@@ -31,7 +31,7 @@ export function DetailMounts({ mounts }: { mounts: MountPoint[] }) {
                 </Chip>
                 <Chip tone={mount.rw ? 'ok' : 'muted'}>{mount.rw ? 'rw' : 'ro'}</Chip>
                 {mount.mode !== '' && mount.mode !== (mount.rw ? 'rw' : 'ro') && (
-                  <span className="font-[family-name:var(--font-mono)] text-[10px] text-white/25">
+                  <span className="font-[family-name:var(--font-mono)] text-[10px] text-fg/25">
                     {mount.mode}
                   </span>
                 )}
@@ -40,14 +40,14 @@ export function DetailMounts({ mounts }: { mounts: MountPoint[] }) {
               <div className="mt-1 flex items-center gap-2">
                 <span
                   title={mount.source}
-                  className="min-w-0 flex-1 truncate font-[family-name:var(--font-mono)] text-[11px] text-white/55"
+                  className="min-w-0 flex-1 truncate font-[family-name:var(--font-mono)] text-[11px] text-fg/55"
                 >
                   {mount.source === '' ? EMPTY_MARK : mount.source}
                 </span>
-                <ArrowRight className="h-3 w-3 shrink-0 text-white/20" />
+                <ArrowRight className="h-3 w-3 shrink-0 text-fg/20" />
                 <span
                   title={mount.destination}
-                  className="min-w-0 flex-1 truncate font-[family-name:var(--font-mono)] text-[11px] text-white/85"
+                  className="min-w-0 flex-1 truncate font-[family-name:var(--font-mono)] text-[11px] text-fg/85"
                 >
                   {mount.destination}
                 </span>

@@ -18,8 +18,8 @@ interface TimeRangePickerProps {
 const HOUR = 3_600_000
 
 const FIELD_CLASS = [
-  'h-7 w-full rounded-md border border-white/8 bg-black/30 px-1.5',
-  'font-[family-name:var(--font-mono)] text-[11px] text-white/85 outline-none',
+  'h-7 w-full rounded-md border border-fg/8 bg-bg/30 px-1.5',
+  'font-[family-name:var(--font-mono)] text-[11px] text-fg/85 outline-none',
   'transition-colors [color-scheme:dark] focus:border-[var(--color-ember-500)]/60',
 ].join(' ')
 
@@ -90,7 +90,7 @@ export function TimeRangePicker({ value, onChange }: TimeRangePickerProps) {
             'text-xs transition-colors duration-150',
             open || !live
               ? 'border-[var(--color-ember-500)]/45 bg-[var(--color-ember-500)]/15 text-[var(--color-ember-300)]'
-              : 'border-white/8 bg-black/30 text-white/70 hover:border-white/15 hover:text-white',
+              : 'border-fg/8 bg-bg/30 text-fg/70 hover:border-fg/15 hover:text-fg',
           ].join(' ')}
         >
           <CalendarClock className="h-3.5 w-3.5 shrink-0" />
@@ -119,7 +119,7 @@ export function TimeRangePicker({ value, onChange }: TimeRangePickerProps) {
                   'rounded-md px-2 py-1 text-left text-xs transition-colors',
                   activeKey === preset.key
                     ? 'bg-[var(--color-ember-500)]/20 text-[var(--color-ember-300)]'
-                    : 'text-white/65 hover:bg-white/8 hover:text-white',
+                    : 'text-fg/65 hover:bg-fg/8 hover:text-fg',
                 ].join(' ')}
               >
                 {preset.label}
@@ -127,13 +127,13 @@ export function TimeRangePicker({ value, onChange }: TimeRangePickerProps) {
             ))}
           </div>
 
-          <div className="my-1.5 h-px bg-white/8" />
+          <div className="my-1.5 h-px bg-fg/8" />
 
           <div className="flex flex-col gap-1.5 px-1 pb-1">
-            <span className="text-[10px] tracking-wide text-white/30 uppercase">Произвольное окно</span>
+            <span className="text-[10px] tracking-wide text-fg/30 uppercase">Произвольное окно</span>
 
             <label className="flex items-center gap-1.5">
-              <span className="w-6 shrink-0 text-[11px] text-white/40">с</span>
+              <span className="w-6 shrink-0 text-[11px] text-fg/40">с</span>
               <input
                 type="datetime-local"
                 value={bounds.from}
@@ -143,7 +143,7 @@ export function TimeRangePicker({ value, onChange }: TimeRangePickerProps) {
             </label>
 
             <label className="flex items-center gap-1.5">
-              <span className="w-6 shrink-0 text-[11px] text-white/40">по</span>
+              <span className="w-6 shrink-0 text-[11px] text-fg/40">по</span>
               <input
                 type="datetime-local"
                 value={bounds.to}
@@ -160,7 +160,7 @@ export function TimeRangePicker({ value, onChange }: TimeRangePickerProps) {
               type="button"
               onClick={handleApply}
               className={[
-                'h-7 rounded-md bg-[var(--color-ember-500)]/85 text-xs font-medium text-white',
+                'h-7 rounded-md bg-[var(--color-ember-500)]/85 text-xs font-medium text-fg',
                 'transition-colors hover:bg-[var(--color-ember-500)]',
               ].join(' ')}
             >

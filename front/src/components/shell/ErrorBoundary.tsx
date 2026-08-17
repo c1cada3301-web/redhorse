@@ -37,15 +37,15 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         <div className="rh-panel w-full max-w-lg p-5">
           <div className="flex items-center gap-2 text-[var(--color-danger)]">
             <AlertTriangle className="h-5 w-5" />
-            <h1 className="text-[15px] font-medium text-white">Интерфейс упал</h1>
+            <h1 className="text-[15px] font-medium text-fg">Интерфейс упал</h1>
           </div>
 
-          <p className="mt-2 text-[12px] leading-relaxed text-white/50">
+          <p className="mt-2 text-[12px] leading-relaxed text-fg/50">
             Данные с Docker Engine продолжают работать — сломался только рендер. Подробности
             в консоли браузера.
           </p>
 
-          <pre className="rh-scroll mt-3 max-h-48 overflow-auto rounded-lg border border-white/8 bg-black/30 p-3 font-[family-name:var(--font-mono)] text-[11px] text-white/60">
+          <pre className="rh-scroll mt-3 max-h-48 overflow-auto rounded-lg border border-fg/8 bg-bg/30 p-3 font-[family-name:var(--font-mono)] text-[11px] text-fg/60">
             {error.message}
           </pre>
 

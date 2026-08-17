@@ -21,7 +21,7 @@ import { countByLevel, linesToText } from '../../lib/logFilter'
 import { TimeRangePicker } from './TimeRangePicker'
 
 const LEVELS: { key: LogLevel; label: string; className: string }[] = [
-  { key: 'debug', label: 'DBG', className: 'text-white/50' },
+  { key: 'debug', label: 'DBG', className: 'text-fg/50' },
   { key: 'info', label: 'INF', className: 'text-[var(--color-sky-400)]' },
   { key: 'warn', label: 'WRN', className: 'text-[var(--color-amber-ok)]' },
   { key: 'error', label: 'ERR', className: 'text-[var(--color-danger)]' },
@@ -69,20 +69,20 @@ export function LogToolbar({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5 border-b border-white/6 bg-black/20 px-2 py-1.5">
+    <div className="flex flex-wrap items-center gap-1.5 border-b border-fg/6 bg-bg/20 px-2 py-1.5">
       <div className="relative">
-        <Search className="pointer-events-none absolute top-1/2 left-2 h-3.5 w-3.5 -translate-y-1/2 text-white/30" />
+        <Search className="pointer-events-none absolute top-1/2 left-2 h-3.5 w-3.5 -translate-y-1/2 text-fg/30" />
         <input
           value={options.search}
           onChange={(event) => onChange({ search: event.target.value })}
           placeholder="grep по логу…"
-          className="h-7 w-44 rounded-md border border-white/8 bg-black/30 pr-6 pl-7 text-xs text-white/85 outline-none placeholder:text-white/25 focus:border-[var(--color-ember-500)]/60"
+          className="h-7 w-44 rounded-md border border-fg/8 bg-bg/30 pr-6 pl-7 text-xs text-fg/85 outline-none placeholder:text-fg/25 focus:border-[var(--color-ember-500)]/60"
         />
         {options.search !== '' && (
           <button
             type="button"
             onClick={() => onChange({ search: '' })}
-            className="absolute top-1/2 right-1 -translate-y-1/2 text-white/35 hover:text-white"
+            className="absolute top-1/2 right-1 -translate-y-1/2 text-fg/35 hover:text-fg"
             aria-label="Очистить поиск"
           >
             <X className="h-3.5 w-3.5" />
@@ -92,7 +92,7 @@ export function LogToolbar({
 
       <TimeRangePicker value={range} onChange={onRangeChange} />
 
-      <div className="flex items-center gap-0.5 rounded-md border border-white/8 bg-black/25 p-0.5">
+      <div className="flex items-center gap-0.5 rounded-md border border-fg/8 bg-bg/25 p-0.5">
         {LEVELS.map((level) => (
           <button
             key={level.key}
@@ -102,8 +102,8 @@ export function LogToolbar({
             className={[
               'rounded px-1.5 py-0.5 font-[family-name:var(--font-mono)] text-[10px] tracking-wide transition-colors',
               options.levels[level.key]
-                ? `bg-white/8 ${level.className}`
-                : 'text-white/20 line-through',
+                ? `bg-fg/8 ${level.className}`
+                : 'text-fg/20 line-through',
             ].join(' ')}
           >
             {level.label}
@@ -111,7 +111,7 @@ export function LogToolbar({
         ))}
       </div>
 
-      <div className="mx-0.5 h-4 w-px bg-white/8" />
+      <div className="mx-0.5 h-4 w-px bg-fg/8" />
 
       <IconButton
         label={options.paused ? 'Возобновить поток' : 'Пауза потока'}
@@ -153,7 +153,7 @@ export function LogToolbar({
         {options.masked ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
       </IconButton>
 
-      <div className="mx-0.5 h-4 w-px bg-white/8" />
+      <div className="mx-0.5 h-4 w-px bg-fg/8" />
 
       <IconButton
         label="Мельче шрифт"
@@ -161,7 +161,7 @@ export function LogToolbar({
       >
         <Minus className="h-4 w-4" />
       </IconButton>
-      <span className="w-6 text-center font-[family-name:var(--font-mono)] text-[11px] text-white/40">
+      <span className="w-6 text-center font-[family-name:var(--font-mono)] text-[11px] text-fg/40">
         {options.fontSize}
       </span>
       <IconButton
@@ -171,7 +171,7 @@ export function LogToolbar({
         <Plus className="h-4 w-4" />
       </IconButton>
 
-      <div className="mx-0.5 h-4 w-px bg-white/8" />
+      <div className="mx-0.5 h-4 w-px bg-fg/8" />
 
       <IconButton label="Копировать в буфер" onClick={handleCopy}>
         <Copy className="h-4 w-4" />
@@ -183,7 +183,7 @@ export function LogToolbar({
         <Eraser className="h-4 w-4" />
       </IconButton>
 
-      <div className="ml-auto pr-1 font-[family-name:var(--font-mono)] text-[11px] text-white/30">
+      <div className="ml-auto pr-1 font-[family-name:var(--font-mono)] text-[11px] text-fg/30">
         {filteredCount === allLines.length
           ? `${allLines.length} строк`
           : `${filteredCount} / ${allLines.length}`}

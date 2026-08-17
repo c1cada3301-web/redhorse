@@ -49,11 +49,11 @@ export function ContainerRow({
         }
       }}
       title="Открыть детали контейнера"
-      className={`${ROW_GRID} cursor-pointer rounded-xl border border-white/6 bg-white/[0.015] px-3 py-2.5 text-left transition-colors hover:border-white/12 hover:bg-white/[0.035] focus-visible:border-[var(--color-ember-500)]/45 focus-visible:outline-none`}
+      className={`${ROW_GRID} cursor-pointer rounded-xl border border-fg/6 bg-fg/[0.015] px-3 py-2.5 text-left transition-colors hover:border-fg/12 hover:bg-fg/[0.035] focus-visible:border-[var(--color-ember-500)]/45 focus-visible:outline-none`}
     >
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <span className="truncate text-[13px] font-medium text-white">{container.name}</span>
+          <span className="truncate text-[13px] font-medium text-fg">{container.name}</span>
           {container.health === 'unhealthy' && (
             <span className="rounded bg-[var(--color-danger)]/12 px-1 text-[9px] text-[var(--color-danger)]">
               unhealthy
@@ -65,13 +65,13 @@ export function ContainerRow({
             </span>
           )}
         </div>
-        <div className="mt-0.5 flex items-center gap-2 truncate font-[family-name:var(--font-mono)] text-[11px] text-white/35">
+        <div className="mt-0.5 flex items-center gap-2 truncate font-[family-name:var(--font-mono)] text-[11px] text-fg/35">
           <span className="truncate">{container.image}</span>
-          <span className="text-white/15">·</span>
+          <span className="text-fg/15">·</span>
           <span>{shortId(container.id)}</span>
           {container.ports.length > 0 && (
             <>
-              <span className="text-white/15">·</span>
+              <span className="text-fg/15">·</span>
               <span className="truncate text-[var(--color-sky-400)]/60">{container.ports[0]}</span>
             </>
           )}
@@ -106,11 +106,11 @@ export function ContainerRow({
         color="var(--color-amber-ok)"
       />
 
-      <div className="text-right font-[family-name:var(--font-mono)] text-[11px] text-white/55">
+      <div className="text-right font-[family-name:var(--font-mono)] text-[11px] text-fg/55">
         {formatBytes(container.sizeRootFs)}
       </div>
 
-      <div className="text-right font-[family-name:var(--font-mono)] text-[11px] text-white/45">
+      <div className="text-right font-[family-name:var(--font-mono)] text-[11px] text-fg/45">
         {formatUptime(container.startedAt)}
       </div>
 
@@ -126,7 +126,7 @@ export function ContainerRow({
             'mr-1 flex h-7 items-center gap-1.5 rounded-md border px-2 text-[11px] transition-colors',
             logsOpen
               ? 'border-[var(--color-ember-500)]/45 bg-[var(--color-ember-500)]/15 text-[var(--color-ember-300)]'
-              : 'border-white/10 bg-white/5 text-white/60 hover:border-[var(--color-ember-500)]/40 hover:text-[var(--color-ember-300)]',
+              : 'border-fg/10 bg-fg/5 text-fg/60 hover:border-[var(--color-ember-500)]/40 hover:text-[var(--color-ember-300)]',
           ].join(' ')}
         >
           <ScrollText className="h-3.5 w-3.5" />
@@ -184,11 +184,11 @@ function MetricCell({ value, hint, series, color }: MetricCellProps) {
     <div className="flex items-center gap-2">
       <Sparkline values={series} color={color} width={44} height={22} />
       <div className="min-w-0 leading-tight">
-        <div className="truncate font-[family-name:var(--font-mono)] text-[11px] text-white/75">
+        <div className="truncate font-[family-name:var(--font-mono)] text-[11px] text-fg/75">
           {value}
         </div>
         {hint !== undefined && (
-          <div className="truncate font-[family-name:var(--font-mono)] text-[10px] text-white/30">
+          <div className="truncate font-[family-name:var(--font-mono)] text-[10px] text-fg/30">
             {hint}
           </div>
         )}

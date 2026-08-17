@@ -43,13 +43,13 @@ export function ConfirmDialog({
             </span>
 
             <div className="min-w-0 flex-1">
-              <Dialog.Title className="text-[14px] font-medium text-white">{title}</Dialog.Title>
-              <Dialog.Description className="mt-1 text-[12px] leading-relaxed text-white/50">
+              <Dialog.Title className="text-[14px] font-medium text-fg">{title}</Dialog.Title>
+              <Dialog.Description className="mt-1 text-[12px] leading-relaxed text-fg/50">
                 {description}
               </Dialog.Description>
 
               {subject !== undefined && (
-                <div className="mt-2 truncate rounded-md border border-white/8 bg-black/30 px-2 py-1.5 font-[family-name:var(--font-mono)] text-[11px] text-white/70">
+                <div className="mt-2 truncate rounded-md border border-fg/8 bg-bg/30 px-2 py-1.5 font-[family-name:var(--font-mono)] text-[11px] text-fg/70">
                   {subject}
                 </div>
               )}
@@ -60,7 +60,7 @@ export function ConfirmDialog({
             <Dialog.Close asChild>
               <button
                 type="button"
-                className="h-8 rounded-lg border border-white/10 bg-white/5 px-3 text-[12px] text-white/70 transition-colors hover:text-white"
+                className="h-8 rounded-lg border border-fg/10 bg-fg/5 px-3 text-[12px] text-fg/70 transition-colors hover:text-fg"
               >
                 Отмена
               </button>

@@ -5,8 +5,14 @@ import type { Language } from '../lib/i18n'
 
 const STORAGE_KEY = 'redhorse.settings'
 
+export type Theme = 'dark' | 'light' | 'system'
+
+export const THEMES: readonly Theme[] = ['dark', 'light', 'system']
+
 export interface Settings {
   language: Language
+  /** Тема оформления. system — следовать настройке операционной системы. */
+  theme: Theme
   /** Сколько строк лога держать в буфере сессии. */
   logBufferSize: number
   /** Прятать секреты в логах по умолчанию. */
@@ -51,6 +57,7 @@ function detectLanguage(): Language {
 function defaultSettings(): Settings {
   return {
     language: detectLanguage(),
+    theme: 'dark',
     logBufferSize: 20_000,
     maskSecrets: true,
     pollInterval: 4_000,
@@ -62,6 +69,10 @@ function defaultSettings(): Settings {
 
 function isLanguage(value: unknown): value is Language {
   return typeof value === 'string' && LANGUAGES.some((item) => item.code === value)
+}
+
+function isTheme(value: unknown): value is Theme {
+  return typeof value === 'string' && (THEMES as readonly string[]).includes(value)
 }
 
 function pickBoolean(raw: Record<string, unknown>, key: string, fallback: boolean): boolean {
@@ -100,6 +111,7 @@ function loadSettings(): Settings {
 
     return {
       language: isLanguage(raw.language) ? raw.language : fallback.language,
+      theme: isTheme(raw.theme) ? raw.theme : fallback.theme,
       logBufferSize: pickChoice(raw, 'logBufferSize', LOG_BUFFER_OPTIONS, fallback.logBufferSize),
       maskSecrets: pickBoolean(raw, 'maskSecrets', fallback.maskSecrets),
       pollInterval: pickChoice(raw, 'pollInterval', POLL_OPTIONS, fallback.pollInterval),
@@ -139,6 +151,27 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.lang = settings.language
   }, [settings.language])
+
+  // В режиме «как в системе» слушаем медиа-запрос: тема должна меняться
+  // вместе с системной, без перезагрузки вкладки.
+  useEffect(() => {
+    const root = document.documentElement
+
+    if (settings.theme !== 'system') {
+      root.dataset.theme = settings.theme
+      return
+    }
+
+    const media = window.matchMedia('(prefers-color-scheme: light)')
+    const apply = () => {
+      root.dataset.theme = media.matches ? 'light' : 'dark'
+    }
+
+    apply()
+    media.addEventListener('change', apply)
+
+    return () => media.removeEventListener('change', apply)
+  }, [settings.theme])
 
   const t = useMemo<Translate>(() => {
     const dict = getDictionary(settings.language)

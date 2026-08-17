@@ -25,7 +25,7 @@ export function ContainerMetricTable({ containers, metric, total }: ContainerMet
           <div
             key={column === '' ? `col-${index}` : column}
             className={[
-              'text-[10px] tracking-wider text-white/25 uppercase',
+              'text-[10px] tracking-wider text-fg/25 uppercase',
               index === 3 || index === 4 ? 'text-right' : '',
             ].join(' ')}
           >
@@ -35,7 +35,7 @@ export function ContainerMetricTable({ containers, metric, total }: ContainerMet
       </div>
 
       {containers.length === 0 ? (
-        <div className="flex h-28 flex-col items-center justify-center gap-2 text-white/30">
+        <div className="flex h-28 flex-col items-center justify-center gap-2 text-fg/30">
           <Activity className="h-5 w-5" />
           <p className="text-[12px]">Нечего показать</p>
         </div>
@@ -68,11 +68,11 @@ function MetricRow({ container, metric, share, grid }: MetricRowProps) {
 
   return (
     <div
-      className={`${grid} rounded-xl border border-white/6 bg-white/[0.015] px-3 py-2 transition-colors hover:border-white/12 hover:bg-white/[0.035]`}
+      className={`${grid} rounded-xl border border-fg/6 bg-fg/[0.015] px-3 py-2 transition-colors hover:border-fg/12 hover:bg-fg/[0.035]`}
     >
       <div className="min-w-0">
-        <div className="truncate text-[13px] text-white/90">{container.name}</div>
-        <div className="truncate font-[family-name:var(--font-mono)] text-[11px] text-white/30">
+        <div className="truncate text-[13px] text-fg/90">{container.name}</div>
+        <div className="truncate font-[family-name:var(--font-mono)] text-[11px] text-fg/30">
           {container.image} · {shortId(container.id)}
         </div>
       </div>
@@ -81,15 +81,15 @@ function MetricRow({ container, metric, share, grid }: MetricRowProps) {
 
       <Sparkline values={series} color={metric.color} width={88} height={22} />
 
-      <div className="text-right font-[family-name:var(--font-mono)] text-[12px] text-white/85">
+      <div className="text-right font-[family-name:var(--font-mono)] text-[12px] text-fg/85">
         {metric.format(metric.value(container))}
       </div>
 
-      <div className="text-right font-[family-name:var(--font-mono)] text-[11px] text-white/40">
+      <div className="text-right font-[family-name:var(--font-mono)] text-[11px] text-fg/40">
         {share.toFixed(0)}%
       </div>
 
-      <div className="h-1.5 overflow-hidden rounded-full bg-white/6">
+      <div className="h-1.5 overflow-hidden rounded-full bg-fg/6">
         <div
           className="h-full rounded-full transition-[width] duration-300"
           style={{ width: `${Math.min(100, Math.max(0, share))}%`, background: metric.color }}

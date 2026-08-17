@@ -21,7 +21,7 @@ export function DetailLabels({ labels }: { labels: Record<string, string> }) {
             type="button"
             onClick={() => setOpen((current) => !current)}
             aria-expanded={open}
-            className="inline-flex h-7 items-center gap-1 rounded-md border border-white/10 bg-white/5 px-2 text-[11px] text-white/55 transition-colors hover:text-white"
+            className="inline-flex h-7 items-center gap-1 rounded-md border border-fg/10 bg-fg/5 px-2 text-[11px] text-fg/55 transition-colors hover:text-fg"
           >
             {open ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
             {open ? 'Свернуть' : 'Показать'}
@@ -36,18 +36,18 @@ export function DetailLabels({ labels }: { labels: Record<string, string> }) {
           {entries.map(([key, value]) => (
             <div
               key={key}
-              className="flex items-center gap-3 rounded-lg border border-white/6 bg-white/[0.015] px-3 py-1.5"
+              className="flex items-center gap-3 rounded-lg border border-fg/6 bg-fg/[0.015] px-3 py-1.5"
             >
               <span
                 title={key}
-                className="w-[280px] shrink-0 truncate font-[family-name:var(--font-mono)] text-[11px] text-white/50"
+                className="w-[280px] shrink-0 truncate font-[family-name:var(--font-mono)] text-[11px] text-fg/50"
               >
                 {key}
               </span>
               <span
                 title={value}
                 className={`min-w-0 flex-1 truncate font-[family-name:var(--font-mono)] text-[11px] ${
-                  value === '' ? 'text-white/25' : 'text-white/80'
+                  value === '' ? 'text-fg/25' : 'text-fg/80'
                 }`}
               >
                 {value === '' ? EMPTY_MARK : value}
@@ -57,7 +57,7 @@ export function DetailLabels({ labels }: { labels: Record<string, string> }) {
           ))}
         </div>
       ) : (
-        <div className="text-[11px] text-white/30">
+        <div className="text-[11px] text-fg/30">
           Скрыто, чтобы не мешать: у compose-контейнеров меток обычно десяток.
         </div>
       )}

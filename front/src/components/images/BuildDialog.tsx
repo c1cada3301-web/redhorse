@@ -200,7 +200,7 @@ export function BuildDialog({ open, onOpenChange }: BuildDialogProps) {
 
           <div>
             <span className={LABEL_CLASS}>Файлы контекста</span>
-            <p className="mb-2 text-[11px] text-white/35">
+            <p className="mb-2 text-[11px] text-fg/35">
               Путь внутри контекста и содержимое — для инструкций COPY в Dockerfile.
             </p>
             <KeyValueEditor
@@ -235,12 +235,12 @@ interface SectionProps {
 
 function Section({ title, open, onToggle, children }: SectionProps) {
   return (
-    <div className="rounded-lg border border-white/6 bg-white/[0.015] px-3 py-2">
+    <div className="rounded-lg border border-fg/6 bg-fg/[0.015] px-3 py-2">
       <button
         type="button"
         onClick={onToggle}
         aria-expanded={open}
-        className="flex w-full items-center gap-1.5 text-[12px] text-white/60 transition-colors hover:text-white"
+        className="flex w-full items-center gap-1.5 text-[12px] text-fg/60 transition-colors hover:text-fg"
       >
         <ChevronRight className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-90' : ''}`} />
         {title}
@@ -260,7 +260,7 @@ interface CheckboxProps {
 
 function Checkbox({ id, label, checked, onChange }: CheckboxProps) {
   return (
-    <label htmlFor={id} className="flex cursor-pointer items-center gap-2 text-[12px] text-white/65">
+    <label htmlFor={id} className="flex cursor-pointer items-center gap-2 text-[12px] text-fg/65">
       <input
         id={id}
         type="checkbox"

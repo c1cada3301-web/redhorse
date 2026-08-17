@@ -55,7 +55,7 @@ export function Sidebar({ current, onNavigate, runningCount, totalCount }: Sideb
   return (
     <aside
       className={[
-        'relative flex shrink-0 flex-col border-r border-white/6 bg-[var(--color-ink-900)]/60 transition-[width] duration-200',
+        'relative flex shrink-0 flex-col border-r border-fg/6 bg-[var(--color-ink-900)]/60 transition-[width] duration-200',
         collapsed ? 'w-[60px]' : 'w-[212px]',
       ].join(' ')}
     >
@@ -66,7 +66,7 @@ export function Sidebar({ current, onNavigate, runningCount, totalCount }: Sideb
         title={toggleLabel}
         aria-label={toggleLabel}
         aria-expanded={!collapsed}
-        className="absolute top-[46px] -right-3 z-30 grid h-6 w-6 place-items-center rounded-full border border-white/10 bg-[var(--color-ink-850)] text-white/45 transition-colors hover:border-[var(--color-ember-500)]/50 hover:text-[var(--color-ember-300)]"
+        className="absolute top-[46px] -right-3 z-30 grid h-6 w-6 place-items-center rounded-full border border-fg/10 bg-[var(--color-ink-850)] text-fg/45 transition-colors hover:border-[var(--color-ember-500)]/50 hover:text-[var(--color-ember-300)]"
       >
         <ChevronLeft className={`h-3.5 w-3.5 transition-transform duration-200 ${collapsed ? 'rotate-180' : ''}`} />
       </button>
@@ -81,8 +81,8 @@ export function Sidebar({ current, onNavigate, runningCount, totalCount }: Sideb
         />
         {!collapsed && (
           <div className="min-w-0 leading-tight">
-            <div className="truncate text-sm font-semibold tracking-tight text-white">RedHorse</div>
-            <div className="truncate text-[10px] text-white/35">{t('nav.tagline')}</div>
+            <div className="truncate text-sm font-semibold tracking-tight text-fg">RedHorse</div>
+            <div className="truncate text-[10px] text-fg/35">{t('nav.tagline')}</div>
           </div>
         )}
       </div>
@@ -104,8 +104,8 @@ export function Sidebar({ current, onNavigate, runningCount, totalCount }: Sideb
                 'relative flex items-center rounded-lg py-2 text-[13px] transition-colors',
                 collapsed ? 'justify-center px-0' : 'gap-2.5 px-2.5',
                 active
-                  ? 'bg-white/[0.06] text-white'
-                  : 'text-white/50 hover:bg-white/[0.03] hover:text-white/80',
+                  ? 'bg-fg/[0.06] text-fg'
+                  : 'text-fg/50 hover:bg-fg/[0.03] hover:text-fg/80',
               ].join(' ')}
             >
               {active && (
@@ -121,21 +121,21 @@ export function Sidebar({ current, onNavigate, runningCount, totalCount }: Sideb
       <div
         title={collapsed ? t('nav.runningOf', { running: runningCount, total: totalCount }) : undefined}
         className={[
-          'm-2 rounded-lg border border-white/6 bg-black/25',
+          'm-2 rounded-lg border border-fg/6 bg-bg/25',
           collapsed ? 'flex flex-col items-center gap-1 px-0 py-2' : 'px-3 py-2.5',
         ].join(' ')}
       >
         <div className="flex items-center gap-2">
           <span className="rh-pulse h-1.5 w-1.5 rounded-full bg-[var(--color-mint-400)]" />
-          {!collapsed && <span className="text-[11px] text-white/60">{t('nav.socket')}</span>}
+          {!collapsed && <span className="text-[11px] text-fg/60">{t('nav.socket')}</span>}
         </div>
 
         {collapsed ? (
-          <span className="font-[family-name:var(--font-mono)] text-[10px] text-white/40">
+          <span className="font-[family-name:var(--font-mono)] text-[10px] text-fg/40">
             {runningCount}/{totalCount}
           </span>
         ) : (
-          <div className="mt-1 font-[family-name:var(--font-mono)] text-[11px] text-white/30">
+          <div className="mt-1 font-[family-name:var(--font-mono)] text-[11px] text-fg/30">
             {t('nav.runningOf', { running: runningCount, total: totalCount })}
           </div>
         )}

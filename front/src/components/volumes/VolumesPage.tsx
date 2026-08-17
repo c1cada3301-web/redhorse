@@ -72,24 +72,24 @@ export function VolumesPage({ search }: VolumesPageProps) {
               'flex h-8 items-center gap-2 rounded-lg border px-3 text-[12px] transition-colors',
               filter === item.key
                 ? 'border-[var(--color-ember-500)]/45 bg-[var(--color-ember-500)]/12 text-[var(--color-ember-300)]'
-                : 'border-white/8 bg-white/[0.02] text-white/50 hover:text-white/85',
+                : 'border-fg/8 bg-fg/[0.02] text-fg/50 hover:text-fg/85',
             ].join(' ')}
           >
             {item.label}
-            <span className="rounded bg-black/30 px-1 font-[family-name:var(--font-mono)] text-[10px] text-white/40">
+            <span className="rounded bg-bg/30 px-1 font-[family-name:var(--font-mono)] text-[10px] text-fg/40">
               {counts.get(item.key) ?? 0}
             </span>
           </button>
         ))}
 
-        <span className="ml-auto font-[family-name:var(--font-mono)] text-[11px] text-white/30">
+        <span className="ml-auto font-[family-name:var(--font-mono)] text-[11px] text-fg/30">
           суммарный размер {formatBytes(totalSize)}
         </span>
       </div>
 
       <div className={`${VOLUME_GRID} shrink-0 px-7 pt-4 pb-2`}>
         {COLUMNS.map((column) => (
-          <div key={column} className="text-[10px] tracking-wider text-white/25 uppercase">
+          <div key={column} className="text-[10px] tracking-wider text-fg/25 uppercase">
             {column}
           </div>
         ))}
@@ -110,7 +110,7 @@ interface VolumesBodyProps {
 
 function VolumesBody({ loading, error, visible }: VolumesBodyProps) {
   if (loading) {
-    return <p className="px-3 pt-6 text-sm text-white/35">Загружаем тома…</p>
+    return <p className="px-3 pt-6 text-sm text-fg/35">Загружаем тома…</p>
   }
 
   if (error !== null) {
@@ -119,7 +119,7 @@ function VolumesBody({ loading, error, visible }: VolumesBodyProps) {
 
   if (visible.length === 0) {
     return (
-      <div className="flex h-40 flex-col items-center justify-center gap-2 text-white/35">
+      <div className="flex h-40 flex-col items-center justify-center gap-2 text-fg/35">
         <HardDrive className="h-6 w-6" />
         <p className="text-sm">Ничего не найдено</p>
       </div>

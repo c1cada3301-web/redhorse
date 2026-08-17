@@ -5,8 +5,8 @@ import { Check, Copy, X } from 'lucide-react'
 /** Общие мелочи детальной страницы: панель, поле, плитка, чип, копирование. */
 
 export const TONE_TEXT = {
-  default: 'text-white/80',
-  muted: 'text-white/30',
+  default: 'text-fg/80',
+  muted: 'text-fg/30',
   accent: 'text-[var(--color-ember-300)]',
   ok: 'text-[var(--color-mint-400)]',
   warn: 'text-[var(--color-amber-ok)]',
@@ -50,8 +50,8 @@ export function DetailPanel({ title, icon, hint, right, children }: DetailPanelP
     <section className="rh-panel p-3">
       <header className="mb-2 flex min-h-7 items-center gap-2">
         <span className="text-[var(--color-ember-400)]">{icon}</span>
-        <h2 className="text-[12px] tracking-wide text-white/70">{title}</h2>
-        {hint !== undefined && <span className="text-[11px] text-white/30">{hint}</span>}
+        <h2 className="text-[12px] tracking-wide text-fg/70">{title}</h2>
+        {hint !== undefined && <span className="text-[11px] text-fg/30">{hint}</span>}
         {right !== undefined && <div className="ml-auto flex items-center gap-1.5">{right}</div>}
       </header>
       {children}
@@ -72,8 +72,8 @@ export function DetailField({ label, value, mono = true, copyable = false, tone 
   const text = filled ? value : EMPTY_MARK
 
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-white/6 bg-white/[0.015] px-3 py-2">
-      <span className="w-[132px] shrink-0 text-[11px] text-white/40">{label}</span>
+    <div className="flex items-center gap-3 rounded-lg border border-fg/6 bg-fg/[0.015] px-3 py-2">
+      <span className="w-[132px] shrink-0 text-[11px] text-fg/40">{label}</span>
       <span
         title={filled ? value : undefined}
         className={[
@@ -98,12 +98,12 @@ interface DetailTileProps {
 
 export function DetailTile({ label, value, hint, tone = 'default' }: DetailTileProps) {
   return (
-    <div className="rounded-lg border border-white/6 bg-white/[0.015] px-3 py-2">
-      <div className="text-[11px] text-white/35">{label}</div>
+    <div className="rounded-lg border border-fg/6 bg-fg/[0.015] px-3 py-2">
+      <div className="text-[11px] text-fg/35">{label}</div>
       <div className={`mt-0.5 truncate font-[family-name:var(--font-mono)] text-[15px] ${TONE_TEXT[tone]}`}>
         {value}
       </div>
-      {hint !== undefined && <div className="truncate text-[11px] text-white/30">{hint}</div>}
+      {hint !== undefined && <div className="truncate text-[11px] text-fg/30">{hint}</div>}
     </div>
   )
 }
@@ -111,7 +111,7 @@ export function DetailTile({ label, value, hint, tone = 'default' }: DetailTileP
 export function Chip({ children, tone = 'sky' }: { children: ReactNode; tone?: Tone }) {
   return (
     <span
-      className={`inline-flex items-center rounded bg-white/6 px-1.5 py-0.5 font-[family-name:var(--font-mono)] text-[10px] ${TONE_TEXT[tone]}`}
+      className={`inline-flex items-center rounded bg-fg/6 px-1.5 py-0.5 font-[family-name:var(--font-mono)] text-[10px] ${TONE_TEXT[tone]}`}
     >
       {children}
     </span>
@@ -119,7 +119,7 @@ export function Chip({ children, tone = 'sky' }: { children: ReactNode; tone?: T
 }
 
 export function EmptyNote({ text }: { text: string }) {
-  return <div className="flex h-16 items-center justify-center text-[12px] text-white/25">{text}</div>
+  return <div className="flex h-16 items-center justify-center text-[12px] text-fg/25">{text}</div>
 }
 
 /** Кнопка копирования: галочка при успехе, крестик если буфер недоступен. */
@@ -161,7 +161,7 @@ export function CopyButton({ value, label = 'Скопировать' }: { value:
           ? 'text-[var(--color-mint-400)]'
           : status === 'error'
             ? 'text-[var(--color-danger)]'
-            : 'text-white/35 hover:bg-white/10 hover:text-white',
+            : 'text-fg/35 hover:bg-fg/10 hover:text-fg',
       ].join(' ')}
     >
       {status === 'done' ? (

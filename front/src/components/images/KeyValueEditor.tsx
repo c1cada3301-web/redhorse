@@ -55,7 +55,7 @@ export function KeyValueEditor({
       {rows.map((row) => (
         <div
           key={row.id}
-          className={multiline ? 'space-y-1.5 rounded-lg border border-white/6 p-2' : 'flex items-center gap-2'}
+          className={multiline ? 'space-y-1.5 rounded-lg border border-fg/6 p-2' : 'flex items-center gap-2'}
         >
           <div className={multiline ? 'flex items-center gap-2' : 'contents'}>
             <input

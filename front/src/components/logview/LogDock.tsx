@@ -52,7 +52,7 @@ export function LogDock({ api }: LogDockProps) {
 
   return (
     <div
-      className="relative flex shrink-0 flex-col border-t border-white/8 bg-[var(--color-ink-900)]/80 backdrop-blur-xl"
+      className="relative flex shrink-0 flex-col border-t border-fg/8 bg-[var(--color-ink-900)]/80 backdrop-blur-xl"
       style={{ height }}
     >
       <div
@@ -91,7 +91,7 @@ export function LogDock({ api }: LogDockProps) {
             <Columns2 className="h-4 w-4" />
           </IconButton>
 
-          <div className="mx-0.5 h-4 w-px bg-white/8" />
+          <div className="mx-0.5 h-4 w-px bg-fg/8" />
 
           <IconButton
             label={api.collapsed ? 'Развернуть панель' : 'Свернуть панель'}
@@ -160,17 +160,17 @@ function DockTab({ session, active, onSelect, onClose }: DockTabProps) {
         'group flex h-6 shrink-0 cursor-pointer items-center gap-1.5 rounded-md border px-2 text-xs transition-colors',
         active
           ? 'border-[var(--color-ember-500)]/40 bg-[var(--color-ember-500)]/12 text-[var(--color-ember-300)]'
-          : 'border-white/8 bg-white/[0.03] text-white/55 hover:text-white/85',
+          : 'border-fg/8 bg-fg/[0.03] text-fg/55 hover:text-fg/85',
       ].join(' ')}
     >
       <span
         className={[
           'h-1 w-1 rounded-full',
-          session.options.paused ? 'bg-white/30' : 'bg-[var(--color-mint-400)]',
+          session.options.paused ? 'bg-fg/30' : 'bg-[var(--color-mint-400)]',
         ].join(' ')}
       />
       <span className="max-w-40 truncate">{session.containerName}</span>
-      {session.floating && <span className="text-[10px] text-white/30">окно</span>}
+      {session.floating && <span className="text-[10px] text-fg/30">окно</span>}
       <button
         type="button"
         onClick={(event) => {

@@ -14,9 +14,9 @@ export function DetailNetworks({ networks }: { networks: NetworkAttachment[] }) 
       ) : (
         <div className="space-y-1">
           {networks.map((net) => (
-            <div key={net.name} className="rounded-lg border border-white/6 bg-white/[0.015] px-3 py-2">
+            <div key={net.name} className="rounded-lg border border-fg/6 bg-fg/[0.015] px-3 py-2">
               <div className="flex items-center gap-2">
-                <span className="min-w-0 flex-1 truncate text-[12px] text-white/85" title={net.name}>
+                <span className="min-w-0 flex-1 truncate text-[12px] text-fg/85" title={net.name}>
                   {net.name}
                 </span>
                 <span className="font-[family-name:var(--font-mono)] text-[11px] text-[var(--color-sky-400)]">
@@ -25,7 +25,7 @@ export function DetailNetworks({ networks }: { networks: NetworkAttachment[] }) 
                 {net.ipAddress !== '' && <CopyButton value={net.ipAddress} label="Скопировать IP" />}
               </div>
 
-              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 font-[family-name:var(--font-mono)] text-[10px] text-white/35">
+              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 font-[family-name:var(--font-mono)] text-[10px] text-fg/35">
                 <span>шлюз {net.gateway === '' ? EMPTY_MARK : net.gateway}</span>
                 <span>mac {net.macAddress === '' ? EMPTY_MARK : net.macAddress}</span>
               </div>

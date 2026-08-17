@@ -58,6 +58,11 @@ export const ru: Dictionary = {
   'common.dash': '—',
 
   // Настройки: язык
+  'settings.theme.title': 'Тема оформления',
+  'settings.theme.hint': 'Тёмная бережёт глаза ночью, светлая читается при ярком свете',
+  'settings.theme.dark': 'Тёмная',
+  'settings.theme.light': 'Светлая',
+  'settings.theme.system': 'Как в системе',
   'settings.language.title': 'Язык интерфейса',
   'settings.language.hint': 'Применяется сразу, без перезагрузки страницы.',
 

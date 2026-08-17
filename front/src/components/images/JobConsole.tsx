@@ -37,17 +37,17 @@ export function JobConsole({ stream, runningLabel, height = '46vh' }: JobConsole
       <div
         ref={scrollRef}
         style={{ height }}
-        className="rh-scroll min-h-[200px] overflow-y-auto rounded-lg border border-white/8 bg-black/45 px-3 py-2 font-[family-name:var(--font-mono)] text-[12px] leading-[1.55]"
+        className="rh-scroll min-h-[200px] overflow-y-auto rounded-lg border border-fg/8 bg-bg/45 px-3 py-2 font-[family-name:var(--font-mono)] text-[12px] leading-[1.55]"
       >
         {stream.events.length === 0 ? (
-          <p className="text-white/30">Ожидаем вывод…</p>
+          <p className="text-fg/30">Ожидаем вывод…</p>
         ) : (
           stream.events.map((event, index) => (
             <div
               key={`${event.ts}-${index}`}
               className={[
                 'break-words whitespace-pre-wrap',
-                event.stream === 'stderr' ? 'text-[var(--color-danger)]' : 'text-white/75',
+                event.stream === 'stderr' ? 'text-[var(--color-danger)]' : 'text-fg/75',
               ].join(' ')}
             >
               {event.text}
@@ -69,7 +69,7 @@ interface StatusBannerProps {
 function StatusBanner({ stream, runningLabel }: StatusBannerProps) {
   if (stream.state === 'running') {
     return (
-      <div className="flex items-center gap-2 rounded-lg border border-white/8 bg-white/[0.03] px-3 py-2 text-[12px] text-white/55">
+      <div className="flex items-center gap-2 rounded-lg border border-fg/8 bg-fg/[0.03] px-3 py-2 text-[12px] text-fg/55">
         <span className="rh-pulse h-1.5 w-1.5 rounded-full bg-[var(--color-ember-400)]" />
         {runningLabel}
       </div>

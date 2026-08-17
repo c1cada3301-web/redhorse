@@ -23,7 +23,7 @@ export function NetworkRow({ network, expanded, onToggle }: NetworkRowProps) {
   const system = SYSTEM_NAMES.has(network.name)
 
   return (
-    <div className="rounded-xl border border-white/6 bg-white/[0.015] transition-colors hover:border-white/12 hover:bg-white/[0.035]">
+    <div className="rounded-xl border border-fg/6 bg-fg/[0.015] transition-colors hover:border-fg/12 hover:bg-fg/[0.035]">
       <button
         type="button"
         onClick={onToggle}
@@ -32,7 +32,7 @@ export function NetworkRow({ network, expanded, onToggle }: NetworkRowProps) {
       >
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className="truncate text-[13px] font-medium text-white">{network.name}</span>
+            <span className="truncate text-[13px] font-medium text-fg">{network.name}</span>
 
             {network.internal && (
               <span className="shrink-0 rounded bg-[var(--color-amber-ok)]/12 px-1 text-[9px] text-[var(--color-amber-ok)]">
@@ -41,11 +41,11 @@ export function NetworkRow({ network, expanded, onToggle }: NetworkRowProps) {
             )}
 
             {system && (
-              <span className="shrink-0 rounded bg-white/6 px-1 text-[9px] text-white/35">системная</span>
+              <span className="shrink-0 rounded bg-fg/6 px-1 text-[9px] text-fg/35">системная</span>
             )}
           </div>
 
-          <div className="mt-0.5 truncate font-[family-name:var(--font-mono)] text-[11px] text-white/35">
+          <div className="mt-0.5 truncate font-[family-name:var(--font-mono)] text-[11px] text-fg/35">
             {shortId(network.id)}
           </div>
         </div>
@@ -54,31 +54,31 @@ export function NetworkRow({ network, expanded, onToggle }: NetworkRowProps) {
           {network.driver}
         </div>
 
-        <div className="truncate font-[family-name:var(--font-mono)] text-[11px] text-white/45">
+        <div className="truncate font-[family-name:var(--font-mono)] text-[11px] text-fg/45">
           {network.scope}
         </div>
 
-        <div className="truncate font-[family-name:var(--font-mono)] text-[11px] text-white/55">
-          {network.subnets.length === 0 ? <span className="text-white/20">—</span> : network.subnets.join(', ')}
+        <div className="truncate font-[family-name:var(--font-mono)] text-[11px] text-fg/55">
+          {network.subnets.length === 0 ? <span className="text-fg/20">—</span> : network.subnets.join(', ')}
         </div>
 
         <div className="font-[family-name:var(--font-mono)] text-[11px]">
           {network.members.length === 0 ? (
-            <span className="text-white/25">пусто</span>
+            <span className="text-fg/25">пусто</span>
           ) : (
             <span className="text-[var(--color-mint-400)]">{network.members.length}</span>
           )}
         </div>
 
-        <div className="flex justify-end text-white/35">
+        <div className="flex justify-end text-fg/35">
           {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </div>
       </button>
 
       {expanded && (
-        <div className="rh-fade-in border-t border-white/6 px-3 py-3">
+        <div className="rh-fade-in border-t border-fg/6 px-3 py-3">
           {network.members.length === 0 ? (
-            <p className="text-[12px] text-white/35">В этой сети нет контейнеров</p>
+            <p className="text-[12px] text-fg/35">В этой сети нет контейнеров</p>
           ) : (
             <div className="flex flex-wrap gap-1.5">
               {network.members.map((name) => (

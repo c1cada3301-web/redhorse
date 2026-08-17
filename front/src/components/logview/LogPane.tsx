@@ -62,21 +62,21 @@ export function LogPane({
         'flex min-h-0 min-w-0 flex-col overflow-hidden rounded-xl border bg-[var(--color-ink-900)]/85',
         active
           ? 'border-[var(--color-ember-500)]/45 shadow-[0_0_0_1px_rgba(244,85,43,0.15)]'
-          : 'border-white/8',
+          : 'border-fg/8',
       ].join(' ')}
     >
       {header && (
-        <header className="flex h-9 shrink-0 items-center gap-2 border-b border-white/6 bg-white/[0.02] px-2">
+        <header className="flex h-9 shrink-0 items-center gap-2 border-b border-fg/6 bg-fg/[0.02] px-2">
           <span
             className={[
               'h-1.5 w-1.5 rounded-full',
               session.options.paused
-                ? 'bg-white/30'
+                ? 'bg-fg/30'
                 : 'rh-pulse bg-[var(--color-mint-400)]',
             ].join(' ')}
           />
-          <h3 className="truncate text-xs font-medium text-white/85">{session.containerName}</h3>
-          <span className="rounded bg-white/6 px-1.5 py-0.5 font-[family-name:var(--font-mono)] text-[10px] text-white/40">
+          <h3 className="truncate text-xs font-medium text-fg/85">{session.containerName}</h3>
+          <span className="rounded bg-fg/6 px-1.5 py-0.5 font-[family-name:var(--font-mono)] text-[10px] text-fg/40">
             {session.connection === 'open' ? 'logs -f' : session.loading ? 'загрузка…' : 'срез'}
           </span>
 

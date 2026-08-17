@@ -97,15 +97,15 @@ function ChartPanel({ title, icon, hint, series, format, max }: ChartPanelProps)
     <section className="rh-panel p-3">
       <header className="mb-1 flex items-center gap-2">
         <span className="text-[var(--color-ember-400)]">{icon}</span>
-        <h2 className="text-[12px] tracking-wide text-white/60">{title}</h2>
-        <span className="text-[11px] text-white/25">{hint}</span>
+        <h2 className="text-[12px] tracking-wide text-fg/60">{title}</h2>
+        <span className="text-[11px] text-fg/25">{hint}</span>
 
         <div className="ml-auto flex items-center gap-3">
           {series.map((item) => (
             <div key={item.label} className="flex items-center gap-1.5">
               <span className="h-1.5 w-1.5 rounded-full" style={{ background: item.color }} />
-              <span className="text-[11px] text-white/35">{item.label}</span>
-              <span className="font-[family-name:var(--font-mono)] text-[12px] text-white/85">
+              <span className="text-[11px] text-fg/35">{item.label}</span>
+              <span className="font-[family-name:var(--font-mono)] text-[12px] text-fg/85">
                 {format(last(item.values))}
               </span>
             </div>

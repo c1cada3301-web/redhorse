@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Info, Languages, Plug, RotateCcw, ScrollText, Timer } from 'lucide-react'
+import { Info, Languages, Palette, Plug, RotateCcw, ScrollText, Timer } from 'lucide-react'
 import { useDiskUsage, useSystemInfo } from '../../api/queries'
 import { formatBytes } from '../../lib/format'
 import { LANGUAGES } from '../../lib/i18n'
@@ -8,6 +8,7 @@ import {
   LOG_FONT_MAX,
   LOG_FONT_MIN,
   POLL_OPTIONS,
+  THEMES,
   useSettings,
   useT,
 } from '../../state/settings'
@@ -64,6 +65,24 @@ export function SettingsPage() {
               label={language.label}
               active={language.code === settings.language}
               onSelect={() => update({ language: language.code })}
+            />
+          ))}
+        </div>
+      </Section>
+
+      <Section
+        title={t('settings.theme.title')}
+        hint={t('settings.theme.hint')}
+        icon={<Palette className="h-4 w-4" />}
+      >
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {THEMES.map((theme) => (
+            <LanguageCard
+              key={theme}
+              nativeLabel={t(`settings.theme.${theme}`)}
+              label={theme}
+              active={theme === settings.theme}
+              onSelect={() => update({ theme })}
             />
           ))}
         </div>
@@ -132,7 +151,7 @@ export function SettingsPage() {
             label={t('settings.connection.version')}
             value={info.data?.serverVersion ?? (info.isPending ? t('common.loading') : dash)}
           />
-          <p className="px-1 pt-0.5 text-[11px] text-white/25">{t('settings.connection.remoteSoon')}</p>
+          <p className="px-1 pt-0.5 text-[11px] text-fg/25">{t('settings.connection.remoteSoon')}</p>
         </Section>
 
         <Section title={t('settings.about.title')} icon={<Info className="h-4 w-4" />}>

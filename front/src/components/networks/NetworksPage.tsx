@@ -111,17 +111,17 @@ export function NetworksPage({ search }: NetworksPageProps) {
               'flex h-8 items-center gap-2 rounded-lg border px-3 text-[12px] transition-colors',
               driver === key
                 ? 'border-[var(--color-ember-500)]/45 bg-[var(--color-ember-500)]/12 text-[var(--color-ember-300)]'
-                : 'border-white/8 bg-white/[0.02] text-white/50 hover:text-white/85',
+                : 'border-fg/8 bg-fg/[0.02] text-fg/50 hover:text-fg/85',
             ].join(' ')}
           >
             {key === 'all' ? 'Все' : key}
-            <span className="rounded bg-black/30 px-1 font-[family-name:var(--font-mono)] text-[10px] text-white/40">
+            <span className="rounded bg-bg/30 px-1 font-[family-name:var(--font-mono)] text-[10px] text-fg/40">
               {counts.get(key) ?? 0}
             </span>
           </button>
         ))}
 
-        <span className="ml-auto font-[family-name:var(--font-mono)] text-[11px] text-white/30">
+        <span className="ml-auto font-[family-name:var(--font-mono)] text-[11px] text-fg/30">
           подключений контейнеров {attached}
         </span>
       </div>
@@ -130,7 +130,7 @@ export function NetworksPage({ search }: NetworksPageProps) {
         {COLUMNS.map((column, index) => (
           <div
             key={column === '' ? `col-${index}` : column}
-            className="text-[10px] tracking-wider text-white/25 uppercase"
+            className="text-[10px] tracking-wider text-fg/25 uppercase"
           >
             {column}
           </div>
@@ -160,7 +160,7 @@ interface NetworksBodyProps {
 
 function NetworksBody({ loading, error, visible, expanded, onToggle }: NetworksBodyProps) {
   if (loading) {
-    return <p className="px-3 pt-6 text-sm text-white/35">Загружаем сети…</p>
+    return <p className="px-3 pt-6 text-sm text-fg/35">Загружаем сети…</p>
   }
 
   if (error !== null) {
@@ -169,7 +169,7 @@ function NetworksBody({ loading, error, visible, expanded, onToggle }: NetworksB
 
   if (visible.length === 0) {
     return (
-      <div className="flex h-40 flex-col items-center justify-center gap-2 text-white/35">
+      <div className="flex h-40 flex-col items-center justify-center gap-2 text-fg/35">
         <Network className="h-6 w-6" />
         <p className="text-sm">Ничего не найдено</p>
       </div>

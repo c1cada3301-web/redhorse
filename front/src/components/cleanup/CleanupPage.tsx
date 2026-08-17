@@ -142,7 +142,7 @@ export function CleanupPage() {
           <button
             type="button"
             onClick={() => void preview.refetch()}
-            className="mt-3 flex h-8 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 text-[12px] text-white/70 transition-colors hover:text-white"
+            className="mt-3 flex h-8 items-center gap-1.5 rounded-lg border border-fg/10 bg-fg/5 px-3 text-[12px] text-fg/70 transition-colors hover:text-fg"
           >
             <RefreshCw className="h-3.5 w-3.5" />
             Повторить
@@ -160,7 +160,7 @@ export function CleanupPage() {
 
       <div className="rh-panel flex flex-wrap items-end gap-4 px-4 py-3">
         <div>
-          <div className="flex items-center gap-2 text-white/35">
+          <div className="flex items-center gap-2 text-fg/35">
             <span className="text-[var(--color-ember-400)]">
               <Trash2 className="h-4 w-4" />
             </span>
@@ -169,22 +169,22 @@ export function CleanupPage() {
           <div className="mt-1 font-[family-name:var(--font-mono)] text-[30px] leading-none text-[var(--color-ember-300)]">
             {formatBytes(total)}
           </div>
-          <div className="mt-1 text-[11px] text-white/30">
+          <div className="mt-1 text-[11px] text-fg/30">
             {candidates > 0 ? `${candidates} объектов под удаление` : 'поимённых объектов нет'}
           </div>
         </div>
 
         <div className="ml-2">
-          <div className="flex items-center gap-2 text-white/35">
-            <span className="text-white/30">
+          <div className="flex items-center gap-2 text-fg/35">
+            <span className="text-fg/30">
               <HardDrive className="h-4 w-4" />
             </span>
             <span className="text-[11px]">Занято Docker сейчас</span>
           </div>
-          <div className="mt-1 font-[family-name:var(--font-mono)] text-[20px] leading-none text-white/80">
+          <div className="mt-1 font-[family-name:var(--font-mono)] text-[20px] leading-none text-fg/80">
             {disk.data === undefined ? '—' : formatBytes(occupied)}
           </div>
-          <div className="mt-1 text-[11px] text-white/30">
+          <div className="mt-1 text-[11px] text-fg/30">
             {occupied > 0 ? `освободится ${((total / occupied) * 100).toFixed(0)}%` : '—'}
           </div>
         </div>
@@ -197,7 +197,7 @@ export function CleanupPage() {
             'ml-auto flex h-9 items-center gap-2 rounded-lg border px-4 text-[13px] transition-colors',
             workGroups.length > 0 && !locked
               ? 'border-[var(--color-ember-500)]/45 bg-[var(--color-ember-500)]/12 text-[var(--color-ember-300)] hover:bg-[var(--color-ember-500)]/22'
-              : 'cursor-not-allowed border-white/8 bg-white/[0.02] text-white/25',
+              : 'cursor-not-allowed border-fg/8 bg-fg/[0.02] text-fg/25',
           ].join(' ')}
         >
           {running === 'all' ? (
@@ -293,8 +293,8 @@ function Centered({ icon, text, action }: { icon: ReactNode; text: string; actio
   return (
     <div className="flex h-full min-h-[220px] items-center justify-center p-8">
       <div className="rh-panel flex max-w-md flex-col items-center px-8 py-7 text-center">
-        <span className="text-white/45">{icon}</span>
-        <p className="mt-3 text-[13px] leading-relaxed text-white/55">{text}</p>
+        <span className="text-fg/45">{icon}</span>
+        <p className="mt-3 text-[13px] leading-relaxed text-fg/55">{text}</p>
         {action}
       </div>
     </div>

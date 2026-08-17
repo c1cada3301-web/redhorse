@@ -1,11 +1,11 @@
 /** Общие классы полей и кнопок диалогов образов. */
 
-export const LABEL_CLASS = 'mb-1.5 block text-[11px] tracking-wider text-white/40 uppercase'
+export const LABEL_CLASS = 'mb-1.5 block text-[11px] tracking-wider text-fg/40 uppercase'
 
 const FIELD_BASE = [
-  'w-full rounded-lg border border-white/8 bg-black/30 px-2.5',
-  'text-[13px] text-white/85 outline-none transition-colors',
-  'placeholder:text-white/22 focus:border-[var(--color-ember-500)]/60',
+  'w-full rounded-lg border border-fg/8 bg-bg/30 px-2.5',
+  'text-[13px] text-fg/85 outline-none transition-colors',
+  'placeholder:text-fg/22 focus:border-[var(--color-ember-500)]/60',
 ].join(' ')
 
 export const MONO_FIELD_CLASS = `h-9 ${FIELD_BASE} font-[family-name:var(--font-mono)] text-[12px]`
@@ -28,7 +28,7 @@ export const PRIMARY_BUTTON = [
 
 export const GHOST_BUTTON = [
   BUTTON_BASE,
-  'border-white/10 bg-white/5 text-white/65 hover:border-white/20 hover:text-white',
+  'border-fg/10 bg-fg/5 text-fg/65 hover:border-fg/20 hover:text-fg',
 ].join(' ')
 
 export const DANGER_BUTTON = [

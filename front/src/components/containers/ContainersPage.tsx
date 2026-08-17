@@ -78,25 +78,25 @@ export function ContainersPage({ docker, logs, search, onOpenDetails }: Containe
               'flex h-8 items-center gap-2 rounded-lg border px-3 text-[12px] transition-colors',
               filter === item.key
                 ? 'border-[var(--color-ember-500)]/45 bg-[var(--color-ember-500)]/12 text-[var(--color-ember-300)]'
-                : 'border-white/8 bg-white/[0.02] text-white/50 hover:text-white/85',
+                : 'border-fg/8 bg-fg/[0.02] text-fg/50 hover:text-fg/85',
             ].join(' ')}
           >
             {item.label}
-            <span className="rounded bg-black/30 px-1 font-[family-name:var(--font-mono)] text-[10px] text-white/40">
+            <span className="rounded bg-bg/30 px-1 font-[family-name:var(--font-mono)] text-[10px] text-fg/40">
               {counts.get(item.key) ?? 0}
             </span>
           </button>
         ))}
 
         <div className="ml-auto flex items-center gap-2">
-          <span className="font-[family-name:var(--font-mono)] text-[11px] text-white/30">
+          <span className="font-[family-name:var(--font-mono)] text-[11px] text-fg/30">
             всего на диске {formatBytes(totalSize)}
           </span>
 
           <button
             type="button"
             onClick={() => running.forEach((container) => logs.open(container))}
-            className="flex h-8 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 text-[12px] text-white/70 transition-colors hover:border-[var(--color-ember-500)]/40 hover:text-[var(--color-ember-300)]"
+            className="flex h-8 items-center gap-1.5 rounded-lg border border-fg/10 bg-fg/5 px-3 text-[12px] text-fg/70 transition-colors hover:border-[var(--color-ember-500)]/40 hover:text-[var(--color-ember-300)]"
           >
             <Layers className="h-3.5 w-3.5" />
             Открыть логи всех запущенных
@@ -109,7 +109,7 @@ export function ContainersPage({ docker, logs, search, onOpenDetails }: Containe
           <div
             key={column === '' ? `col-${index}` : column}
             className={[
-              'text-[10px] tracking-wider text-white/25 uppercase',
+              'text-[10px] tracking-wider text-fg/25 uppercase',
               index >= 6 && index <= 7 ? 'text-right' : '',
             ].join(' ')}
           >
@@ -120,7 +120,7 @@ export function ContainersPage({ docker, logs, search, onOpenDetails }: Containe
 
       <div className="rh-scroll min-h-0 flex-1 space-y-1.5 overflow-y-auto px-4 pb-4">
         {visible.length === 0 ? (
-          <div className="flex h-40 flex-col items-center justify-center gap-2 text-white/35">
+          <div className="flex h-40 flex-col items-center justify-center gap-2 text-fg/35">
             <ScrollText className="h-6 w-6" />
             <p className="text-sm">Ничего не найдено</p>
           </div>

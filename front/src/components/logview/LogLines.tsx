@@ -14,14 +14,14 @@ const OVERSCAN = 20
 const BOTTOM_EPS = 24
 
 const LEVEL_COLOR: Record<LogLine['level'], string> = {
-  debug: 'text-white/40',
-  info: 'text-white/80',
+  debug: 'text-fg/40',
+  info: 'text-fg/80',
   warn: 'text-[var(--color-amber-ok)]',
   error: 'text-[var(--color-danger)]',
 }
 
 const LEVEL_BAR: Record<LogLine['level'], string> = {
-  debug: 'bg-white/10',
+  debug: 'bg-fg/10',
   info: 'bg-[var(--color-sky-400)]/50',
   warn: 'bg-[var(--color-amber-ok)]',
   error: 'bg-[var(--color-danger)]',
@@ -153,7 +153,7 @@ export function LogLines({ lines, options, onUserScroll }: LogLinesProps) {
 
   if (lines.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center text-sm text-white/35">
+      <div className="flex h-full items-center justify-center text-sm text-fg/35">
         Нет строк под текущим фильтром
       </div>
     )
@@ -178,7 +178,7 @@ export function LogLines({ lines, options, onUserScroll }: LogLinesProps) {
               style={{ transform: `translateY(${item.start}px)` }}
               className={[
                 'group absolute top-0 left-0 flex w-full gap-2 rounded px-2',
-                'font-[family-name:var(--font-mono)] hover:bg-white/[0.045]',
+                'font-[family-name:var(--font-mono)] hover:bg-fg/[0.045]',
                 options.wrap ? 'items-start' : 'items-center',
               ].join(' ')}
             >
@@ -187,7 +187,7 @@ export function LogLines({ lines, options, onUserScroll }: LogLinesProps) {
               />
 
               {options.showTimestamps && (
-                <span className="shrink-0 tabular-nums text-white/28 select-none">
+                <span className="shrink-0 tabular-nums text-fg/28 select-none">
                   {formatTime(line.ts)}
                 </span>
               )}

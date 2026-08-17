@@ -75,7 +75,7 @@ export function MonitoringPage({ docker, search }: MonitoringPageProps) {
               'flex h-8 items-center gap-2 rounded-lg border px-3 text-[12px] transition-colors',
               item.key === metricKey
                 ? 'border-[var(--color-ember-500)]/45 bg-[var(--color-ember-500)]/12 text-[var(--color-ember-300)]'
-                : 'border-white/8 bg-white/[0.02] text-white/50 hover:text-white/85',
+                : 'border-fg/8 bg-fg/[0.02] text-fg/50 hover:text-fg/85',
             ].join(' ')}
           >
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: item.color }} />
@@ -84,7 +84,7 @@ export function MonitoringPage({ docker, search }: MonitoringPageProps) {
         ))}
 
         <div className="ml-auto flex items-center gap-3">
-          <span className="font-[family-name:var(--font-mono)] text-[11px] text-white/30">
+          <span className="font-[family-name:var(--font-mono)] text-[11px] text-fg/30">
             {running.length} из {docker.containers.length} запущено
           </span>
           <Toggle
@@ -97,7 +97,7 @@ export function MonitoringPage({ docker, search }: MonitoringPageProps) {
 
       <ContainerMetricTable containers={visible} metric={metric} total={total} />
 
-      <p className="pb-1 text-center text-[11px] text-white/20">
+      <p className="pb-1 text-center text-[11px] text-fg/20">
         История за текущую сессию вкладки — около 40 последних точек. Долговременное хранение
         появится позже.
       </p>
@@ -122,18 +122,18 @@ function Toggle({ checked, onChange, label }: ToggleProps) {
         'flex h-8 items-center gap-2 rounded-lg border px-3 text-[12px] transition-colors',
         checked
           ? 'border-[var(--color-ember-500)]/45 bg-[var(--color-ember-500)]/12 text-[var(--color-ember-300)]'
-          : 'border-white/8 bg-white/[0.02] text-white/50 hover:text-white/85',
+          : 'border-fg/8 bg-fg/[0.02] text-fg/50 hover:text-fg/85',
       ].join(' ')}
     >
       <span
         className={[
           'flex h-3.5 w-6 items-center rounded-full p-0.5 transition-colors',
-          checked ? 'bg-[var(--color-ember-500)]/60' : 'bg-white/12',
+          checked ? 'bg-[var(--color-ember-500)]/60' : 'bg-fg/12',
         ].join(' ')}
       >
         <span
           className={[
-            'h-2.5 w-2.5 rounded-full bg-white transition-transform',
+            'h-2.5 w-2.5 rounded-full bg-fg transition-transform',
             checked ? 'translate-x-2.5' : '',
           ].join(' ')}
         />

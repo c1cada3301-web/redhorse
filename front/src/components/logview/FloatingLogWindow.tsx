@@ -111,7 +111,7 @@ export function FloatingLogWindow({
       className={[
         'rh-fade-in fixed flex flex-col overflow-hidden rounded-xl border shadow-2xl shadow-black/60',
         'bg-[var(--color-ink-900)]/95 backdrop-blur-xl',
-        active ? 'border-[var(--color-ember-500)]/50' : 'border-white/10',
+        active ? 'border-[var(--color-ember-500)]/50' : 'border-fg/10',
       ].join(' ')}
       style={{
         left: session.rect.x,

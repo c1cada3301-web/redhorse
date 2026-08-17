@@ -72,15 +72,15 @@ export function DetailStatus({ container }: { container: ContainerDetails }) {
       {container.error.trim() !== '' && (
         <div className="mt-2 rounded-lg border border-[var(--color-danger)]/25 bg-[var(--color-danger)]/8 px-3 py-2">
           <div className="text-[11px] text-[var(--color-danger)]">Ошибка Docker</div>
-          <div className="mt-1 font-[family-name:var(--font-mono)] text-[11px] break-words whitespace-pre-wrap text-white/70">
+          <div className="mt-1 font-[family-name:var(--font-mono)] text-[11px] break-words whitespace-pre-wrap text-fg/70">
             {container.error}
           </div>
         </div>
       )}
 
       {container.healthLog.length > 0 && (
-        <div className="mt-2 rounded-lg border border-white/6 bg-black/25 px-3 py-2">
-          <div className="mb-1 flex items-center gap-1.5 text-[11px] text-white/40">
+        <div className="mt-2 rounded-lg border border-fg/6 bg-bg/25 px-3 py-2">
+          <div className="mb-1 flex items-center gap-1.5 text-[11px] text-fg/40">
             <HeartPulse className="h-3.5 w-3.5 text-[var(--color-mint-400)]" />
             Последние проверки здоровья
           </div>
@@ -88,7 +88,7 @@ export function DetailStatus({ container }: { container: ContainerDetails }) {
             {container.healthLog.map((line, index) => (
               <div
                 key={`${index}-${line.slice(0, 24)}`}
-                className="font-[family-name:var(--font-mono)] text-[11px] break-words whitespace-pre-wrap text-white/55"
+                className="font-[family-name:var(--font-mono)] text-[11px] break-words whitespace-pre-wrap text-fg/55"
               >
                 {line === '' ? EMPTY_MARK : line}
               </div>

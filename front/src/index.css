@@ -1,11 +1,18 @@
 @import 'tailwindcss';
 
 @theme {
-  /* Фирменная палитра Redhorse: тёмная база + «раскалённый» акцент */
+  /* Фирменная палитра RedHorse: тёмная база + «раскалённый» акцент.
+     Значения ниже — тёмная тема, светлая переопределяет их в :root ниже. */
   --color-ink-950: #07080b;
   --color-ink-900: #0b0d12;
   --color-ink-850: #10131a;
   --color-ink-800: #151922;
+
+  /* Смысловые токены. Почти вся вёрстка — это «цвет текста при N% прозрачности»
+     и «подложка при N%». Держим два цвета и меняем их местами в светлой теме:
+     тогда все сотни классов вида text-fg/50 и bg-fg/[0.02] работают в обеих. */
+  --color-fg: #ffffff;
+  --color-bg: #07080b;
 
   --color-ember-300: #ff9b7a;
   --color-ember-400: #ff7a55;
@@ -18,6 +25,31 @@
   --color-sky-400: #4aa8ff;
 
   --font-mono: 'SFMono-Regular', 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+
+  /* Текст основного уровня и подложка страницы. */
+  --color-body: #e6e9f0;
+}
+
+/* Светлая тема. Акценты слегка притемнены: исходные на белом теряют контраст. */
+:root[data-theme='light'] {
+  --color-ink-950: #f4f6f9;
+  --color-ink-900: #ffffff;
+  --color-ink-850: #ffffff;
+  --color-ink-800: #eef1f6;
+
+  --color-fg: #0a0d14;
+  --color-bg: #ffffff;
+  --color-body: #161a22;
+
+  --color-ember-300: #c23c14;
+  --color-ember-400: #d9451a;
+  --color-ember-500: #d93d16;
+  --color-ember-600: #b02f0f;
+
+  --color-mint-400: #0f9c6e;
+  --color-amber-ok: #a9700a;
+  --color-danger: #cf2b2b;
+  --color-sky-400: #1668c4;
 }
 
 @layer base {
@@ -30,7 +62,7 @@
   body {
     margin: 0;
     background: var(--color-ink-950);
-    color: #e6e9f0;
+    color: var(--color-body);
     font-family: ui-sans-serif, -apple-system, 'Segoe UI', Roboto, Inter, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     overflow: hidden;
@@ -39,6 +71,15 @@
   ::selection {
     background: var(--color-ember-500);
     color: #fff;
+  }
+
+  /* Нативные контролы (чекбоксы, поля даты) должны следовать теме. */
+  :root {
+    color-scheme: dark;
+  }
+
+  :root[data-theme='light'] {
+    color-scheme: light;
   }
 }
 
@@ -60,13 +101,17 @@
 }
 
 .rh-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgb(255 255 255 / 0.2);
+  background: color-mix(in srgb, var(--color-fg) 26%, transparent);
   background-clip: content-box;
 }
 
 .rh-panel {
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.035), rgb(255 255 255 / 0.012));
-  border: 1px solid rgb(255 255 255 / 0.07);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-fg) 3.5%, transparent),
+    color-mix(in srgb, var(--color-fg) 1.2%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--color-fg) 8%, transparent);
   border-radius: 14px;
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
@@ -101,4 +146,48 @@
 
 .rh-fade-in {
   animation: rh-fade-in 0.18s ease-out;
+}
+
+/* На белом фоне полупрозрачная панель почти не читается — делаем её плотнее. */
+:root[data-theme='light'] .rh-panel {
+  background: var(--color-ink-900);
+  border-color: color-mix(in srgb, var(--color-fg) 12%, transparent);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-fg) 6%, transparent);
+}
+
+/* Светлая тема: та же прозрачность читается хуже.
+   Белый на почти чёрном при 30% ещё различим, чёрный на белом — уже нет.
+   Поэтому нижние уровни приглушённого текста усиливаем; от 60% и выше
+   правка не нужна, там контраста хватает. Список уровней собран из вёрстки. */
+:root[data-theme='light'] {
+  .text-fg\/15 {
+    color: color-mix(in oklab, var(--color-fg) 41%, transparent);
+  }
+  .text-fg\/20 {
+    color: color-mix(in oklab, var(--color-fg) 49%, transparent);
+  }
+  .text-fg\/25 {
+    color: color-mix(in oklab, var(--color-fg) 57%, transparent);
+  }
+  .text-fg\/28 {
+    color: color-mix(in oklab, var(--color-fg) 61%, transparent);
+  }
+  .text-fg\/30 {
+    color: color-mix(in oklab, var(--color-fg) 64%, transparent);
+  }
+  .text-fg\/35 {
+    color: color-mix(in oklab, var(--color-fg) 72%, transparent);
+  }
+  .text-fg\/40 {
+    color: color-mix(in oklab, var(--color-fg) 80%, transparent);
+  }
+  .text-fg\/45 {
+    color: color-mix(in oklab, var(--color-fg) 88%, transparent);
+  }
+  .text-fg\/50 {
+    color: color-mix(in oklab, var(--color-fg) 95%, transparent);
+  }
+  .text-fg\/55 {
+    color: color-mix(in oklab, var(--color-fg) 95%, transparent);
+  }
 }
