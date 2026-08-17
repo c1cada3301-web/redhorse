@@ -15,8 +15,6 @@ export interface Settings {
   theme: Theme
   /** Сколько строк лога держать в буфере сессии. */
   logBufferSize: number
-  /** Прятать секреты в логах по умолчанию. */
-  maskSecrets: boolean
   /** Период опроса списка контейнеров, мс. 0 — только вручную. */
   pollInterval: number
   /** Показывать метки времени в логах по умолчанию. */
@@ -59,7 +57,6 @@ function defaultSettings(): Settings {
     language: detectLanguage(),
     theme: 'dark',
     logBufferSize: 20_000,
-    maskSecrets: true,
     pollInterval: 4_000,
     logTimestamps: true,
     logFontSize: 12,
@@ -113,7 +110,6 @@ function loadSettings(): Settings {
       language: isLanguage(raw.language) ? raw.language : fallback.language,
       theme: isTheme(raw.theme) ? raw.theme : fallback.theme,
       logBufferSize: pickChoice(raw, 'logBufferSize', LOG_BUFFER_OPTIONS, fallback.logBufferSize),
-      maskSecrets: pickBoolean(raw, 'maskSecrets', fallback.maskSecrets),
       pollInterval: pickChoice(raw, 'pollInterval', POLL_OPTIONS, fallback.pollInterval),
       logTimestamps: pickBoolean(raw, 'logTimestamps', fallback.logTimestamps),
       logFontSize: pickRange(raw, 'logFontSize', LOG_FONT_MIN, LOG_FONT_MAX, fallback.logFontSize),

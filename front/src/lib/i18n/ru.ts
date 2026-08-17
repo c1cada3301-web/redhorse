@@ -77,8 +77,6 @@ export const ru: Dictionary = {
   'settings.logs.fontSizeValue': '{size} px',
   'settings.logs.timestamps': 'Метки времени',
   'settings.logs.timestampsHint': 'Показывать время каждой строки.',
-  'settings.logs.mask': 'Прятать секреты',
-  'settings.logs.maskHint': 'Маскировать токены и пароли в выводе.',
 
   // Настройки: обновление данных
   'settings.refresh.title': 'Обновление данных',

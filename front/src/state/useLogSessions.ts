@@ -274,7 +274,6 @@ export function useLogSessions(): LogSessionsApi {
         options: {
           ...BASE_OPTIONS,
           levels: { ...BASE_OPTIONS.levels },
-          masked: prefs.current.maskSecrets,
           showTimestamps: prefs.current.logTimestamps,
           fontSize: prefs.current.logFontSize,
         },

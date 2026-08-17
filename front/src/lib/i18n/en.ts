@@ -77,8 +77,6 @@ export const en: Dictionary = {
   'settings.logs.fontSizeValue': '{size} px',
   'settings.logs.timestamps': 'Timestamps',
   'settings.logs.timestampsHint': 'Show the time of every line.',
-  'settings.logs.mask': 'Hide secrets',
-  'settings.logs.maskHint': 'Mask tokens and passwords in the output.',
 
   // Settings: data refresh
   'settings.refresh.title': 'Data refresh',

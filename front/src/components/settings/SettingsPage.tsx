@@ -118,12 +118,6 @@ export function SettingsPage() {
           onChange={(value) => update({ logTimestamps: value })}
         />
 
-        <ToggleRow
-          label={t('settings.logs.mask')}
-          hint={t('settings.logs.maskHint')}
-          checked={settings.maskSecrets}
-          onChange={(value) => update({ maskSecrets: value })}
-        />
       </Section>
 
       <Section
