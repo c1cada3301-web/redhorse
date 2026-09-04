@@ -39,8 +39,7 @@ services:
     environment:
       - DALA_ENV=development
       - DALA_DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-dala}:${POSTGRES_PASSWORD:-dala}@db:5432/${POSTGRES_DB:-dala}
-      # Пустой секрет — генерируется при старте: удобно в деве, но после
-      # рестарта все сессии слетают. Для постоянного входа задай его в .env.
+      # Пусто — секрет создаётся при первом старте и сохраняется в базе.
       - DALA_JWT_SECRET=${DALA_JWT_SECRET:-}
       # Первый administrator создаётся при пустой таблице пользователей.
       # Пароль пустой — сгенерируется и один раз напечатается в лог API.

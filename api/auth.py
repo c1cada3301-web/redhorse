@@ -9,34 +9,67 @@ from fastapi import Depends, HTTPException, Response, WebSocket, WebSocketExcept
 from starlette.requests import HTTPConnection
 from jose import JWTError, jwt
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import get_settings
-from database.models import User
+from database.models import Setting, User
 from database.session import get_session, sessionmaker
 
 log = logging.getLogger(__name__)
 
 ALGORITHM = "HS256"
+_SECRET_KEY = "jwt_secret"
 
-# Секрет держим в модуле: если в окружении пусто, генерируем один на процесс.
-# Тогда токены живут до рестарта API — для дева нормально, для прода задаётся явно.
+# Секрет держим в модуле, но берём его из базы: сгенерированный на процесс
+# разлогинивал всех при каждом перезапуске API.
 _secret: str | None = None
 
 
 def secret() -> str:
-    global _secret
     if _secret is None:
-        configured = get_settings().jwt_secret
-        if configured:
-            _secret = configured
-        else:
-            _secret = secrets.token_urlsafe(48)
-            log.warning(
-                "DALA_JWT_SECRET не задан — сгенерирован временный. "
-                "После рестарта API все сессии слетят."
-            )
+        # Сюда попадаем, только если ensure_secret ещё не отработал — например
+        # запрос пришёл до конца старта. Молча подписывать нечем.
+        raise RuntimeError("Секрет подписи токенов ещё не загружен")
+
     return _secret
+
+
+async def ensure_secret() -> None:
+    """
+    Берёт секрет из окружения, а если его нет — из базы; когда нет и там,
+    генерирует и сохраняет. Так он переживает перезапуск сам, без ручной
+    настройки, и остаётся один на все реплики, которые смотрят в одну базу.
+    """
+    global _secret
+
+    configured = get_settings().jwt_secret.strip()
+
+    if configured:
+        _secret = configured
+        return
+
+    async with sessionmaker()() as session:
+        stored = await session.get(Setting, _SECRET_KEY)
+
+        if stored is not None:
+            _secret = stored.value
+            return
+
+        generated = secrets.token_urlsafe(48)
+        session.add(Setting(key=_SECRET_KEY, value=generated))
+
+        try:
+            await session.commit()
+        except IntegrityError:
+            # Гонка двух воркеров на первом старте: побеждает тот, кто успел,
+            # второй просто перечитывает записанное.
+            await session.rollback()
+            existing = await session.get(Setting, _SECRET_KEY)
+            generated = existing.value if existing is not None else generated
+
+        _secret = generated
+        log.info("Секрет подписи токенов создан и сохранён в базе")
 
 
 # --- пароли ----------------------------------------------------------------

@@ -29,7 +29,9 @@ class Settings(BaseSettings):
     build_history: int = 20
 
     # --- база данных -------------------------------------------------------
-    database_url: str = "postgresql+asyncpg://dala:dala@db:5432/dala"
+    # По умолчанию — файл в /data: так панель поднимается одной командой,
+    # без отдельного сервера БД. Postgres подключается через DALA_DATABASE_URL.
+    database_url: str = "sqlite+aiosqlite:////data/dala.db"
 
     # --- авторизация -------------------------------------------------------
     # Секрет подписи JWT. Пустой — сгенерируем случайный при старте, но тогда

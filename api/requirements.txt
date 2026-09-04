@@ -6,6 +6,7 @@ uvicorn[standard]
 docker
 sqlalchemy[asyncio]
 asyncpg
+aiosqlite
 python-dotenv
 httpx[socks]
 bcrypt

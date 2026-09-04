@@ -41,8 +41,10 @@ services:
     environment:
       - DALA_ENV=production
       - DALA_DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
-      # Секрет подписи токенов. Без него сессии слетают при каждом рестарте.
-      - DALA_JWT_SECRET=${DALA_JWT_SECRET:?задай DALA_JWT_SECRET в .env}
+      # Секрет подписи токенов. Пусто — панель создаст его сама при первом
+      # старте и сохранит в базе; задавать вручную нужно, только если хочется
+      # общий секрет на несколько независимых установок.
+      - DALA_JWT_SECRET=${DALA_JWT_SECRET:-}
       - DALA_ADMIN_USER=${DALA_ADMIN_USER:-admin}
       - DALA_ADMIN_PASSWORD=${DALA_ADMIN_PASSWORD:-}
     # Только чтение сокета нам не подходит — нужны start/stop и сборка образов.

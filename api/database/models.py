@@ -22,3 +22,16 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class Setting(Base):
+    """
+    Служебные значения, которые должны пережить перезапуск: секрет подписи
+    токенов и подобное. Держим в базе, а не в файле: том у API может быть
+    временным, а база и так обязательна.
+    """
+
+    __tablename__ = "settings"
+
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    value: Mapped[str] = mapped_column(String(512))
