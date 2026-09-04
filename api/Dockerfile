@@ -20,8 +20,6 @@ RUN python -m venv /opt/venv \
 # --- рантайм ---------------------------------------------------------------
 FROM python:3.13-slim
 
-LABEL maintainer="shtrnv@gmail.com"
-
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PATH="/opt/venv/bin:$PATH"
