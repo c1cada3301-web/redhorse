@@ -40,6 +40,11 @@ class Job:
         self.error: str | None = None
         self.events: list[JobEvent] = []
         self._subscribers: set[asyncio.Queue[Any]] = set()
+        # Что выполнить после успешного завершения — например навесить теги.
+        self._on_success: Callable[[], None] | None = None
+
+    def on_success(self, callback: Callable[[], None]) -> None:
+        self._on_success = callback
 
     def emit(self, text: str, stream: str = "stdout") -> None:
         event = JobEvent(ts=time.time() * 1000, text=text, stream=stream)  # type: ignore[arg-type]
@@ -149,6 +154,13 @@ class JobRegistry:
             job.emit(str(exc), "stderr")
             job.finish(error=str(exc))
             return
+
+        # Хук выполняем до finish: подписчики должны увидеть его вывод в том же логе.
+        if job._on_success is not None:
+            try:
+                await asyncio.to_thread(job._on_success)
+            except Exception as exc:
+                job.emit(f"не удалось выполнить действие после сборки: {exc}", "stderr")
 
         job.finish()
 

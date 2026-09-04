@@ -9,7 +9,8 @@ from docker.errors import APIError
 from fastapi import APIRouter, HTTPException, Query, WebSocket, WebSocketDisconnect
 
 from config import get_settings
-from schemas import Container, ContainerDetails, ContainerStats, LogPage
+from schemas import Container, ContainerDetails, ContainerStats, CreateContainerRequest, LogPage
+from services.create import build_kwargs
 from services.docker_client import get_client, get_container
 from services.logs import iter_log_lines, renumber, to_docker_time
 from services.mappers import to_container, to_details, to_stats
@@ -51,6 +52,40 @@ async def list_containers(
 
     raw = await asyncio.to_thread(fetch)
     return [to_container(item) for item in raw]
+
+
+@router.post("", response_model=Container, status_code=201)
+async def create_container(request: CreateContainerRequest) -> Container:
+    """Создаёт контейнер и, если попросили, сразу запускает его."""
+    client = await asyncio.to_thread(get_client)
+    kwargs = build_kwargs(request)
+
+    def run() -> str:
+        if request.always_pull:
+            # Тянем образ заранее: иначе create возьмёт устаревшую локальную копию.
+            repository, _, tag = request.image.strip().rpartition(":")
+            if repository == "" or "/" in tag:
+                client.images.pull(request.image.strip())
+            else:
+                client.images.pull(repository, tag=tag or "latest")
+
+        container = client.containers.create(**kwargs)
+
+        if request.start:
+            container.start()
+
+        return container.id
+
+    try:
+        container_id = await asyncio.to_thread(run)
+    except APIError as exc:
+        # Docker сам объясняет, что не так: занятое имя, нет образа, битый порт.
+        raise HTTPException(status_code=400, detail=str(exc.explanation or exc)) from exc
+
+    created = await asyncio.to_thread(get_container, container_id)
+    created.reload()
+
+    return to_container(created)
 
 
 @router.get("/{container_id}", response_model=Container)

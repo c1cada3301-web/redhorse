@@ -5,8 +5,9 @@ import asyncio
 from docker.errors import APIError
 from fastapi import APIRouter, HTTPException, Query, WebSocket, WebSocketDisconnect
 
-from schemas import BuildRequest, Image, JobStatus, PullRequest
+from schemas import BuildRequest, HubImage, Image, JobStatus, PullRequest
 from services.docker_client import get_client, get_image
+from services.hub import fetch_tags
 from services.jobs import make_context_tar, registry
 from services.mappers import to_image
 
@@ -31,31 +32,90 @@ async def list_images(all: bool = Query(False, description="Включая пр�
     return [to_image(item, usage) for item in images]
 
 
+@router.get("/search", response_model=list[HubImage])
+async def search_hub(term: str = Query(min_length=2, max_length=120), limit: int = Query(25, ge=1, le=100)):
+    """Поиск образов в Docker Hub — тем же механизмом, что `docker search`."""
+    client = await asyncio.to_thread(get_client)
+
+    try:
+        found = await asyncio.to_thread(client.images.search, term)
+    except APIError as exc:
+        raise HTTPException(status_code=502, detail=str(exc.explanation or exc)) from exc
+
+    # Официальные и популярные — выше: иначе в выдаче тонут форки.
+    ordered = sorted(
+        found,
+        key=lambda item: (bool(item.get("is_official")), int(item.get("star_count") or 0)),
+        reverse=True,
+    )
+
+    return [
+        HubImage(
+            name=str(item.get("name", "")),
+            description=str(item.get("description") or ""),
+            stars=int(item.get("star_count") or 0),
+            official=bool(item.get("is_official")),
+        )
+        for item in ordered[:limit]
+    ]
+
+
+@router.get("/tags", response_model=list[str])
+async def image_tags(repository: str = Query(min_length=1, max_length=200)) -> list[str]:
+    """Теги образа из Docker Hub: демон их не знает."""
+    return await asyncio.to_thread(fetch_tags, repository)
+
+
 @router.post("/build", response_model=JobStatus, status_code=202)
 async def build_image(request: BuildRequest) -> JobStatus:
     """Стартует сборку и сразу возвращает задачу — лог читается по WebSocket."""
     # Оба вызова блокирующие: упаковка контекста в память и первое подключение
     # к сокету Docker. В event loop они держали бы все остальные запросы и потоки.
-    context = await asyncio.to_thread(make_context_tar, request.dockerfile, request.files)
     client = await asyncio.to_thread(get_client)
 
-    def make_stream():
-        context.seek(0)
-        return client.api.build(
-            fileobj=context,
-            custom_context=True,
-            tag=request.tag,
-            buildargs=request.build_args or None,
-            nocache=request.no_cache,
-            pull=request.pull,
-            rm=True,
-            decode=True,
-        )
+    common = {
+        "tag": request.tag,
+        "buildargs": request.build_args or None,
+        "nocache": request.no_cache,
+        "pull": request.pull,
+        "rm": True,
+        "decode": True,
+    }
+    if request.dockerfile_path.strip() != "":
+        common["dockerfile"] = request.dockerfile_path.strip()
+
+    if request.source == "url":
+        # Контекст выкачивает сам демон: git-репозиторий или tar по ссылке.
+        # Внутрь мы не заглядываем — сборка чужого Dockerfile равна запуску
+        # чужого кода на хосте, но доступ к панели это и так позволяет.
+        source = request.context_url.strip()
+
+        def make_stream():
+            return client.api.build(path=source, **common)
+    else:
+        context = await asyncio.to_thread(make_context_tar, request.dockerfile, request.files)
+        source = "."
+
+        def make_stream():
+            context.seek(0)
+            return client.api.build(fileobj=context, custom_context=True, **common)
 
     job = registry.start("build", make_stream)
-    job.emit(f"$ docker build -t {request.tag} .")
+    job.emit(f"$ docker build -t {request.tag} {source}")
+
+    # Остальные теги вешаем на готовый образ: Docker при сборке принимает один.
+    if request.extra_tags:
+        job.on_success(lambda: _apply_extra_tags(client, request.tag, request.extra_tags))
 
     return job.to_status()
+
+
+def _apply_extra_tags(client, built: str, extra: list[str]) -> None:
+    image = client.images.get(built)
+
+    for name in extra:
+        repository, _, tag = name.partition(":")
+        image.tag(repository, tag or "latest")
 
 
 @router.post("/pull", response_model=JobStatus, status_code=202)

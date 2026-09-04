@@ -11,6 +11,7 @@ import type { NavKey } from './components/shell/Sidebar'
 import { TopBar } from './components/shell/TopBar'
 import { ContainersPage } from './components/containers/ContainersPage'
 import { ContainerDetailPage } from './components/containers/ContainerDetailPage'
+import { CreateContainerPage } from './components/create/CreateContainerPage'
 import { DashboardPage } from './components/dashboard/DashboardPage'
 import { ImagesPage } from './components/images/ImagesPage'
 import { CleanupPage } from './components/cleanup/CleanupPage'
@@ -41,6 +42,8 @@ function App({ account, onSignOut }: AppProps) {
   // Открытый контейнер живёт рядом с разделом: React Router появится позже,
   // до тех пор адрес в строке браузера не меняется.
   const [detailId, setDetailId] = useState<string | null>(null)
+  // Форма создания живёт в том же разделе: отдельного адреса у страниц пока нет.
+  const [creating, setCreating] = useState(false)
   const [search, setSearch] = useState('')
 
   const totals = useMemo(() => {
@@ -77,6 +80,7 @@ function App({ account, onSignOut }: AppProps) {
         current={nav}
         onNavigate={(key) => {
             setDetailId(null)
+            setCreating(false)
             setNav(key)
           }}
         runningCount={runningCount}
@@ -109,7 +113,15 @@ function App({ account, onSignOut }: AppProps) {
 
         <main className="min-h-0 flex-1">
           {nav === 'containers' ? (
-            detailId !== null ? (
+            creating ? (
+              <CreateContainerPage
+                onCreated={(containerId) => {
+                  setCreating(false)
+                  setDetailId(containerId)
+                }}
+                onCancel={() => setCreating(false)}
+              />
+            ) : detailId !== null ? (
               <ContainerDetailPage
                 containerId={detailId}
                 onBack={() => setDetailId(null)}
@@ -135,6 +147,7 @@ function App({ account, onSignOut }: AppProps) {
                 logs={logs}
                 search={search}
                 onOpenDetails={setDetailId}
+                onCreate={() => setCreating(true)}
               />
             )
           ) : nav === 'dashboard' ? (

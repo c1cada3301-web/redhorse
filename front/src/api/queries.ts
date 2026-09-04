@@ -6,6 +6,8 @@ import type {
   BuildRequest,
   ContainerAction,
   ContainerDetails,
+  CreateContainerRequest,
+  HubImage,
   DiskUsage,
   DockerNetwork,
   DockerVolume,
@@ -85,6 +87,36 @@ export function useImagesQuery() {
     queryKey: keys.images,
     queryFn: () => request<ApiImage[]>('/images'),
     staleTime: 10_000,
+  })
+}
+
+/** Поиск по Docker Hub. Запрос уходит только когда есть что искать. */
+export function useHubSearch(term: string) {
+  return useQuery({
+    queryKey: ['hub', 'search', term] as const,
+    queryFn: () => request<HubImage[]>('/images/search', { query: { term, limit: 20 } }),
+    enabled: term.trim().length >= 2,
+    staleTime: 60_000,
+  })
+}
+
+/** Теги выбранного образа: демон их не знает, тянем из Hub. */
+export function useHubTags(repository: string) {
+  return useQuery({
+    queryKey: ['hub', 'tags', repository] as const,
+    queryFn: () => request<string[]>('/images/tags', { query: { repository } }),
+    enabled: repository.trim() !== '',
+    staleTime: 60_000,
+  })
+}
+
+export function useCreateContainer() {
+  const client = useQueryClient()
+
+  return useMutation({
+    mutationFn: (body: CreateContainerRequest) =>
+      request<ApiContainer>('/containers', { method: 'POST', body }),
+    onSuccess: () => client.invalidateQueries({ queryKey: keys.containers }),
   })
 }
 

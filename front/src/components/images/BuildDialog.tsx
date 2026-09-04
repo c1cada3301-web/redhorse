@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { ChevronRight, Hammer, RotateCw } from 'lucide-react'
 import { useBuildImage } from '../../api/queries'
-import type { BuildRequest } from '../../api/types'
+import type { BuildRequest, BuildSource } from '../../api/types'
 import { useJobStream } from '../../state/useJobStream'
 import { DialogShell } from './DialogShell'
 import { JobConsole } from './JobConsole'
@@ -18,6 +18,8 @@ import {
   TEXTAREA_CLASS,
 } from './styles'
 import { useT } from '@/state/settings'
+import { Input } from '@/components/ui/input'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 const DOCKERFILE_PLACEHOLDER = `FROM alpine:3.20
 
@@ -34,6 +36,10 @@ interface BuildDialogProps {
 export function BuildDialog({ open, onOpenChange }: BuildDialogProps) {
   const t = useT()
   const [tag, setTag] = useState('')
+  const [extraTags, setExtraTags] = useState('')
+  const [source, setSource] = useState<BuildSource>('editor')
+  const [contextUrl, setContextUrl] = useState('')
+  const [dockerfilePath, setDockerfilePath] = useState('')
   const [dockerfile, setDockerfile] = useState('')
   const [buildArgs, setBuildArgs] = useState<Pair[]>([])
   const [files, setFiles] = useState<Pair[]>([])
@@ -65,8 +71,13 @@ export function BuildDialog({ open, onOpenChange }: BuildDialogProps) {
       return
     }
 
-    if (dockerfile.trim() === '') {
-      setFormError('Dockerfile не может быть пустым')
+    if (source === 'editor' && dockerfile.trim() === '') {
+      setFormError(t('build.emptyDockerfile'))
+      return
+    }
+
+    if (source === 'url' && contextUrl.trim() === '') {
+      setFormError(t('build.emptyUrl'))
       return
     }
 
@@ -74,11 +85,19 @@ export function BuildDialog({ open, onOpenChange }: BuildDialogProps) {
 
     const request: BuildRequest = {
       tag: trimmedTag,
-      dockerfile,
-      files: toRecord(files),
+      // Пустые строки отсекаем: пользователь мог оставить запятую в конце.
+      extraTags: extraTags
+        .split(',')
+        .map((item) => item.trim())
+        .filter((item) => item !== ''),
+      source,
+      dockerfilePath: dockerfilePath.trim(),
       buildArgs: toRecord(buildArgs),
       noCache,
       pull,
+      ...(source === 'editor'
+        ? { dockerfile, files: toRecord(files) }
+        : { contextUrl: contextUrl.trim() }),
     }
 
     build.mutate(request, {
@@ -96,7 +115,7 @@ export function BuildDialog({ open, onOpenChange }: BuildDialogProps) {
       title={t('build.title')}
       description={
         jobId === null
-          ? 'Dockerfile и файлы контекста уходят на сервер, сборка идёт на хосте Docker'
+          ? t(source === 'url' ? 'build.subtitleUrl' : 'build.subtitle')
           : `Тег ${tag.trim()}`
       }
       width="760px"
@@ -140,35 +159,93 @@ export function BuildDialog({ open, onOpenChange }: BuildDialogProps) {
     >
       {jobId === null ? (
         <div className="space-y-4">
-          <div>
-            <label htmlFor="build-tag" className={LABEL_CLASS}>
-              Тег
-            </label>
-            <input
-              id="build-tag"
-              value={tag}
-              onChange={(event) => setTag(event.target.value)}
-              placeholder="sing-box:latest"
-              spellCheck={false}
-              autoComplete="off"
-              className={MONO_FIELD_CLASS}
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="build-tag" className={LABEL_CLASS}>
+                {t('build.tag')}
+              </label>
+              <input
+                id="build-tag"
+                value={tag}
+                onChange={(event) => setTag(event.target.value)}
+                placeholder="sing-box:latest"
+                spellCheck={false}
+                autoComplete="off"
+                className={MONO_FIELD_CLASS}
+              />
+            </div>
+            <div>
+              <label htmlFor="build-extra-tags" className={LABEL_CLASS}>
+                {t('build.extraTags')}
+              </label>
+              <input
+                id="build-extra-tags"
+                value={extraTags}
+                onChange={(event) => setExtraTags(event.target.value)}
+                placeholder="sing-box:1.9, registry.local/sing-box:latest"
+                spellCheck={false}
+                autoComplete="off"
+                className={MONO_FIELD_CLASS}
+              />
+            </div>
           </div>
 
-          <div>
-            <label htmlFor="build-dockerfile" className={LABEL_CLASS}>
-              Dockerfile
-            </label>
-            <textarea
-              id="build-dockerfile"
-              value={dockerfile}
-              onChange={(event) => setDockerfile(event.target.value)}
-              placeholder={DOCKERFILE_PLACEHOLDER}
-              spellCheck={false}
-              rows={12}
-              className={TEXTAREA_CLASS}
-            />
-          </div>
+          {/* Контекст можно написать здесь же или отдать демону ссылкой на репозиторий. */}
+          <Tabs value={source} onValueChange={(next) => setSource(next as BuildSource)}>
+            <TabsList>
+              <TabsTrigger value="editor">{t('build.source.editor')}</TabsTrigger>
+              <TabsTrigger value="url">{t('build.source.url')}</TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          {source === 'editor' ? (
+            <div>
+              <label htmlFor="build-dockerfile" className={LABEL_CLASS}>
+                Dockerfile
+              </label>
+              <textarea
+                id="build-dockerfile"
+                value={dockerfile}
+                onChange={(event) => setDockerfile(event.target.value)}
+                placeholder={DOCKERFILE_PLACEHOLDER}
+                spellCheck={false}
+                rows={12}
+                className={TEXTAREA_CLASS}
+              />
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div>
+                <label htmlFor="build-url" className={LABEL_CLASS}>
+                  {t('build.contextUrl')}
+                </label>
+                <Input
+                  id="build-url"
+                  value={contextUrl}
+                  onChange={(event) => setContextUrl(event.target.value)}
+                  placeholder="https://github.com/owner/repo.git#main"
+                  spellCheck={false}
+                  autoComplete="off"
+                  className="h-9 font-mono"
+                />
+                <p className="mt-1.5 text-xs text-muted-foreground">{t('build.contextUrlHint')}</p>
+              </div>
+              <div>
+                <label htmlFor="build-dockerfile-path" className={LABEL_CLASS}>
+                  {t('build.dockerfilePath')}
+                </label>
+                <Input
+                  id="build-dockerfile-path"
+                  value={dockerfilePath}
+                  onChange={(event) => setDockerfilePath(event.target.value)}
+                  placeholder="docker/Dockerfile"
+                  spellCheck={false}
+                  autoComplete="off"
+                  className="h-9 font-mono"
+                />
+              </div>
+            </div>
+          )}
 
           <Section title={t('build.advanced')} open={advanced} onToggle={() => setAdvanced(!advanced)}>
             <div className="space-y-4 pt-1">

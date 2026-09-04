@@ -34,10 +34,20 @@ export interface JobStatus {
   events: JobEvent[]
 }
 
+/** Откуда брать контекст сборки: редактор в браузере или адрес репозитория. */
+export type BuildSource = 'editor' | 'url'
+
 export interface BuildRequest {
   tag: string
-  dockerfile: string
+  /** Дополнительные теги: Docker при сборке принимает один, остальные вешаются следом. */
+  extraTags?: string[]
+  source?: BuildSource
+  dockerfile?: string
   files?: Record<string, string>
+  /** source=url: адрес git-репозитория или tar-архива. */
+  contextUrl?: string
+  /** Путь к Dockerfile внутри контекста, если он не в корне. */
+  dockerfilePath?: string
   buildArgs?: Record<string, string>
   noCache?: boolean
   pull?: boolean
@@ -161,4 +171,80 @@ export interface PrunePreview {
 export interface PruneResult {
   deleted: number
   reclaimed: number
+}
+
+// --- создание контейнера ----------------------------------------------------
+
+export type RestartPolicyName = 'no' | 'always' | 'on-failure' | 'unless-stopped'
+
+export interface PortBinding {
+  containerPort: number
+  /** Пусто — Docker выберет свободный порт хоста сам. */
+  hostPort?: number | null
+  protocol: 'tcp' | 'udp'
+  hostIp?: string
+}
+
+export interface VolumeBinding {
+  source: string
+  target: string
+  readOnly?: boolean
+}
+
+export interface DeviceBinding {
+  hostPath: string
+  containerPath?: string
+  /** r — чтение, w — запись, m — mknod. */
+  permissions: string
+}
+
+export interface LogConfig {
+  driver: string
+  options?: Record<string, string>
+}
+
+export interface CreateContainerRequest {
+  name?: string
+  image: string
+  alwaysPull?: boolean
+  command?: string
+  entrypoint?: string
+  workingDir?: string
+  user?: string
+  hostname?: string
+  ports?: PortBinding[]
+  publishAll?: boolean
+  volumes?: VolumeBinding[]
+  env?: Record<string, string>
+  labels?: Record<string, string>
+  network?: string
+  restartPolicy?: { name: RestartPolicyName; maximumRetry?: number }
+  memoryMb?: number
+  memoryReservationMb?: number
+  cpus?: number
+  privileged?: boolean
+  init?: boolean
+  tty?: boolean
+  stdinOpen?: boolean
+  autoRemove?: boolean
+  capAdd?: string[]
+  capDrop?: string[]
+  devices?: DeviceBinding[]
+  sysctls?: Record<string, string>
+  /** Размер /dev/shm в мегабайтах, 0 — умолчание Docker. */
+  shmSizeMb?: number
+  runtime?: string
+  logConfig?: LogConfig
+  domainname?: string
+  dns?: string[]
+  extraHosts?: Record<string, string>
+  /** Запустить сразу после создания. */
+  start?: boolean
+}
+
+export interface HubImage {
+  name: string
+  description: string
+  stars: number
+  official: boolean
 }

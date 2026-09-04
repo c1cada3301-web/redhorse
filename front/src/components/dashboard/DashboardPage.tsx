@@ -66,12 +66,14 @@ export function DashboardPage({ docker, onOpenLogs }: DashboardPageProps) {
         <Tile
           icon={<Cpu className="h-4 w-4" />}
           label={t('dash.cpuTotal')}
+          tone="cpu"
           value={formatPercent(totals.cpu, 0)}
           hint={info.data !== undefined ? t('dash.coresHint', { count: info.data.cpus }) : t('common.dash')}
         />
         <Tile
           icon={<MemoryStick className="h-4 w-4" />}
           label={t('dash.memory')}
+          tone="memory"
           value={formatBytes(totals.mem)}
           hint={
             memLimit > 0
@@ -82,13 +84,14 @@ export function DashboardPage({ docker, onOpenLogs }: DashboardPageProps) {
         <Tile
           icon={<HardDrive className="h-4 w-4" />}
           label={t('dash.network')}
+          tone="network"
           value={formatRate(totals.net)}
           hint={t('dash.containersHint', { count: docker.containers.length })}
         />
       </div>
 
       <div className="grid gap-3 lg:grid-cols-[1.4fr_1fr]">
-        <Panel title={t('dash.stacks')} icon={<Layers className="h-4 w-4" />}>
+        <Panel title={t('dash.stacks')} tone="memory" icon={<Layers className="h-4 w-4" />}>
           {stacks.length === 0 ? (
             <Empty text={t('dash.noStacks')} />
           ) : (
@@ -130,7 +133,7 @@ export function DashboardPage({ docker, onOpenLogs }: DashboardPageProps) {
           )}
         </Panel>
 
-        <Panel title={t('dash.disk')} icon={<Boxes className="h-4 w-4" />}>
+        <Panel title={t('dash.disk')} tone="disk" icon={<Boxes className="h-4 w-4" />}>
           {disk.data === undefined ? (
             <Empty text={disk.isPending ? t('dash.counting') : t('common.noData')} />
           ) : (
@@ -144,7 +147,7 @@ export function DashboardPage({ docker, onOpenLogs }: DashboardPageProps) {
         </Panel>
       </div>
 
-      <Panel title={t('dash.top')} icon={<Cpu className="h-4 w-4" />}>
+      <Panel title={t('dash.top')} tone="cpu" icon={<Cpu className="h-4 w-4" />}>
         {hottest.length === 0 ? (
           <Empty text={t('dash.noRunning')} />
         ) : (
@@ -197,20 +200,34 @@ function groupByStack(containers: Container[]): Stack[] {
   return [...map.values()].sort((a, b) => b.containers.length - a.containers.length)
 }
 
+/**
+ * Цвет иконки — это смысл величины, а не украшение: тот же оттенок несёт эта
+ * величина на графиках мониторинга, поэтому взгляд связывает плитку с графиком.
+ */
+type TileTone = 'ok' | 'cpu' | 'memory' | 'network' | 'disk' | 'default'
+
+const TILE_ICON: Record<TileTone, string> = {
+  ok: 'text-success',
+  cpu: 'text-primary',
+  memory: 'text-info',
+  network: 'text-warning',
+  disk: 'text-warning',
+  default: 'text-muted-foreground',
+}
+
 interface TileProps {
   icon: React.ReactNode
   label: string
   value: string
   hint: string
-  tone?: 'ok' | 'default'
+  tone?: TileTone
 }
 
 function Tile({ icon, label, value, hint, tone = 'default' }: TileProps) {
   return (
     <div className="rh-panel px-4 py-3.5">
       <div className="flex items-center gap-2 text-muted-foreground">
-        {/* Иконка нейтральная: цветом выделяем только состояние, а не каждую плитку. */}
-        <span className={tone === 'ok' ? 'text-success' : 'text-muted-foreground'}>{icon}</span>
+        <span className={TILE_ICON[tone]}>{icon}</span>
         <span className="text-2xs tracking-wider uppercase">{label}</span>
       </div>
       <div className="mt-2 font-mono text-3xl leading-none text-foreground tabular-nums">{value}</div>
@@ -219,11 +236,21 @@ function Tile({ icon, label, value, hint, tone = 'default' }: TileProps) {
   )
 }
 
-function Panel({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
+function Panel({
+  title,
+  icon,
+  tone = 'default',
+  children,
+}: {
+  title: string
+  icon: React.ReactNode
+  tone?: TileTone
+  children: React.ReactNode
+}) {
   return (
     <section className="rh-panel p-3">
       <header className="mb-2 flex items-center gap-2 text-muted-foreground">
-        <span className="text-muted-foreground">{icon}</span>
+        <span className={TILE_ICON[tone]}>{icon}</span>
         <h2 className="text-base font-medium text-foreground">{title}</h2>
       </header>
       {children}

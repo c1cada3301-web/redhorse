@@ -5,14 +5,18 @@ import { formatBytes, formatPercent, formatRate, formatUptime, shortId } from '.
 import { Sparkline } from '../ui/Sparkline'
 import { IconButton } from '../ui/IconButton'
 import { useT } from '@/state/settings'
+import { Checkbox } from '@/components/ui/checkbox'
 import { ConfirmDialog } from '../ui/ConfirmDialog'
 import { StateBadge } from './StateBadge'
 
 export const ROW_GRID =
-  'grid grid-cols-[minmax(220px,1.7fr)_104px_124px_148px_118px_118px_88px_78px_216px] items-center gap-3'
+  'grid grid-cols-[28px_minmax(200px,1.7fr)_104px_124px_148px_118px_118px_88px_78px_216px] items-center gap-3'
 
 interface ContainerRowProps {
   container: Container
+  /** Отмечен ли контейнер для группового действия. */
+  selected: boolean
+  onToggleSelect: () => void
   logsOpen: boolean
   onOpenLogs: () => void
   onOpenDetails: () => void
@@ -25,6 +29,8 @@ interface ContainerRowProps {
 
 export function ContainerRow({
   container,
+  selected,
+  onToggleSelect,
   logsOpen,
   onOpenLogs,
   onOpenDetails,
@@ -53,6 +59,11 @@ export function ContainerRow({
       title={t('containers.openDetails')}
       className={`${ROW_GRID} cursor-pointer border-b border-border px-3 py-2.5 text-left transition-colors hover:bg-foreground/4 focus-visible:bg-foreground/5 focus-visible:outline-none`}
     >
+      {/* Клик по чекбоксу не должен открывать карточку контейнера. */}
+      <div onClick={(event) => event.stopPropagation()} onKeyDown={(event) => event.stopPropagation()}>
+        <Checkbox checked={selected} onCheckedChange={onToggleSelect} aria-label={container.name} />
+      </div>
+
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <span className="truncate text-base font-medium text-foreground">{container.name}</span>
