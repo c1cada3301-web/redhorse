@@ -15,6 +15,24 @@ export function getDictionary(language: Language): Dictionary {
 }
 
 /**
+ * Текущий словарь вне React.
+ *
+ * Хук useT доступен только в компонентах-функциях, а перевод нужен и классовому
+ * ErrorBoundary, и модулям без React. Провайдер настроек обновляет это значение
+ * при смене языка, остальные читают его через `t`.
+ */
+let current: Dictionary = ru
+
+export function setCurrentLanguage(language: Language): void {
+  current = DICTIONARIES[language]
+}
+
+/** Перевод вне компонентов. В компонентах используйте useT. */
+export function t(key: string, params?: Record<string, string | number>): string {
+  return translate(current, key, params)
+}
+
+/**
  * Достаёт строку по ключу и подставляет параметры вида `{count}`.
  * Пропавший ключ возвращается как есть — дырку в переводе видно прямо в UI.
  */

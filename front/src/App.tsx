@@ -71,9 +71,7 @@ function App({ account, onSignOut }: AppProps) {
 
   return (
     <div className="relative flex h-screen overflow-hidden bg-[var(--color-ink-950)]">
-      {/* Тёплое свечение в углу — фирменный акцент Dala */}
-      <div className="pointer-events-none absolute -top-40 -left-32 h-96 w-96 rounded-full bg-[var(--color-ember-600)]/12 blur-[120px]" />
-      <div className="pointer-events-none absolute top-1/3 -right-40 h-96 w-96 rounded-full bg-[var(--color-sky-400)]/6 blur-[120px]" />
+
 
       <Sidebar
         current={nav}

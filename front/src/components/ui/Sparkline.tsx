@@ -1,4 +1,3 @@
-import { useId } from 'react'
 
 interface SparklineProps {
   values: number[]
@@ -21,7 +20,6 @@ export function Sparkline({
   // подхватывал цвет первого.
   // useId отдаёт значение со спецсимволами, а на него ссылается url(#…) —
   // оставляем только буквы и цифры.
-  const gradientId = `spark-${useId().replace(/[^a-zA-Z0-9]/g, '')}`
 
   if (values.length < 2) {
     return <div style={{ width, height }} />
@@ -35,15 +33,10 @@ export function Sparkline({
 
   return (
     <svg width={width} height={height} className="overflow-visible">
-      <defs>
-        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} style={{ stopOpacity: 'var(--rh-area-fill, 0.35)' }} />
-          <stop offset="100%" stopColor={color} stopOpacity="0" />
-        </linearGradient>
-      </defs>
       <polygon
         points={`0,${height} ${points.join(' ')} ${width},${height}`}
-        fill={`url(#${gradientId})`}
+        fill={color}
+        fillOpacity="var(--rh-area-fill)"
       />
       <polyline
         points={points.join(' ')}

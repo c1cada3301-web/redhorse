@@ -9,16 +9,17 @@ import { IMAGE_GRID, ImageRow, imageLabel } from './ImageRow'
 import { PullDialog } from './PullDialog'
 import { errorText, isConflict } from './errorText'
 import { DANGER_BUTTON, GHOST_BUTTON, PRIMARY_BUTTON } from './styles'
+import { useT } from '@/state/settings'
 
 type Filter = 'all' | 'used' | 'dangling'
 
 const FILTERS: { key: Filter; label: string }[] = [
-  { key: 'all', label: 'Все' },
-  { key: 'used', label: 'Используются' },
-  { key: 'dangling', label: 'Без тега' },
+  { key: 'all', label: 'common.all' },
+  { key: 'used', label: 'images.filter.used' },
+  { key: 'dangling', label: 'images.filter.untagged' },
 ]
 
-const COLUMNS = ['Образ', 'Размер', 'Контейнеров', 'Создан', '']
+const COLUMNS = ['images.col.image', 'images.col.size', 'images.col.containers', 'images.col.created', '']
 
 interface Notice {
   tone: 'ok' | 'error'
@@ -43,6 +44,7 @@ function inFilter(image: ApiImage, filter: Filter): boolean {
 }
 
 export function ImagesPage({ search }: ImagesPageProps) {
+  const t = useT()
   const query = useImagesQuery()
   const removeImage = useRemoveImage()
   const pruneImages = usePruneImages()
@@ -118,14 +120,14 @@ export function ImagesPage({ search }: ImagesPageProps) {
             type="button"
             onClick={() => setFilter(item.key)}
             className={[
-              'flex h-8 items-center gap-2 rounded-lg border px-3 text-[12px] transition-colors',
+              'flex h-8 items-center gap-2 rounded-lg border px-3 text-sm transition-colors',
               filter === item.key
                 ? 'border-[var(--color-ember-500)]/45 bg-[var(--color-ember-500)]/12 text-[var(--color-ember-300)]'
-                : 'border-fg/8 bg-fg/[0.02] text-fg/50 hover:text-fg/85',
+                : 'border-border bg-fg/[0.02] text-muted-foreground hover:text-foreground/90',
             ].join(' ')}
           >
-            {item.label}
-            <span className="rounded bg-bg/30 px-1 font-[family-name:var(--font-mono)] text-[10px] text-fg/40">
+            {t(item.label)}
+            <span className="rounded bg-bg/30 px-1 font-[family-name:var(--font-mono)] text-2xs text-muted-foreground">
               {counts[item.key]}
             </span>
           </button>
@@ -133,8 +135,8 @@ export function ImagesPage({ search }: ImagesPageProps) {
 
         <div className="ml-auto flex items-center gap-2">
           {notice === null ? (
-            <span className="font-[family-name:var(--font-mono)] text-[11px] text-fg/30">
-              всего на диске {formatBytes(totalSize)}
+            <span className="font-[family-name:var(--font-mono)] text-xs text-muted-foreground">
+              {t('containers.diskTotal', { size: formatBytes(totalSize) })}
             </span>
           ) : (
             <NoticeLine notice={notice} onDismiss={() => setNotice(null)} />
@@ -142,17 +144,17 @@ export function ImagesPage({ search }: ImagesPageProps) {
 
           <button type="button" onClick={() => setBuildOpen(true)} className={PRIMARY_BUTTON}>
             <Hammer className="h-3.5 w-3.5" />
-            Собрать образ
+            {t('images.build')}
           </button>
 
           <button type="button" onClick={() => setPullOpen(true)} className={GHOST_BUTTON}>
             <Download className="h-3.5 w-3.5" />
-            Загрузить (pull)
+            {t('images.pull')}
           </button>
 
           <button type="button" onClick={() => setPruneOpen(true)} className={DANGER_BUTTON}>
             <Trash2 className="h-3.5 w-3.5" />
-            Очистить неиспользуемые
+            {t('images.pruneUnused')}
           </button>
         </div>
       </div>
@@ -161,14 +163,14 @@ export function ImagesPage({ search }: ImagesPageProps) {
         {COLUMNS.map((column, index) => (
           <div
             key={column === '' ? `col-${index}` : column}
-            className="text-[10px] tracking-wider text-fg/25 uppercase"
+            className="text-2xs tracking-wider text-muted-foreground uppercase"
           >
-            {column}
+            {column === '' ? '' : t(column)}
           </div>
         ))}
       </div>
 
-      <div className="rh-scroll min-h-0 flex-1 space-y-1.5 overflow-y-auto px-4 pb-4">
+      <div className="rh-scroll min-h-0 flex-1 overflow-y-auto px-4 pb-4">
         <ImagesBody
           loading={query.isLoading}
           error={query.error}
@@ -185,10 +187,10 @@ export function ImagesPage({ search }: ImagesPageProps) {
         onOpenChange={(next) => {
           if (!next) setConflicting(null)
         }}
-        title="Образ занят"
+        title={t('images.busy.title')}
         description="Docker отказал: образ используется контейнерами. Принудительное удаление снимет все его теги."
         subject={conflicting === null ? undefined : imageLabel(conflicting)}
-        confirmLabel="Удалить принудительно"
+        confirmLabel={t('images.busy.force')}
         onConfirm={() => {
           if (conflicting === null) return
           handleRemove(conflicting, true)
@@ -198,8 +200,8 @@ export function ImagesPage({ search }: ImagesPageProps) {
       <ConfirmDialog
         open={pruneOpen}
         onOpenChange={setPruneOpen}
-        title="Очистить неиспользуемые образы?"
-        description="Будут удалены образы без тега (dangling) — промежуточные результаты прошлых сборок. Образы с тегами останутся."
+        title={t('images.prune.title')}
+        description={t('images.prune.text')}
         confirmLabel="Очистить"
         onConfirm={handlePrune}
       />
@@ -217,7 +219,7 @@ function NoticeLine({ notice, onDismiss }: NoticeLineProps) {
     <span
       className={[
         'flex max-w-[420px] items-center gap-1.5 rounded-lg border px-2 py-1',
-        'font-[family-name:var(--font-mono)] text-[11px]',
+        'font-[family-name:var(--font-mono)] text-xs',
         notice.tone === 'ok'
           ? 'border-[var(--color-mint-400)]/30 bg-[var(--color-mint-400)]/10 text-[var(--color-mint-400)]'
           : 'border-[var(--color-danger)]/35 bg-[var(--color-danger)]/10 text-[var(--color-danger)]',
@@ -239,8 +241,9 @@ interface ImagesBodyProps {
 }
 
 function ImagesBody({ loading, error, visible, onRemove }: ImagesBodyProps) {
+  const t = useT()
   if (loading) {
-    return <p className="px-3 pt-6 text-sm text-fg/35">Загружаем образы…</p>
+    return <p className="px-3 pt-6 text-sm text-muted-foreground">{t('images.loading')}</p>
   }
 
   if (error !== null) {
@@ -253,7 +256,7 @@ function ImagesBody({ loading, error, visible, onRemove }: ImagesBodyProps) {
 
   if (visible.length === 0) {
     return (
-      <div className="flex h-40 flex-col items-center justify-center gap-2 text-fg/35">
+      <div className="flex h-40 flex-col items-center justify-center gap-2 text-muted-foreground">
         <Boxes className="h-6 w-6" />
         <p className="text-sm">Ничего не найдено</p>
       </div>

@@ -1,23 +1,23 @@
 /** Общие классы полей и кнопок диалогов образов. */
 
-export const LABEL_CLASS = 'mb-1.5 block text-[11px] tracking-wider text-fg/40 uppercase'
+export const LABEL_CLASS = 'mb-1.5 block text-xs tracking-wider text-muted-foreground uppercase'
 
 const FIELD_BASE = [
-  'w-full rounded-lg border border-fg/8 bg-bg/30 px-2.5',
-  'text-[13px] text-fg/85 outline-none transition-colors',
-  'placeholder:text-fg/22 focus:border-[var(--color-ember-500)]/60',
+  'w-full rounded-lg border border-border bg-bg/30 px-2.5',
+  'text-base text-foreground/90 outline-none transition-colors',
+  'placeholder:text-muted-foreground focus:border-[var(--color-ember-500)]/60',
 ].join(' ')
 
-export const MONO_FIELD_CLASS = `h-9 ${FIELD_BASE} font-[family-name:var(--font-mono)] text-[12px]`
+export const MONO_FIELD_CLASS = `h-9 ${FIELD_BASE} font-[family-name:var(--font-mono)] text-sm`
 
 export const TEXTAREA_CLASS = [
   FIELD_BASE,
-  'rh-scroll resize-y py-2 font-[family-name:var(--font-mono)] text-[12px] leading-relaxed',
+  'rh-scroll resize-y py-2 font-[family-name:var(--font-mono)] text-sm leading-relaxed',
 ].join(' ')
 
 const BUTTON_BASE = [
   'flex h-9 items-center justify-center gap-1.5 rounded-lg border px-3.5',
-  'text-[12px] transition-colors disabled:cursor-not-allowed disabled:opacity-40',
+  'text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40',
 ].join(' ')
 
 export const PRIMARY_BUTTON = [
@@ -28,7 +28,7 @@ export const PRIMARY_BUTTON = [
 
 export const GHOST_BUTTON = [
   BUTTON_BASE,
-  'border-fg/10 bg-fg/5 text-fg/65 hover:border-fg/20 hover:text-fg',
+  'border-border bg-fg/5 text-foreground/75 hover:border-border hover:text-foreground',
 ].join(' ')
 
 export const DANGER_BUTTON = [

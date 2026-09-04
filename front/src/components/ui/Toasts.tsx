@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { AlertTriangle, X } from 'lucide-react'
+import { useT } from '@/state/settings'
 
 export interface Toast {
   id: number
@@ -16,6 +17,7 @@ interface ToastsProps {
 }
 
 export function Toasts({ items, onDismiss }: ToastsProps) {
+  const t = useT()
   useEffect(() => {
     if (items.length === 0) return
 
@@ -43,14 +45,14 @@ export function Toasts({ items, onDismiss }: ToastsProps) {
             <AlertTriangle className="mt-0.5 h-4 w-4" />
           </span>
 
-          <p className="min-w-0 flex-1 text-[12px] leading-relaxed break-words text-fg/75">
+          <p className="min-w-0 flex-1 text-sm leading-relaxed break-words text-fg/75">
             {item.text}
           </p>
 
           <button
             type="button"
             onClick={() => onDismiss(item.id)}
-            aria-label="Скрыть"
+            aria-label={t('common.hide')}
             className="text-fg/30 transition-colors hover:text-fg"
           >
             <X className="h-3.5 w-3.5" />

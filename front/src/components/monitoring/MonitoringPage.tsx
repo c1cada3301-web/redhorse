@@ -7,6 +7,7 @@ import { HostCharts } from './HostCharts'
 import { METRICS, metricByKey, sumAligned } from './metrics'
 import type { MetricKey } from './metrics'
 import { useHostFlow } from './useHostFlow'
+import { useT } from '@/state/settings'
 
 interface MonitoringPageProps {
   docker: DockerApi
@@ -14,6 +15,7 @@ interface MonitoringPageProps {
 }
 
 export function MonitoringPage({ docker, search }: MonitoringPageProps) {
+  const t = useT()
   const info = useSystemInfo()
   const [metricKey, setMetricKey] = useState<MetricKey>('cpu')
   const [showStopped, setShowStopped] = useState(false)
@@ -72,34 +74,33 @@ export function MonitoringPage({ docker, search }: MonitoringPageProps) {
             type="button"
             onClick={() => setMetricKey(item.key)}
             className={[
-              'flex h-8 items-center gap-2 rounded-lg border px-3 text-[12px] transition-colors',
+              'flex h-8 items-center gap-2 rounded-lg border px-3 text-sm transition-colors',
               item.key === metricKey
                 ? 'border-[var(--color-ember-500)]/45 bg-[var(--color-ember-500)]/12 text-[var(--color-ember-300)]'
-                : 'border-fg/8 bg-fg/[0.02] text-fg/50 hover:text-fg/85',
+                : 'border-border bg-fg/[0.02] text-muted-foreground hover:text-foreground/90',
             ].join(' ')}
           >
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: item.color }} />
-            {item.label}
+            {t(item.label)}
           </button>
         ))}
 
         <div className="ml-auto flex items-center gap-3">
-          <span className="font-[family-name:var(--font-mono)] text-[11px] text-fg/30">
-            {running.length} из {docker.containers.length} запущено
+          <span className="font-[family-name:var(--font-mono)] text-xs text-muted-foreground">
+            {t('mon.runningOf', { running: running.length, total: docker.containers.length })}
           </span>
           <Toggle
             checked={showStopped}
             onChange={setShowStopped}
-            label="Показывать остановленные"
+            label={t('mon.showStopped')}
           />
         </div>
       </div>
 
       <ContainerMetricTable containers={visible} metric={metric} total={total} />
 
-      <p className="pb-1 text-center text-[11px] text-fg/20">
-        История за текущую сессию вкладки — около 40 последних точек. Долговременное хранение
-        появится позже.
+      <p className="pb-1 text-center text-xs text-muted-foreground">
+        {t('mon.note')}
       </p>
     </div>
   )
@@ -119,10 +120,10 @@ function Toggle({ checked, onChange, label }: ToggleProps) {
       aria-checked={checked}
       onClick={() => onChange(!checked)}
       className={[
-        'flex h-8 items-center gap-2 rounded-lg border px-3 text-[12px] transition-colors',
+        'flex h-8 items-center gap-2 rounded-lg border px-3 text-sm transition-colors',
         checked
           ? 'border-[var(--color-ember-500)]/45 bg-[var(--color-ember-500)]/12 text-[var(--color-ember-300)]'
-          : 'border-fg/8 bg-fg/[0.02] text-fg/50 hover:text-fg/85',
+          : 'border-border bg-fg/[0.02] text-muted-foreground hover:text-foreground/90',
       ].join(' ')}
     >
       <span

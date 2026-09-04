@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useT } from '@/state/settings'
 
 export interface Series {
   values: number[]
@@ -25,9 +26,9 @@ const PAD_BOTTOM = 8
 const DIVISIONS = 3
 
 export function AreaChart({ series, height = 148, format, max }: AreaChartProps) {
+  const t = useT()
   const [wrapRef, width] = useElementWidth()
   const [hover, setHover] = useState<number | null>(null)
-  const gradientId = useId()
 
   const points = useMemo(
     () => series.reduce((longest, item) => Math.max(longest, item.values.length), 0),
@@ -74,21 +75,6 @@ export function AreaChart({ series, height = 148, format, max }: AreaChartProps)
           onMouseMove={handleMove}
           onMouseLeave={() => setHover(null)}
         >
-          <defs>
-            {series.map((item, index) => (
-              <linearGradient
-                key={item.label}
-                id={`${gradientId}-${index}`}
-                x1="0"
-                y1="0"
-                x2="0"
-                y2="1"
-              >
-                <stop offset="0%" stopColor={item.color} style={{ stopOpacity: 'var(--rh-area-fill, 0.32)' }} />
-                <stop offset="100%" stopColor={item.color} stopOpacity="0" />
-              </linearGradient>
-            ))}
-          </defs>
 
           {gridValues.map((value, index) => {
             const y = PAD_TOP + (plotH * index) / DIVISIONS
@@ -118,7 +104,7 @@ export function AreaChart({ series, height = 148, format, max }: AreaChartProps)
           })}
 
           {ready &&
-            series.map((item, index) => {
+            series.map((item) => {
               const coords = alignedCoords(item.values, points, toX, toY)
               if (coords.length < 2) return null
 
@@ -131,7 +117,8 @@ export function AreaChart({ series, height = 148, format, max }: AreaChartProps)
                 <g key={item.label}>
                   <polygon
                     points={`${first.x.toFixed(2)},${base} ${line} ${last.x.toFixed(2)},${base}`}
-                    fill={`url(#${gradientId}-${index})`}
+                    fill={item.color}
+                    fillOpacity="var(--rh-area-fill)"
                   />
                   <polyline
                     points={line}
@@ -180,10 +167,10 @@ export function AreaChart({ series, height = 148, format, max }: AreaChartProps)
               x={PAD_LEFT + plotW / 2}
               y={PAD_TOP + plotH / 2}
               textAnchor="middle"
-              fill="rgb(255 255 255 / 0.25)"
+              fill="var(--muted-foreground)"
               fontSize="11"
             >
-              копим данные…
+              {t('chart.collecting')}
             </text>
           )}
         </svg>
@@ -206,6 +193,7 @@ interface TooltipProps {
 }
 
 function Tooltip({ series, points, index, x, width, format }: TooltipProps) {
+  const t = useT()
   // У правого края разворачиваем подсказку влево, чтобы не выезжала за панель.
   const flip = x > width / 2
   const behind = points - 1 - index
@@ -215,8 +203,8 @@ function Tooltip({ series, points, index, x, width, format }: TooltipProps) {
       className="pointer-events-none absolute top-1 z-10 rounded-lg border border-fg/10 bg-[var(--color-ink-900)]/95 px-2 py-1.5 shadow-lg"
       style={{ left: x, transform: flip ? 'translateX(calc(-100% - 10px))' : 'translateX(10px)' }}
     >
-      <div className="mb-1 font-[family-name:var(--font-mono)] text-[10px] text-fg/30">
-        {behind === 0 ? 'сейчас' : `−${behind} с`}
+      <div className="mb-1 font-[family-name:var(--font-mono)] text-2xs text-fg/30">
+        {behind === 0 ? t('chart.now') : `−${behind} с`}
       </div>
       {series.map((item) => {
         const value = valueAt(item.values, points, index)
@@ -224,8 +212,8 @@ function Tooltip({ series, points, index, x, width, format }: TooltipProps) {
         return (
           <div key={item.label} className="flex items-center gap-2 whitespace-nowrap">
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: item.color }} />
-            <span className="text-[11px] text-fg/45">{item.label}</span>
-            <span className="ml-auto font-[family-name:var(--font-mono)] text-[11px] text-fg/85">
+            <span className="text-xs text-muted-foreground">{item.label}</span>
+            <span className="ml-auto font-[family-name:var(--font-mono)] text-xs text-fg/85">
               {value === null ? '—' : format(value)}
             </span>
           </div>

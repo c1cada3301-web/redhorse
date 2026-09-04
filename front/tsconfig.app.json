@@ -20,7 +20,10 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    /* Абсолютные импорты: @/components/... вместо ../../.. */
+    "paths": { "@/*": ["./src/*"] }
   },
   "include": ["src"]
 }

@@ -4,11 +4,12 @@ import { shortId } from '../../lib/format'
 import { Sparkline } from '../ui/Sparkline'
 import { StateBadge } from '../containers/StateBadge'
 import type { MetricDef } from './metrics'
+import { useT } from '@/state/settings'
 
 const ROW_GRID =
   'grid grid-cols-[minmax(200px,1.6fr)_112px_92px_128px_60px_minmax(80px,1fr)] items-center gap-3'
 
-const COLUMNS = ['Контейнер', 'Состояние', 'История', 'Значение', 'Доля', '']
+const COLUMNS = ['mon.col.container', 'mon.col.state', 'mon.col.history', 'mon.col.value', 'mon.col.share', '']
 
 interface ContainerMetricTableProps {
   containers: Container[]
@@ -18,6 +19,7 @@ interface ContainerMetricTableProps {
 }
 
 export function ContainerMetricTable({ containers, metric, total }: ContainerMetricTableProps) {
+  const t = useT()
   return (
     <section className="rh-panel p-3">
       <div className={`${ROW_GRID} px-3 pb-2`}>
@@ -25,19 +27,19 @@ export function ContainerMetricTable({ containers, metric, total }: ContainerMet
           <div
             key={column === '' ? `col-${index}` : column}
             className={[
-              'text-[10px] tracking-wider text-fg/25 uppercase',
+              'text-2xs tracking-wider text-muted-foreground uppercase',
               index === 3 || index === 4 ? 'text-right' : '',
             ].join(' ')}
           >
-            {column}
+            {t(column)}
           </div>
         ))}
       </div>
 
       {containers.length === 0 ? (
-        <div className="flex h-28 flex-col items-center justify-center gap-2 text-fg/30">
+        <div className="flex h-28 flex-col items-center justify-center gap-2 text-muted-foreground">
           <Activity className="h-5 w-5" />
-          <p className="text-[12px]">Нечего показать</p>
+          <p className="text-sm">{t('mon.nothing')}</p>
         </div>
       ) : (
         <div className="space-y-1.5">
@@ -68,11 +70,11 @@ function MetricRow({ container, metric, share, grid }: MetricRowProps) {
 
   return (
     <div
-      className={`${grid} rounded-xl border border-fg/6 bg-fg/[0.015] px-3 py-2 transition-colors hover:border-fg/12 hover:bg-fg/[0.035]`}
+      className={`${grid} rounded-lg bg-foreground/3 px-3 py-2 transition-colors hover:border-border hover:bg-fg/[0.035]`}
     >
       <div className="min-w-0">
-        <div className="truncate text-[13px] text-fg/90">{container.name}</div>
-        <div className="truncate font-[family-name:var(--font-mono)] text-[11px] text-fg/30">
+        <div className="truncate text-base text-foreground/90">{container.name}</div>
+        <div className="truncate font-[family-name:var(--font-mono)] text-xs text-muted-foreground">
           {container.image} · {shortId(container.id)}
         </div>
       </div>
@@ -81,11 +83,11 @@ function MetricRow({ container, metric, share, grid }: MetricRowProps) {
 
       <Sparkline values={series} color={metric.color} width={88} height={22} />
 
-      <div className="text-right font-[family-name:var(--font-mono)] text-[12px] text-fg/85">
+      <div className="text-right font-[family-name:var(--font-mono)] text-sm text-foreground/90">
         {metric.format(metric.value(container))}
       </div>
 
-      <div className="text-right font-[family-name:var(--font-mono)] text-[11px] text-fg/40">
+      <div className="text-right font-[family-name:var(--font-mono)] text-xs text-muted-foreground">
         {share.toFixed(0)}%
       </div>
 

@@ -12,6 +12,8 @@ import {
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useSettings, useT } from '../../state/settings'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 export type NavKey =
   | 'dashboard'
@@ -66,21 +68,22 @@ export function Sidebar({
   return (
     <aside
       className={[
-        'relative flex shrink-0 flex-col border-r border-fg/6 bg-[var(--color-ink-900)]/60 transition-[width] duration-200',
+        'relative flex shrink-0 flex-col border-r border-border bg-card/60 transition-[width] duration-200',
         collapsed ? 'w-[60px]' : 'w-[212px]',
       ].join(' ')}
     >
       {/* Кнопка сидит на самой границе — она нужна и в свёрнутом виде, где места в шапке нет. */}
-      <button
-        type="button"
+      <Button
+        variant="outline"
+        size="icon-sm"
         onClick={() => update({ sidebarCollapsed: !collapsed })}
         title={toggleLabel}
         aria-label={toggleLabel}
         aria-expanded={!collapsed}
-        className="absolute top-[46px] -right-3 z-30 grid h-6 w-6 place-items-center rounded-full border border-fg/10 bg-[var(--color-ink-850)] text-fg/45 transition-colors hover:border-[var(--color-ember-500)]/50 hover:text-[var(--color-ember-300)]"
+        className="absolute top-[46px] -right-3 z-30 rounded-full bg-popover"
       >
-        <ChevronLeft className={`h-3.5 w-3.5 transition-transform duration-200 ${collapsed ? 'rotate-180' : ''}`} />
-      </button>
+        <ChevronLeft className={`transition-transform duration-200 ${collapsed ? 'rotate-180' : ''}`} />
+      </Button>
 
       <div className={`flex h-14 items-center gap-2.5 ${collapsed ? 'justify-center px-0' : 'px-4'}`}>
         <img
@@ -92,8 +95,8 @@ export function Sidebar({
         />
         {!collapsed && (
           <div className="min-w-0 leading-tight">
-            <div className="truncate text-sm font-semibold tracking-tight text-fg">Dala</div>
-            <div className="truncate text-[10px] text-fg/35">{t('nav.tagline')}</div>
+            <div className="truncate text-base font-semibold tracking-tight text-foreground">Dala</div>
+            <div className="truncate text-2xs text-muted-foreground">{t('nav.tagline')}</div>
           </div>
         )}
       </div>
@@ -112,11 +115,11 @@ export function Sidebar({
               title={collapsed ? label : undefined}
               aria-label={label}
               className={[
-                'relative flex items-center rounded-lg py-2 text-[13px] transition-colors',
+                'relative flex items-center rounded-lg py-2 text-base transition-colors',
                 collapsed ? 'justify-center px-0' : 'gap-2.5 px-2.5',
                 active
-                  ? 'bg-fg/[0.06] text-fg'
-                  : 'text-fg/50 hover:bg-fg/[0.03] hover:text-fg/80',
+                  ? 'bg-foreground/6 text-foreground'
+                  : 'text-muted-foreground hover:bg-foreground/3 hover:text-foreground/85',
               ].join(' ')}
             >
               {active && (
@@ -132,41 +135,41 @@ export function Sidebar({
       <div
         title={collapsed ? t('nav.runningOf', { running: runningCount, total: totalCount }) : undefined}
         className={[
-          'm-2 rounded-lg border border-fg/6 bg-bg/25',
+          'm-2 rounded-lg bg-foreground/4',
           collapsed ? 'flex flex-col items-center gap-1 px-0 py-2' : 'px-3 py-2.5',
         ].join(' ')}
       >
         <div className="flex items-center gap-2">
           <span className="rh-pulse h-1.5 w-1.5 rounded-full bg-[var(--color-mint-400)]" />
-          {!collapsed && <span className="text-[11px] text-fg/60">{t('nav.socket')}</span>}
+          {!collapsed && <span className="text-xs text-foreground/70">{t('nav.socket')}</span>}
         </div>
 
         {collapsed ? (
-          <span className="font-[family-name:var(--font-mono)] text-[10px] text-fg/40">
+          <span className="font-mono text-2xs text-muted-foreground">
             {runningCount}/{totalCount}
           </span>
         ) : (
-          <div className="mt-1 font-[family-name:var(--font-mono)] text-[11px] text-fg/30">
+          <div className="mt-1 font-mono text-xs text-muted-foreground">
             {t('nav.runningOf', { running: runningCount, total: totalCount })}
           </div>
         )}
       </div>
 
       <div className={`mb-2 ${collapsed ? 'px-1.5' : 'px-2'}`}>
-        <button
-          type="button"
-          onClick={onSignOut}
-          title={collapsed ? `${username} — выйти` : 'Выйти'}
-          aria-label="Выйти"
-          className={[
-            'flex w-full items-center rounded-lg py-2 text-[13px] text-fg/50 transition-colors',
-            'hover:bg-fg/[0.03] hover:text-fg/80',
-            collapsed ? 'justify-center px-0' : 'gap-2.5 px-2.5',
-          ].join(' ')}
-        >
-          <LogOut className="h-4 w-4 shrink-0" />
-          {!collapsed && <span className="truncate">{username}</span>}
-        </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              onClick={onSignOut}
+              aria-label={t('auth.signOut')}
+              className={collapsed ? 'w-full justify-center px-0' : 'w-full justify-start gap-2.5'}
+            >
+              <LogOut className="size-4 shrink-0" />
+              {!collapsed && <span className="truncate">{username}</span>}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="right">{t('auth.signOut')} — {username}</TooltipContent>
+        </Tooltip>
       </div>
     </aside>
   )

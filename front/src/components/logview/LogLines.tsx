@@ -3,6 +3,7 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import type { LogLine, LogViewOptions } from '../../types'
 import { formatTime } from '../../lib/format'
 import { visibleText } from '../../lib/maskCache'
+import { useT } from '@/state/settings'
 
 /** Межстрочный интервал списка — должен совпадать с lineHeight контейнера. */
 const LINE_HEIGHT = 1.55
@@ -14,8 +15,8 @@ const OVERSCAN = 20
 const BOTTOM_EPS = 24
 
 const LEVEL_COLOR: Record<LogLine['level'], string> = {
-  debug: 'text-fg/40',
-  info: 'text-fg/80',
+  debug: 'text-muted-foreground',
+  info: 'text-foreground/90',
   warn: 'text-[var(--color-amber-ok)]',
   error: 'text-[var(--color-danger)]',
 }
@@ -67,6 +68,7 @@ function highlight(text: string, needle: string) {
 }
 
 export function LogLines({ lines, options, onUserScroll }: LogLinesProps) {
+  const t = useT()
   const scrollRef = useRef<HTMLDivElement>(null)
   /** Последняя известная ширина контейнера — её смена меняет переносы. */
   const widthRef = useRef(0)
@@ -153,8 +155,8 @@ export function LogLines({ lines, options, onUserScroll }: LogLinesProps) {
 
   if (lines.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center text-sm text-fg/35">
-        Нет строк под текущим фильтром
+      <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+        {t('logs.empty')}
       </div>
     )
   }
@@ -187,7 +189,7 @@ export function LogLines({ lines, options, onUserScroll }: LogLinesProps) {
               />
 
               {options.showTimestamps && (
-                <span className="shrink-0 tabular-nums text-fg/28 select-none">
+                <span className="shrink-0 tabular-nums text-muted-foreground select-none">
                   {formatTime(line.ts)}
                 </span>
               )}
@@ -203,7 +205,7 @@ export function LogLines({ lines, options, onUserScroll }: LogLinesProps) {
               </span>
 
               {line.stream === 'stderr' && (
-                <span className="shrink-0 rounded bg-[var(--color-danger)]/12 px-1 text-[10px] text-[var(--color-danger)]/80 opacity-0 group-hover:opacity-100">
+                <span className="shrink-0 rounded bg-[var(--color-danger)]/12 px-1 text-2xs text-[var(--color-danger)]/80 opacity-0 group-hover:opacity-100">
                   stderr
                 </span>
               )}

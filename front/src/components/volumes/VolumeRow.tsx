@@ -1,5 +1,6 @@
 import type { DockerVolume } from '../../api/types'
 import { formatBytes, shortId } from '../../lib/format'
+import { useT } from '@/state/settings'
 
 export const VOLUME_GRID =
   'grid grid-cols-[minmax(220px,1.5fr)_84px_88px_132px_minmax(200px,1.7fr)] items-center gap-3'
@@ -39,32 +40,33 @@ interface VolumeRowProps {
 }
 
 export function VolumeRow({ volume }: VolumeRowProps) {
+  const t = useT()
   const anonymous = isAnonymous(volume)
   const project = volume.labels[COMPOSE_PROJECT] ?? ''
   const composeVolume = volume.labels[COMPOSE_VOLUME] ?? ''
 
   return (
     <div
-      className={`${VOLUME_GRID} rounded-xl border border-fg/6 bg-fg/[0.015] px-3 py-2.5 transition-colors hover:border-fg/12 hover:bg-fg/[0.035]`}
+      className={`${VOLUME_GRID} border-b border-border px-3 py-2.5 transition-colors hover:bg-foreground/4`}
     >
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <span
             title={volume.name}
             className={[
-              'truncate text-[13px] font-medium text-fg',
-              anonymous ? 'font-[family-name:var(--font-mono)] text-fg/70' : '',
+              'truncate text-base font-medium text-foreground',
+              anonymous ? 'font-[family-name:var(--font-mono)] text-foreground/75' : '',
             ].join(' ')}
           >
             {anonymous ? shortId(volume.name) : volume.name}
           </span>
 
           {anonymous && (
-            <span className="shrink-0 rounded bg-fg/6 px-1 text-[9px] text-fg/35">анонимный</span>
+            <span className="shrink-0 rounded bg-fg/6 px-1 text-2xs text-muted-foreground">{t('volumes.anonymous')}</span>
           )}
 
           {isOrphan(volume) && !anonymous && (
-            <span className="shrink-0 rounded bg-[var(--color-amber-ok)]/12 px-1 text-[9px] text-[var(--color-amber-ok)]">
+            <span className="shrink-0 rounded bg-[var(--color-amber-ok)]/12 px-1 text-2xs text-[var(--color-amber-ok)]">
               возможно осиротевший
             </span>
           )}
@@ -72,11 +74,11 @@ export function VolumeRow({ volume }: VolumeRowProps) {
 
         {project !== '' && (
           <div className="mt-1 flex flex-wrap items-center gap-1">
-            <span className="rounded bg-fg/5 px-1.5 py-0.5 font-[family-name:var(--font-mono)] text-[10px] text-fg/40">
+            <span className="rounded bg-fg/5 px-1.5 py-0.5 font-[family-name:var(--font-mono)] text-2xs text-muted-foreground">
               {project}
             </span>
             {composeVolume !== '' && (
-              <span className="rounded bg-fg/5 px-1.5 py-0.5 font-[family-name:var(--font-mono)] text-[10px] text-fg/30">
+              <span className="rounded bg-fg/5 px-1.5 py-0.5 font-[family-name:var(--font-mono)] text-2xs text-muted-foreground">
                 {composeVolume}
               </span>
             )}
@@ -84,21 +86,21 @@ export function VolumeRow({ volume }: VolumeRowProps) {
         )}
       </div>
 
-      <div className="truncate font-[family-name:var(--font-mono)] text-[11px] text-[var(--color-sky-400)]/70">
+      <div className="truncate font-[family-name:var(--font-mono)] text-xs text-[var(--color-sky-400)]/70">
         {volume.driver}
       </div>
 
-      <div className="font-[family-name:var(--font-mono)] text-[11px] text-fg/55">
-        {volume.size > 0 ? formatBytes(volume.size) : <span className="text-fg/25">—</span>}
+      <div className="font-[family-name:var(--font-mono)] text-xs text-muted-foreground">
+        {volume.size > 0 ? formatBytes(volume.size) : <span className="text-muted-foreground">—</span>}
       </div>
 
-      <div className="font-[family-name:var(--font-mono)] text-[11px] text-fg/45">
+      <div className="font-[family-name:var(--font-mono)] text-xs text-muted-foreground">
         {formatCreatedAt(volume.createdAt)}
       </div>
 
       <div
         title={volume.mountpoint}
-        className="truncate font-[family-name:var(--font-mono)] text-[11px] text-fg/40"
+        className="truncate font-[family-name:var(--font-mono)] text-xs text-muted-foreground"
       >
         {volume.mountpoint}
       </div>

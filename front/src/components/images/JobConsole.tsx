@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { CheckCircle2, XCircle } from 'lucide-react'
 import { keys } from '../../api/queries'
 import type { JobStream } from '../../state/useJobStream'
+import { useT } from '@/state/settings'
 
 interface JobConsoleProps {
   stream: JobStream
@@ -13,6 +14,7 @@ interface JobConsoleProps {
 
 /** Живой вывод задачи: моноширинный лог с автопрокруткой и плашкой результата. */
 export function JobConsole({ stream, runningLabel, height = '46vh' }: JobConsoleProps) {
+  const t = useT()
   const scrollRef = useRef<HTMLDivElement>(null)
   const client = useQueryClient()
 
@@ -37,17 +39,17 @@ export function JobConsole({ stream, runningLabel, height = '46vh' }: JobConsole
       <div
         ref={scrollRef}
         style={{ height }}
-        className="rh-scroll min-h-[200px] overflow-y-auto rounded-lg border border-fg/8 bg-bg/45 px-3 py-2 font-[family-name:var(--font-mono)] text-[12px] leading-[1.55]"
+        className="rh-scroll min-h-[200px] overflow-y-auto rounded-lg border border-border bg-bg/45 px-3 py-2 font-[family-name:var(--font-mono)] text-sm leading-[1.55]"
       >
         {stream.events.length === 0 ? (
-          <p className="text-fg/30">Ожидаем вывод…</p>
+          <p className="text-muted-foreground">{t('job.waiting')}</p>
         ) : (
           stream.events.map((event, index) => (
             <div
               key={`${event.ts}-${index}`}
               className={[
                 'break-words whitespace-pre-wrap',
-                event.stream === 'stderr' ? 'text-[var(--color-danger)]' : 'text-fg/75',
+                event.stream === 'stderr' ? 'text-[var(--color-danger)]' : 'text-foreground/75',
               ].join(' ')}
             >
               {event.text}
@@ -67,9 +69,10 @@ interface StatusBannerProps {
 }
 
 function StatusBanner({ stream, runningLabel }: StatusBannerProps) {
+  const t = useT()
   if (stream.state === 'running') {
     return (
-      <div className="flex items-center gap-2 rounded-lg border border-fg/8 bg-fg/[0.03] px-3 py-2 text-[12px] text-fg/55">
+      <div className="flex items-center gap-2 rounded-lg border border-border bg-fg/[0.03] px-3 py-2 text-sm text-muted-foreground">
         <span className="rh-pulse h-1.5 w-1.5 rounded-full bg-[var(--color-ember-400)]" />
         {runningLabel}
       </div>
@@ -78,7 +81,7 @@ function StatusBanner({ stream, runningLabel }: StatusBannerProps) {
 
   if (stream.state === 'success') {
     return (
-      <div className="flex items-center gap-2 rounded-lg border border-[var(--color-mint-400)]/35 bg-[var(--color-mint-400)]/10 px-3 py-2 text-[12px] text-[var(--color-mint-400)]">
+      <div className="flex items-center gap-2 rounded-lg border border-[var(--color-mint-400)]/35 bg-[var(--color-mint-400)]/10 px-3 py-2 text-sm text-[var(--color-mint-400)]">
         <CheckCircle2 className="h-4 w-4 shrink-0" />
         Готово
       </div>
@@ -86,10 +89,10 @@ function StatusBanner({ stream, runningLabel }: StatusBannerProps) {
   }
 
   return (
-    <div className="flex items-start gap-2 rounded-lg border border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 px-3 py-2 text-[12px] text-[var(--color-danger)]">
+    <div className="flex items-start gap-2 rounded-lg border border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 px-3 py-2 text-sm text-[var(--color-danger)]">
       <XCircle className="mt-0.5 h-4 w-4 shrink-0" />
       <span className="break-words whitespace-pre-wrap">
-        {stream.error ?? 'Задача завершилась с ошибкой'}
+        {stream.error ?? t('job.failed')}
       </span>
     </div>
   )

@@ -1,6 +1,7 @@
 import { Plus, Trash2 } from 'lucide-react'
 import { IconButton } from '../ui/IconButton'
 import { GHOST_BUTTON, MONO_FIELD_CLASS, TEXTAREA_CLASS } from './styles'
+import { useT } from '@/state/settings'
 
 export interface Pair {
   /** Ключ для React: сами поля пустыми и одинаковыми быть могут. */
@@ -44,6 +45,7 @@ export function KeyValueEditor({
   multiline = false,
   onChange,
 }: KeyValueEditorProps) {
+  const t = useT()
   const patch = (id: string, field: 'key' | 'value', value: string) => {
     onChange(rows.map((row) => (row.id === id ? { ...row, [field]: value } : row)))
   }
@@ -55,7 +57,7 @@ export function KeyValueEditor({
       {rows.map((row) => (
         <div
           key={row.id}
-          className={multiline ? 'space-y-1.5 rounded-lg border border-fg/6 p-2' : 'flex items-center gap-2'}
+          className={multiline ? 'space-y-1.5 rounded-lg border border-border p-2' : 'flex items-center gap-2'}
         >
           <div className={multiline ? 'flex items-center gap-2' : 'contents'}>
             <input
@@ -76,7 +78,7 @@ export function KeyValueEditor({
               />
             )}
 
-            <IconButton label="Убрать строку" tone="danger" onClick={() => remove(row.id)}>
+            <IconButton label={t('kv.removeRow')} tone="danger" onClick={() => remove(row.id)}>
               <Trash2 className="h-4 w-4" />
             </IconButton>
           </div>

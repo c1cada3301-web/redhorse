@@ -3,6 +3,7 @@ import { AreaChart } from '../ui/AreaChart'
 import type { Series } from '../ui/AreaChart'
 import { formatBytes, formatPercent, formatRate } from '../../lib/format'
 import type { HostFlow } from './useHostFlow'
+import { useT } from '@/state/settings'
 
 interface HostChartsProps {
   cpu: number[]
@@ -22,49 +23,50 @@ const MEM_FLOOR = 512 * 1024 * 1024
 const RATE_FLOOR = 1024 * 1024
 
 export function HostCharts({ cpu, mem, flow, cpuMax, memMax }: HostChartsProps) {
+  const t = useT()
   const net: Series[] = [
-    { values: flow.netRx, color: 'var(--color-mint-400)', label: 'Приём' },
-    { values: flow.netTx, color: 'var(--color-ember-300)', label: 'Передача' },
+    { values: flow.netRx, color: 'var(--color-mint-400)', label: t('mon.series.netRx') },
+    { values: flow.netTx, color: 'var(--color-ember-300)', label: t('mon.series.netTx') },
   ]
 
   const blk: Series[] = [
-    { values: flow.blkRead, color: 'var(--color-amber-ok)', label: 'Чтение' },
-    { values: flow.blkWrite, color: 'var(--color-sky-400)', label: 'Запись' },
+    { values: flow.blkRead, color: 'var(--color-amber-ok)', label: t('mon.series.blkRead') },
+    { values: flow.blkWrite, color: 'var(--color-sky-400)', label: t('mon.series.blkWrite') },
   ]
 
   return (
     <div className="grid gap-3 xl:grid-cols-2">
       <ChartPanel
-        title="CPU суммарно"
+        title={t('mon.cpuTotal')}
         icon={<Cpu className="h-4 w-4" />}
-        hint={cpuMax !== undefined ? `потолок ${formatPercent(cpuMax, 0)}` : 'по данным'}
+        hint={cpuMax !== undefined ? t('mon.capHint', { value: formatPercent(cpuMax, 0) }) : t('mon.byData')}
         series={[{ values: cpu, color: 'var(--color-ember-400)', label: 'CPU' }]}
         format={(value) => formatPercent(value, 0)}
         max={floorFor([cpu], Math.min(CPU_FLOOR, cpuMax ?? CPU_FLOOR))}
       />
 
       <ChartPanel
-        title="Память суммарно"
+        title={t('mon.memTotal')}
         icon={<MemoryStick className="h-4 w-4" />}
-        hint={memMax !== undefined ? `из ${formatBytes(memMax)}` : 'по данным'}
-        series={[{ values: mem, color: 'var(--color-sky-400)', label: 'Занято' }]}
+        hint={memMax !== undefined ? t('mon.ofHint', { value: formatBytes(memMax) }) : t('mon.byData')}
+        series={[{ values: mem, color: 'var(--color-sky-400)', label: t('mon.series.used') }]}
         format={(value) => formatBytes(value, 0)}
         max={floorFor([mem], Math.min(MEM_FLOOR, memMax ?? MEM_FLOOR))}
       />
 
       <ChartPanel
-        title="Сеть"
+        title={t('mon.network')}
         icon={<ArrowDownUp className="h-4 w-4" />}
-        hint="приём и передача"
+        hint={t('mon.netHint')}
         series={net}
         format={(value) => formatRate(value)}
         max={floorFor([flow.netRx, flow.netTx], RATE_FLOOR)}
       />
 
       <ChartPanel
-        title="Диск"
+        title={t('mon.disk')}
         icon={<HardDrive className="h-4 w-4" />}
-        hint="чтение и запись"
+        hint={t('mon.diskHint')}
         series={blk}
         format={(value) => formatRate(value)}
         max={floorFor([flow.blkRead, flow.blkWrite], RATE_FLOOR)}
@@ -95,19 +97,24 @@ interface ChartPanelProps {
 function ChartPanel({ title, icon, hint, series, format, max }: ChartPanelProps) {
   return (
     <section className="rh-panel p-3">
-      <header className="mb-1 flex items-center gap-2">
-        <span className="text-[var(--color-ember-400)]">{icon}</span>
-        <h2 className="text-[12px] tracking-wide text-fg/60">{title}</h2>
-        <span className="text-[11px] text-fg/25">{hint}</span>
+      <header className="mb-3 flex items-start gap-2">
+        <span className="mt-0.5 text-muted-foreground">{icon}</span>
+        <div className="min-w-0">
+          <h2 className="text-base font-medium text-foreground">{title}</h2>
+          <p className="text-xs text-muted-foreground">{hint}</p>
+        </div>
 
-        <div className="ml-auto flex items-center gap-3">
+        {/* Текущее значение — главное на карточке, потому и набрано крупно. */}
+        <div className="ml-auto flex items-start gap-5">
           {series.map((item) => (
-            <div key={item.label} className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full" style={{ background: item.color }} />
-              <span className="text-[11px] text-fg/35">{item.label}</span>
-              <span className="font-[family-name:var(--font-mono)] text-[12px] text-fg/85">
+            <div key={item.label} className="text-right">
+              <div className="flex items-center justify-end gap-1.5 text-2xs tracking-wider text-muted-foreground uppercase">
+                <span className="size-1.5 rounded-full" style={{ background: item.color }} />
+                {item.label}
+              </div>
+              <div className="font-mono text-2xl leading-tight text-foreground tabular-nums">
                 {format(last(item.values))}
-              </span>
+              </div>
             </div>
           ))}
         </div>

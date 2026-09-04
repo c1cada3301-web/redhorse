@@ -1,5 +1,6 @@
 import { AlertTriangle, PackageX, RefreshCw } from 'lucide-react'
 import { BackButton } from './DetailHeader'
+import { useT } from '@/state/settings'
 
 /** Загрузка, ошибка и «контейнера больше нет» — три экрана вместо страницы. */
 
@@ -8,7 +9,7 @@ function Shell({ onBack, children }: { onBack: () => void; children: React.React
     <div className="rh-scroll h-full space-y-3 overflow-y-auto p-4">
       <div className="rh-panel flex items-center gap-3 p-3">
         <BackButton onBack={onBack} />
-        <span className="text-[11px] text-fg/35">Контейнеры</span>
+        <span className="text-xs text-muted-foreground">Контейнеры</span>
       </div>
       {children}
     </div>
@@ -55,18 +56,19 @@ interface DetailFailureProps {
 }
 
 export function DetailFailure({ message, onRetry, onBack }: DetailFailureProps) {
+  const t = useT()
   return (
     <Shell onBack={onBack}>
       <div className="rh-panel flex flex-col items-center gap-3 px-4 py-10 text-center">
         <AlertTriangle className="h-7 w-7 text-[var(--color-danger)]" />
-        <div className="text-[13px] text-fg/80">Не удалось загрузить контейнер</div>
-        <div className="max-w-lg font-[family-name:var(--font-mono)] text-[11px] break-words text-fg/40">
+        <div className="text-base text-foreground/90">{t('detail.loadFailed')}</div>
+        <div className="max-w-lg font-[family-name:var(--font-mono)] text-xs break-words text-muted-foreground">
           {message}
         </div>
         <button
           type="button"
           onClick={onRetry}
-          className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-[var(--color-ember-500)]/45 bg-[var(--color-ember-500)]/15 px-3 text-[12px] text-[var(--color-ember-300)] transition-colors hover:bg-[var(--color-ember-500)]/25"
+          className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-[var(--color-ember-500)]/45 bg-[var(--color-ember-500)]/15 px-3 text-sm text-[var(--color-ember-300)] transition-colors hover:bg-[var(--color-ember-500)]/25"
         >
           <RefreshCw className="h-3.5 w-3.5" />
           Повторить
@@ -77,16 +79,17 @@ export function DetailFailure({ message, onRetry, onBack }: DetailFailureProps) 
 }
 
 export function DetailMissing({ onBack }: { onBack: () => void }) {
+  const t = useT()
   return (
     <Shell onBack={onBack}>
       <div className="rh-panel flex flex-col items-center gap-3 px-4 py-10 text-center">
-        <PackageX className="h-7 w-7 text-fg/30" />
-        <div className="text-[13px] text-fg/80">Контейнер удалён</div>
-        <div className="text-[12px] text-fg/40">Docker больше не знает такого контейнера.</div>
+        <PackageX className="h-7 w-7 text-muted-foreground" />
+        <div className="text-base text-foreground/90">{t('detail.removed')}</div>
+        <div className="text-sm text-muted-foreground">{t('detail.removedHint')}</div>
         <button
           type="button"
           onClick={onBack}
-          className="h-8 rounded-lg border border-fg/10 bg-fg/5 px-3 text-[12px] text-fg/70 transition-colors hover:text-fg"
+          className="h-8 rounded-lg border border-border bg-fg/5 px-3 text-sm text-foreground/75 transition-colors hover:text-foreground"
         >
           К списку
         </button>

@@ -145,7 +145,7 @@ export function SettingsPage() {
             label={t('settings.connection.version')}
             value={info.data?.serverVersion ?? (info.isPending ? t('common.loading') : dash)}
           />
-          <p className="px-1 pt-0.5 text-[11px] text-fg/25">{t('settings.connection.remoteSoon')}</p>
+          <p className="px-1 pt-0.5 text-xs text-muted-foreground">{t('settings.connection.remoteSoon')}</p>
         </Section>
 
         <Section title={t('settings.about.title')} icon={<Info className="h-4 w-4" />}>
@@ -190,7 +190,7 @@ export function SettingsPage() {
         <button
           type="button"
           onClick={() => setConfirmReset(true)}
-          className="flex h-9 items-center gap-2 rounded-lg border border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 px-3 text-[12px] text-[var(--color-danger)] transition-colors hover:bg-[var(--color-danger)]/20"
+          className="flex h-9 items-center gap-2 rounded-lg border border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 px-3 text-sm text-[var(--color-danger)] transition-colors hover:bg-[var(--color-danger)]/20"
         >
           <RotateCcw className="h-3.5 w-3.5" />
           {t('settings.reset.action')}

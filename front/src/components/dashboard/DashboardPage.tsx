@@ -6,6 +6,8 @@ import type { Container } from '../../types'
 import { formatBytes, formatPercent, formatRate } from '../../lib/format'
 import { Sparkline } from '../ui/Sparkline'
 import { StateBadge } from '../containers/StateBadge'
+import { useT } from '@/state/settings'
+import { t as tStatic } from '@/lib/i18n'
 
 interface DashboardPageProps {
   docker: DockerApi
@@ -20,6 +22,7 @@ interface Stack {
 }
 
 export function DashboardPage({ docker, onOpenLogs }: DashboardPageProps) {
+  const t = useT()
   const info = useSystemInfo()
   const disk = useDiskUsage()
 
@@ -55,67 +58,71 @@ export function DashboardPage({ docker, onOpenLogs }: DashboardPageProps) {
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Tile
           icon={<Play className="h-4 w-4" />}
-          label="Запущено"
+          label={t('dash.running')}
           value={String(running.length)}
-          hint={`${stopped.length} остановлено`}
+          hint={t('dash.stoppedHint', { count: stopped.length })}
           tone="ok"
         />
         <Tile
           icon={<Cpu className="h-4 w-4" />}
-          label="CPU суммарно"
+          label={t('dash.cpuTotal')}
           value={formatPercent(totals.cpu, 0)}
-          hint={info.data !== undefined ? `${info.data.cpus} ядер` : '—'}
+          hint={info.data !== undefined ? t('dash.coresHint', { count: info.data.cpus }) : t('common.dash')}
         />
         <Tile
           icon={<MemoryStick className="h-4 w-4" />}
-          label="Память"
+          label={t('dash.memory')}
           value={formatBytes(totals.mem)}
-          hint={memLimit > 0 ? `${memPercent.toFixed(0)}% от ${formatBytes(memLimit)}` : '—'}
+          hint={
+            memLimit > 0
+              ? t('dash.memHint', { percent: memPercent.toFixed(0), total: formatBytes(memLimit) })
+              : t('common.dash')
+          }
         />
         <Tile
           icon={<HardDrive className="h-4 w-4" />}
-          label="Сеть"
+          label={t('dash.network')}
           value={formatRate(totals.net)}
-          hint={`${docker.containers.length} контейнеров`}
+          hint={t('dash.containersHint', { count: docker.containers.length })}
         />
       </div>
 
       <div className="grid gap-3 lg:grid-cols-[1.4fr_1fr]">
-        <Panel title="Стеки" icon={<Layers className="h-4 w-4" />}>
+        <Panel title={t('dash.stacks')} icon={<Layers className="h-4 w-4" />}>
           {stacks.length === 0 ? (
-            <Empty text="Стеков не найдено" />
+            <Empty text={t('dash.noStacks')} />
           ) : (
             <div className="space-y-1.5">
               {stacks.map((stack) => (
                 <div
                   key={stack.name}
-                  className="flex items-center gap-3 rounded-lg border border-fg/6 bg-fg/[0.015] px-3 py-2"
+                  className="flex items-center gap-3 rounded-md bg-foreground/3 px-3 py-2"
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-[13px] text-fg/85">{stack.name}</div>
+                    <div className="truncate text-base text-foreground/90">{stack.name}</div>
                     <div className="mt-0.5 flex flex-wrap gap-1">
                       {stack.containers.slice(0, 6).map((item) => (
                         <button
                           key={item.id}
                           type="button"
                           onClick={() => onOpenLogs(item)}
-                          title="Открыть логи"
-                          className="rounded bg-bg/30 px-1.5 py-0.5 font-[family-name:var(--font-mono)] text-[10px] text-fg/45 transition-colors hover:text-[var(--color-ember-300)]"
+                          title={t('dash.openLogs')}
+                          className="rounded bg-bg/30 px-1.5 py-0.5 font-[family-name:var(--font-mono)] text-2xs text-muted-foreground transition-colors hover:text-foreground"
                         >
                           {item.name}
                         </button>
                       ))}
                       {stack.containers.length > 6 && (
-                        <span className="px-1 text-[10px] text-fg/25">
+                        <span className="px-1 text-2xs text-muted-foreground">
                           +{stack.containers.length - 6}
                         </span>
                       )}
                     </div>
                   </div>
 
-                  <div className="text-right font-[family-name:var(--font-mono)] text-[11px]">
-                    <div className="text-fg/75">{formatPercent(stack.cpu, 1)}</div>
-                    <div className="text-fg/30">{formatBytes(stack.mem)}</div>
+                  <div className="text-right font-[family-name:var(--font-mono)] text-xs">
+                    <div className="text-foreground/75">{formatPercent(stack.cpu, 1)}</div>
+                    <div className="text-muted-foreground">{formatBytes(stack.mem)}</div>
                   </div>
                 </div>
               ))}
@@ -123,43 +130,43 @@ export function DashboardPage({ docker, onOpenLogs }: DashboardPageProps) {
           )}
         </Panel>
 
-        <Panel title="Место на диске" icon={<Boxes className="h-4 w-4" />}>
+        <Panel title={t('dash.disk')} icon={<Boxes className="h-4 w-4" />}>
           {disk.data === undefined ? (
-            <Empty text={disk.isPending ? 'Считаем…' : 'Нет данных'} />
+            <Empty text={disk.isPending ? t('dash.counting') : t('common.noData')} />
           ) : (
             <div className="space-y-1.5">
-              <DiskRow label="Образы" value={disk.data.images} />
-              <DiskRow label="Контейнеры" value={disk.data.containers} />
-              <DiskRow label="Тома" value={disk.data.volumes} />
-              <DiskRow label="Кеш сборки" value={disk.data.buildCache} />
+              <DiskRow label={t('dash.disk.images')} value={disk.data.images} />
+              <DiskRow label={t('dash.disk.containers')} value={disk.data.containers} />
+              <DiskRow label={t('dash.disk.volumes')} value={disk.data.volumes} />
+              <DiskRow label={t('dash.disk.buildCache')} value={disk.data.buildCache} />
             </div>
           )}
         </Panel>
       </div>
 
-      <Panel title="Больше всего нагружают" icon={<Cpu className="h-4 w-4" />}>
+      <Panel title={t('dash.top')} icon={<Cpu className="h-4 w-4" />}>
         {hottest.length === 0 ? (
-          <Empty text="Запущенных контейнеров нет" />
+          <Empty text={t('dash.noRunning')} />
         ) : (
           <div className="space-y-1.5">
             {hottest.map((item) => (
               <div
                 key={item.id}
-                className="flex items-center gap-3 rounded-lg border border-fg/6 bg-fg/[0.015] px-3 py-2"
+                className="flex items-center gap-3 rounded-md bg-foreground/3 px-3 py-2"
               >
                 <button
                   type="button"
                   onClick={() => onOpenLogs(item)}
-                  className="min-w-0 flex-1 truncate text-left text-[13px] text-fg/85 hover:text-[var(--color-ember-300)]"
+                  className="min-w-0 flex-1 truncate text-left text-base text-foreground/90 hover:text-foreground"
                 >
                   {item.name}
                 </button>
                 <StateBadge state={item.state} />
                 <Sparkline values={item.history.cpu} color="var(--color-ember-400)" width={72} height={22} />
-                <div className="w-16 text-right font-[family-name:var(--font-mono)] text-[11px] text-fg/75">
+                <div className="w-16 text-right font-[family-name:var(--font-mono)] text-xs text-foreground/75">
                   {formatPercent(item.stats.cpu, 1)}
                 </div>
-                <div className="w-20 text-right font-[family-name:var(--font-mono)] text-[11px] text-fg/45">
+                <div className="w-20 text-right font-[family-name:var(--font-mono)] text-xs text-muted-foreground">
                   {formatBytes(item.stats.mem)}
                 </div>
               </div>
@@ -176,7 +183,7 @@ function groupByStack(containers: Container[]): Stack[] {
   const map = new Map<string, Stack>()
 
   for (const container of containers) {
-    const name = container.stack ?? 'без стека'
+    const name = container.stack ?? tStatic('dash.noStack')
     const current = map.get(name) ?? { name, containers: [], cpu: 0, mem: 0 }
 
     map.set(name, {
@@ -200,15 +207,14 @@ interface TileProps {
 
 function Tile({ icon, label, value, hint, tone = 'default' }: TileProps) {
   return (
-    <div className="rh-panel px-3 py-2.5">
-      <div className="flex items-center gap-2 text-fg/35">
-        <span className={tone === 'ok' ? 'text-[var(--color-mint-400)]' : 'text-[var(--color-ember-400)]'}>
-          {icon}
-        </span>
-        <span className="text-[11px]">{label}</span>
+    <div className="rh-panel px-4 py-3.5">
+      <div className="flex items-center gap-2 text-muted-foreground">
+        {/* Иконка нейтральная: цветом выделяем только состояние, а не каждую плитку. */}
+        <span className={tone === 'ok' ? 'text-success' : 'text-muted-foreground'}>{icon}</span>
+        <span className="text-2xs tracking-wider uppercase">{label}</span>
       </div>
-      <div className="mt-1 font-[family-name:var(--font-mono)] text-[20px] text-fg">{value}</div>
-      <div className="text-[11px] text-fg/30">{hint}</div>
+      <div className="mt-2 font-mono text-3xl leading-none text-foreground tabular-nums">{value}</div>
+      <div className="mt-1.5 text-xs text-muted-foreground">{hint}</div>
     </div>
   )
 }
@@ -216,9 +222,9 @@ function Tile({ icon, label, value, hint, tone = 'default' }: TileProps) {
 function Panel({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
   return (
     <section className="rh-panel p-3">
-      <header className="mb-2 flex items-center gap-2 text-fg/45">
-        <span className="text-[var(--color-ember-400)]">{icon}</span>
-        <h2 className="text-[12px] tracking-wide">{title}</h2>
+      <header className="mb-2 flex items-center gap-2 text-muted-foreground">
+        <span className="text-muted-foreground">{icon}</span>
+        <h2 className="text-base font-medium text-foreground">{title}</h2>
       </header>
       {children}
     </section>
@@ -227,9 +233,9 @@ function Panel({ title, icon, children }: { title: string; icon: React.ReactNode
 
 function DiskRow({ label, value }: { label: string; value: number }) {
   return (
-    <div className="flex items-center justify-between rounded-lg border border-fg/6 bg-fg/[0.015] px-3 py-2">
-      <span className="text-[12px] text-fg/60">{label}</span>
-      <span className="font-[family-name:var(--font-mono)] text-[12px] text-fg/80">
+    <div className="flex items-center justify-between rounded-md bg-foreground/3 px-3 py-2">
+      <span className="text-sm text-foreground/75">{label}</span>
+      <span className="font-[family-name:var(--font-mono)] text-sm text-foreground/90">
         {formatBytes(value)}
       </span>
     </div>
@@ -238,7 +244,7 @@ function DiskRow({ label, value }: { label: string; value: number }) {
 
 function Empty({ text }: { text: string }) {
   return (
-    <div className="flex h-20 items-center justify-center gap-2 text-[12px] text-fg/30">
+    <div className="flex h-20 items-center justify-center gap-2 text-sm text-muted-foreground">
       <Square className="h-3.5 w-3.5" />
       {text}
     </div>

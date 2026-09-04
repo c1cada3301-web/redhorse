@@ -7,6 +7,7 @@ import { SettingsProvider } from './state/settings'
 import { ErrorBoundary } from './components/shell/ErrorBoundary'
 import { AuthGate } from './components/auth/AuthGate'
 import { ErrorLog } from './components/shell/ErrorLog'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import { installClientErrorHandlers } from './lib/clientErrors'
 
 const queryClient = new QueryClient({
@@ -24,11 +25,14 @@ installClientErrorHandlers()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ErrorLog />
     <ErrorBoundary>
       <SettingsProvider>
+        {/* Внутри провайдера: панель ошибок переводится, как и всё остальное. */}
+        <ErrorLog />
         <QueryClientProvider client={queryClient}>
-          <AuthGate>{(account, signOut) => <App account={account} onSignOut={signOut} />}</AuthGate>
+          <TooltipProvider>
+            <AuthGate>{(account, signOut) => <App account={account} onSignOut={signOut} />}</AuthGate>
+          </TooltipProvider>
         </QueryClientProvider>
       </SettingsProvider>
     </ErrorBoundary>

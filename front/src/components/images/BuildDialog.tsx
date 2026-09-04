@@ -17,6 +17,7 @@ import {
   PRIMARY_BUTTON,
   TEXTAREA_CLASS,
 } from './styles'
+import { useT } from '@/state/settings'
 
 const DOCKERFILE_PLACEHOLDER = `FROM alpine:3.20
 
@@ -31,6 +32,7 @@ interface BuildDialogProps {
 }
 
 export function BuildDialog({ open, onOpenChange }: BuildDialogProps) {
+  const t = useT()
   const [tag, setTag] = useState('')
   const [dockerfile, setDockerfile] = useState('')
   const [buildArgs, setBuildArgs] = useState<Pair[]>([])
@@ -59,7 +61,7 @@ export function BuildDialog({ open, onOpenChange }: BuildDialogProps) {
     const trimmedTag = tag.trim()
 
     if (trimmedTag === '') {
-      setFormError('Укажите тег образа, например sing-box:latest')
+      setFormError(t('build.tagPlaceholder'))
       return
     }
 
@@ -91,7 +93,7 @@ export function BuildDialog({ open, onOpenChange }: BuildDialogProps) {
     <DialogShell
       open={open}
       onOpenChange={handleOpenChange}
-      title="Сборка образа"
+      title={t('build.title')}
       description={
         jobId === null
           ? 'Dockerfile и файлы контекста уходят на сервер, сборка идёт на хосте Docker'
@@ -111,7 +113,7 @@ export function BuildDialog({ open, onOpenChange }: BuildDialogProps) {
               className={PRIMARY_BUTTON}
             >
               <Hammer className="h-3.5 w-3.5" />
-              {build.isPending ? 'Запускаем…' : 'Собрать'}
+              {build.isPending ? t('build.starting') : t('build.submit')}
             </button>
           </>
         ) : (
@@ -168,7 +170,7 @@ export function BuildDialog({ open, onOpenChange }: BuildDialogProps) {
             />
           </div>
 
-          <Section title="Дополнительно" open={advanced} onToggle={() => setAdvanced(!advanced)}>
+          <Section title={t('build.advanced')} open={advanced} onToggle={() => setAdvanced(!advanced)}>
             <div className="space-y-4 pt-1">
               <div>
                 <span className={LABEL_CLASS}>Build-args</span>
@@ -176,7 +178,7 @@ export function BuildDialog({ open, onOpenChange }: BuildDialogProps) {
                   rows={buildArgs}
                   keyPlaceholder="VERSION"
                   valuePlaceholder="1.10.0"
-                  addLabel="Добавить аргумент"
+                  addLabel={t('build.addArg')}
                   onChange={setBuildArgs}
                 />
               </div>
@@ -184,13 +186,13 @@ export function BuildDialog({ open, onOpenChange }: BuildDialogProps) {
               <div className="flex flex-wrap items-center gap-5">
                 <Checkbox
                   id="build-no-cache"
-                  label="Без кеша"
+                  label={t('build.noCache')}
                   checked={noCache}
                   onChange={setNoCache}
                 />
                 <Checkbox
                   id="build-pull"
-                  label="Обновить базовый образ (pull)"
+                  label={t('build.pullBase')}
                   checked={pull}
                   onChange={setPull}
                 />
@@ -199,28 +201,28 @@ export function BuildDialog({ open, onOpenChange }: BuildDialogProps) {
           </Section>
 
           <div>
-            <span className={LABEL_CLASS}>Файлы контекста</span>
-            <p className="mb-2 text-[11px] text-fg/35">
+            <span className={LABEL_CLASS}>{t('build.contextFiles')}</span>
+            <p className="mb-2 text-xs text-muted-foreground">
               Путь внутри контекста и содержимое — для инструкций COPY в Dockerfile.
             </p>
             <KeyValueEditor
               rows={files}
               keyPlaceholder="config.json"
-              valuePlaceholder="Содержимое файла"
-              addLabel="Добавить файл"
+              valuePlaceholder={t('build.fileContent')}
+              addLabel={t('build.addFile')}
               multiline
               onChange={setFiles}
             />
           </div>
 
           {formError !== null && (
-            <p className="rounded-lg border border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 px-3 py-2 text-[12px] text-[var(--color-danger)]">
+            <p className="rounded-lg border border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 px-3 py-2 text-sm text-[var(--color-danger)]">
               {formError}
             </p>
           )}
         </div>
       ) : (
-        <JobConsole stream={stream} runningLabel="Идёт сборка…" />
+        <JobConsole stream={stream} runningLabel={t('build.running')} />
       )}
     </DialogShell>
   )
@@ -235,12 +237,12 @@ interface SectionProps {
 
 function Section({ title, open, onToggle, children }: SectionProps) {
   return (
-    <div className="rounded-lg border border-fg/6 bg-fg/[0.015] px-3 py-2">
+    <div className="rounded-md bg-foreground/3 px-3 py-2">
       <button
         type="button"
         onClick={onToggle}
         aria-expanded={open}
-        className="flex w-full items-center gap-1.5 text-[12px] text-fg/60 transition-colors hover:text-fg"
+        className="flex w-full items-center gap-1.5 text-sm text-foreground/75 transition-colors hover:text-foreground"
       >
         <ChevronRight className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-90' : ''}`} />
         {title}
@@ -260,7 +262,7 @@ interface CheckboxProps {
 
 function Checkbox({ id, label, checked, onChange }: CheckboxProps) {
   return (
-    <label htmlFor={id} className="flex cursor-pointer items-center gap-2 text-[12px] text-fg/65">
+    <label htmlFor={id} className="flex cursor-pointer items-center gap-2 text-sm text-foreground/75">
       <input
         id={id}
         type="checkbox"

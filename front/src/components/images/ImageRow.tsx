@@ -6,6 +6,7 @@ import type { ApiImage } from '../../api/types'
 import { formatBytes, shortId } from '../../lib/format'
 import { ConfirmDialog } from '../ui/ConfirmDialog'
 import { IconButton } from '../ui/IconButton'
+import { useT } from '@/state/settings'
 
 export const IMAGE_GRID = 'grid grid-cols-[minmax(240px,2.6fr)_100px_128px_150px_60px] items-center gap-3'
 
@@ -25,6 +26,7 @@ interface ImageRowProps {
 }
 
 export function ImageRow({ image, onRemove }: ImageRowProps) {
+  const t = useT()
   const [confirming, setConfirming] = useState(false)
 
   const [primaryTag, ...restTags] = image.tags
@@ -32,16 +34,16 @@ export function ImageRow({ image, onRemove }: ImageRowProps) {
 
   return (
     <div
-      className={`${IMAGE_GRID} rounded-xl border border-fg/6 bg-fg/[0.015] px-3 py-2.5 transition-colors hover:border-fg/12 hover:bg-fg/[0.035]`}
+      className={`${IMAGE_GRID} border-b border-border px-3 py-2.5 transition-colors hover:bg-foreground/4`}
     >
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           {primaryTag === undefined ? (
-            <span className="truncate font-[family-name:var(--font-mono)] text-[13px] text-fg/35">
+            <span className="truncate font-[family-name:var(--font-mono)] text-base text-muted-foreground">
               &lt;без тега&gt;
             </span>
           ) : (
-            <span className="truncate font-[family-name:var(--font-mono)] text-[13px] font-medium text-fg">
+            <span className="truncate font-[family-name:var(--font-mono)] text-base font-medium text-foreground">
               {primaryTag}
             </span>
           )}
@@ -49,38 +51,38 @@ export function ImageRow({ image, onRemove }: ImageRowProps) {
           {restTags.length > 0 && (
             <span
               title={restTags.join(', ')}
-              className="shrink-0 rounded bg-fg/8 px-1 text-[10px] text-fg/45"
+              className="shrink-0 rounded bg-fg/8 px-1 text-2xs text-muted-foreground"
             >
               +{restTags.length}
             </span>
           )}
 
           {image.dangling && (
-            <span className="shrink-0 rounded bg-[var(--color-amber-ok)]/12 px-1 text-[9px] text-[var(--color-amber-ok)]">
-              без тега
+            <span className="shrink-0 rounded bg-[var(--color-amber-ok)]/12 px-1 text-2xs text-[var(--color-amber-ok)]">
+              {t('images.untagged')}
             </span>
           )}
         </div>
 
-        <div className="mt-0.5 truncate font-[family-name:var(--font-mono)] text-[11px] text-fg/35">
+        <div className="mt-0.5 truncate font-[family-name:var(--font-mono)] text-xs text-muted-foreground">
           {imageShortId(image.id)}
         </div>
       </div>
 
-      <div className="font-[family-name:var(--font-mono)] text-[11px] text-fg/55">
+      <div className="font-[family-name:var(--font-mono)] text-xs text-muted-foreground">
         {formatBytes(image.size)}
       </div>
 
-      <div className="font-[family-name:var(--font-mono)] text-[11px]">
-        <span className={used ? 'text-[var(--color-mint-400)]' : 'text-fg/30'}>
+      <div className="font-[family-name:var(--font-mono)] text-xs">
+        <span className={used ? 'text-[var(--color-mint-400)]' : 'text-muted-foreground'}>
           {used ? image.containers : '—'}
         </span>
       </div>
 
-      <div className="truncate text-[11px] text-fg/40">{formatCreated(image.createdAt)}</div>
+      <div className="truncate text-xs text-muted-foreground">{formatCreated(image.createdAt)}</div>
 
       <div className="flex items-center justify-end">
-        <IconButton label="Удалить образ" tone="danger" onClick={() => setConfirming(true)}>
+        <IconButton label={t('images.remove')} tone="danger" onClick={() => setConfirming(true)}>
           <Trash2 className="h-4 w-4" />
         </IconButton>
       </div>
@@ -88,11 +90,11 @@ export function ImageRow({ image, onRemove }: ImageRowProps) {
       <ConfirmDialog
         open={confirming}
         onOpenChange={setConfirming}
-        title="Удалить образ?"
+        title={t('images.remove.title')}
         description={
           used
-            ? 'Образ занят контейнерами — Docker откажет, и мы предложим удалить принудительно.'
-            : 'Образ и его неиспользуемые слои будут удалены. Действие необратимо.'
+            ? t('images.remove.textUsed')
+            : t('images.remove.text')
         }
         subject={imageLabel(image)}
         onConfirm={onRemove}

@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import { LANGUAGES, getDictionary, translate } from '../lib/i18n'
+import { LANGUAGES, getDictionary, setCurrentLanguage, translate } from '../lib/i18n'
 import type { Language } from '../lib/i18n'
 
 const STORAGE_KEY = 'dala.settings'
@@ -146,6 +146,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.lang = settings.language
+    // Тот же язык — модулям вне React: классовому ErrorBoundary и журналу ошибок.
+    setCurrentLanguage(settings.language)
   }, [settings.language])
 
   // В режиме «как в системе» слушаем медиа-запрос: тема должна меняться

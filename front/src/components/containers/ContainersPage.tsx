@@ -5,6 +5,10 @@ import type { DockerApi } from '../../state/useDocker'
 import type { LogSessionsApi } from '../../state/useLogSessions'
 import { formatBytes } from '../../lib/format'
 import { ContainerRow, ROW_GRID } from './ContainerRow'
+import { Button } from '@/components/ui/button'
+import { useT } from '@/state/settings'
+import { ColumnHeader } from './ColumnHeader'
+import type { SortKey } from './filters'
 import { FilterMenu } from './FilterMenu'
 import {
   DEFAULT_FILTERS,
@@ -14,15 +18,32 @@ import {
   type ContainerFilterState,
 } from './filters'
 
-const FILTERS: { key: ContainerState | 'all'; label: string }[] = [
-  { key: 'all', label: 'Все' },
-  { key: 'running', label: 'Запущенные' },
-  { key: 'exited', label: 'Остановленные' },
-  { key: 'paused', label: 'На паузе' },
-  { key: 'restarting', label: 'Перезапуск' },
+const FILTERS: { key: ContainerState | 'all'; labelKey: string }[] = [
+  { key: 'all', labelKey: 'containers.filter.all' },
+  { key: 'running', labelKey: 'containers.filter.running' },
+  { key: 'exited', labelKey: 'containers.filter.exited' },
+  { key: 'paused', labelKey: 'containers.filter.paused' },
+  { key: 'restarting', labelKey: 'containers.filter.restarting' },
 ]
 
-const COLUMNS = ['Контейнер', 'Статус', 'CPU', 'Память', 'Сеть', 'Диск I/O', 'Размер', 'Аптайм', '']
+interface Column {
+  labelKey: string
+  /** Без ключа колонка не сортируется — например блок кнопок справа. */
+  sort?: SortKey
+  align?: 'left' | 'right'
+}
+
+const COLUMNS: Column[] = [
+  { labelKey: 'containers.col.container', sort: 'name' },
+  { labelKey: 'containers.col.status', sort: 'state' },
+  { labelKey: 'containers.col.cpu', sort: 'cpu' },
+  { labelKey: 'containers.col.memory', sort: 'mem' },
+  { labelKey: 'containers.col.net', sort: 'net' },
+  { labelKey: 'containers.col.disk', sort: 'blk' },
+  { labelKey: 'containers.col.size', sort: 'size', align: 'right' },
+  { labelKey: 'containers.col.uptime', sort: 'uptime', align: 'right' },
+  { labelKey: '' },
+]
 
 interface ContainersPageProps {
   docker: DockerApi
@@ -49,10 +70,17 @@ function matches(container: Container, needle: string): boolean {
 }
 
 export function ContainersPage({ docker, logs, search, onOpenDetails }: ContainersPageProps) {
+  const t = useT()
   const [filter, setFilter] = useState<ContainerState | 'all'>('all')
   const [filters, setFilters] = useState<ContainerFilterState>(DEFAULT_FILTERS)
 
   const options = useMemo(() => collectOptions(docker.containers), [docker.containers])
+
+  const sortBy = (key: SortKey) => {
+    setFilters((current) =>
+      current.sort === key ? { ...current, desc: !current.desc } : { ...current, sort: key, desc: false },
+    )
+  }
 
   const visible = useMemo(() => {
     const byStateAndSearch = docker.containers.filter(
@@ -79,69 +107,70 @@ export function ContainersPage({ docker, logs, search, onOpenDetails }: Containe
     <div className="flex h-full flex-col">
       <div className="flex shrink-0 flex-wrap items-center gap-2 px-4 pt-4">
         {FILTERS.map((item) => (
-          <button
+          <Button
             key={item.key}
-            type="button"
+            variant={filter === item.key ? 'default' : 'outline'}
             onClick={() => setFilter(item.key)}
-            className={[
-              'flex h-8 items-center gap-2 rounded-lg border px-3 text-[12px] transition-colors',
-              filter === item.key
-                ? 'border-[var(--color-ember-500)]/45 bg-[var(--color-ember-500)]/12 text-[var(--color-ember-300)]'
-                : 'border-fg/8 bg-fg/[0.02] text-fg/50 hover:text-fg/85',
-            ].join(' ')}
           >
-            {item.label}
-            <span className="rounded bg-bg/30 px-1 font-[family-name:var(--font-mono)] text-[10px] text-fg/40">
+            {t(item.labelKey)}
+            <span
+              className={[
+                'rounded px-1 font-mono text-2xs',
+                filter === item.key ? 'bg-black/20' : 'bg-foreground/8 text-muted-foreground',
+              ].join(' ')}
+            >
               {counts.get(item.key) ?? 0}
             </span>
-          </button>
+          </Button>
         ))}
 
         <FilterMenu value={filters} onChange={setFilters} options={options} />
 
         <div className="ml-auto flex items-center gap-2">
-          <span className="font-[family-name:var(--font-mono)] text-[11px] text-fg/30">
-            всего на диске {formatBytes(totalSize)}
+          <span className="font-mono text-xs text-muted-foreground">
+            {t('containers.diskTotal', { size: formatBytes(totalSize) })}
           </span>
 
-          <button
-            type="button"
-            onClick={() => running.forEach((container) => logs.open(container))}
-            className="flex h-8 items-center gap-1.5 rounded-lg border border-fg/10 bg-fg/5 px-3 text-[12px] text-fg/70 transition-colors hover:border-[var(--color-ember-500)]/40 hover:text-[var(--color-ember-300)]"
-          >
-            <Layers className="h-3.5 w-3.5" />
-            Открыть логи всех запущенных
-          </button>
+          <Button variant="outline" onClick={() => running.forEach((container) => logs.open(container))}>
+            <Layers />
+            {t('containers.openAllLogs')}
+          </Button>
         </div>
       </div>
 
-      <div className={`${ROW_GRID} shrink-0 px-7 pt-4 pb-2`}>
-        {COLUMNS.map((column, index) => (
-          <div
-            key={column === '' ? `col-${index}` : column}
-            className={[
-              'text-[10px] tracking-wider text-fg/25 uppercase',
-              index >= 6 && index <= 7 ? 'text-right' : '',
-            ].join(' ')}
-          >
-            {column}
-          </div>
-        ))}
-      </div>
+      <div className="rh-scroll min-h-0 flex-1 overflow-y-auto px-4 pb-4">
+        {/* Шапка внутри той же прокрутки, что и строки: только так ширина
+            колонок совпадает — иначе полосу прокрутки видят строки, но не она. */}
+        <div
+          className={`${ROW_GRID} sticky top-0 z-10 border-x border-b border-x-transparent border-b-border bg-background/92 px-3 pt-4 pb-2 backdrop-blur`}
+        >
+          {COLUMNS.map((column, index) => (
+            <ColumnHeader
+              key={column.labelKey === '' ? `col-${index}` : column.labelKey}
+              label={column.labelKey === '' ? '' : t(column.labelKey)}
+              sortKey={column.sort}
+              align={column.align}
+              active={filters.sort}
+              desc={filters.desc}
+              onSort={sortBy}
+              className={column.align === 'right' ? 'justify-self-end' : ''}
+            />
+          ))}
+        </div>
 
-      <div className="rh-scroll min-h-0 flex-1 space-y-1.5 overflow-y-auto px-4 pb-4">
+        <div>
         {visible.length === 0 ? (
-          <div className="flex h-40 flex-col items-center justify-center gap-2 text-fg/35">
+          <div className="flex h-40 flex-col items-center justify-center gap-2 text-muted-foreground">
             <ScrollText className="h-6 w-6" />
-            <p className="text-sm">Ничего не найдено</p>
+            <p className="text-sm">{t('common.empty')}</p>
             {countActive(filters) > 0 && (
-              <button
-                type="button"
+              <Button
+                variant="link"
+                size="sm"
                 onClick={() => setFilters({ ...DEFAULT_FILTERS, sort: filters.sort, desc: filters.desc })}
-                className="text-[12px] text-[var(--color-ember-300)] transition-colors hover:text-[var(--color-ember-400)]"
               >
-                Сбросить фильтры
-              </button>
+                {t('containers.resetFilters')}
+              </Button>
             )}
           </div>
         ) : (
@@ -158,8 +187,9 @@ export function ContainersPage({ docker, logs, search, onOpenDetails }: Containe
               onPause={() => docker.pause(container.id)}
               onRemove={() => docker.remove(container.id)}
             />
-          ))
-        )}
+            ))
+          )}
+        </div>
       </div>
     </div>
   )

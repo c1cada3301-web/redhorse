@@ -1,6 +1,6 @@
 import type { Container } from '../../types'
 
-export type SortKey = 'name' | 'cpu' | 'mem' | 'size' | 'uptime' | 'restarts'
+export type SortKey = 'name' | 'state' | 'cpu' | 'mem' | 'net' | 'blk' | 'size' | 'uptime' | 'restarts'
 export type HealthFilter = 'any' | 'healthy' | 'unhealthy' | 'starting' | 'none'
 
 export interface ContainerFilterState {
@@ -73,8 +73,14 @@ function uptimeOf(container: Container): number {
 
 function compare(a: Container, b: Container, key: SortKey): number {
   switch (key) {
+    case 'state':
+      return a.state.localeCompare(b.state)
     case 'cpu':
       return a.stats.cpu - b.stats.cpu
+    case 'net':
+      return a.stats.netRx + a.stats.netTx - (b.stats.netRx + b.stats.netTx)
+    case 'blk':
+      return a.stats.blkRead + a.stats.blkWrite - (b.stats.blkRead + b.stats.blkWrite)
     case 'mem':
       return a.stats.mem - b.stats.mem
     case 'size':

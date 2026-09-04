@@ -4,16 +4,23 @@ import { useVolumesQuery } from '../../api/queries'
 import type { DockerVolume } from '../../api/types'
 import { formatBytes } from '../../lib/format'
 import { VOLUME_GRID, VolumeRow, isOrphan } from './VolumeRow'
+import { useT } from '@/state/settings'
 
 type Filter = 'all' | 'used' | 'orphan'
 
 const FILTERS: { key: Filter; label: string }[] = [
-  { key: 'all', label: 'Все' },
-  { key: 'used', label: 'Занятые' },
-  { key: 'orphan', label: 'Осиротевшие' },
+  { key: 'all', label: 'common.all' },
+  { key: 'used', label: 'volumes.filter.used' },
+  { key: 'orphan', label: 'volumes.filter.orphan' },
 ]
 
-const COLUMNS = ['Том', 'Драйвер', 'Размер', 'Создан', 'Точка монтирования']
+const COLUMNS = [
+  'volumes.col.volume',
+  'volumes.col.driver',
+  'volumes.col.size',
+  'volumes.col.created',
+  'volumes.col.mountpoint',
+]
 
 interface VolumesPageProps {
   search: string
@@ -37,6 +44,7 @@ function inFilter(volume: DockerVolume, filter: Filter): boolean {
 }
 
 export function VolumesPage({ search }: VolumesPageProps) {
+  const t = useT()
   const query = useVolumesQuery()
   const [filter, setFilter] = useState<Filter>('all')
 
@@ -69,33 +77,33 @@ export function VolumesPage({ search }: VolumesPageProps) {
             type="button"
             onClick={() => setFilter(item.key)}
             className={[
-              'flex h-8 items-center gap-2 rounded-lg border px-3 text-[12px] transition-colors',
+              'flex h-8 items-center gap-2 rounded-lg border px-3 text-sm transition-colors',
               filter === item.key
                 ? 'border-[var(--color-ember-500)]/45 bg-[var(--color-ember-500)]/12 text-[var(--color-ember-300)]'
-                : 'border-fg/8 bg-fg/[0.02] text-fg/50 hover:text-fg/85',
+                : 'border-border bg-fg/[0.02] text-muted-foreground hover:text-foreground/90',
             ].join(' ')}
           >
-            {item.label}
-            <span className="rounded bg-bg/30 px-1 font-[family-name:var(--font-mono)] text-[10px] text-fg/40">
+            {t(item.label)}
+            <span className="rounded bg-bg/30 px-1 font-[family-name:var(--font-mono)] text-2xs text-muted-foreground">
               {counts.get(item.key) ?? 0}
             </span>
           </button>
         ))}
 
-        <span className="ml-auto font-[family-name:var(--font-mono)] text-[11px] text-fg/30">
+        <span className="ml-auto font-[family-name:var(--font-mono)] text-xs text-muted-foreground">
           суммарный размер {formatBytes(totalSize)}
         </span>
       </div>
 
       <div className={`${VOLUME_GRID} shrink-0 px-7 pt-4 pb-2`}>
         {COLUMNS.map((column) => (
-          <div key={column} className="text-[10px] tracking-wider text-fg/25 uppercase">
-            {column}
+          <div key={column} className="text-2xs tracking-wider text-muted-foreground uppercase">
+            {t(column)}
           </div>
         ))}
       </div>
 
-      <div className="rh-scroll min-h-0 flex-1 space-y-1.5 overflow-y-auto px-4 pb-4">
+      <div className="rh-scroll min-h-0 flex-1 overflow-y-auto px-4 pb-4">
         <VolumesBody loading={query.isLoading} error={query.error} visible={visible} />
       </div>
     </div>
@@ -109,19 +117,20 @@ interface VolumesBodyProps {
 }
 
 function VolumesBody({ loading, error, visible }: VolumesBodyProps) {
+  const t = useT()
   if (loading) {
-    return <p className="px-3 pt-6 text-sm text-fg/35">Загружаем тома…</p>
+    return <p className="px-3 pt-6 text-sm text-muted-foreground">{t('volumes.loading')}</p>
   }
 
   if (error !== null) {
-    return <p className="px-3 pt-6 text-sm text-[var(--color-danger)]">Не удалось получить тома: {error.message}</p>
+    return <p className="px-3 pt-6 text-sm text-[var(--color-danger)]">{t('volumes.error', { message: error.message })}</p>
   }
 
   if (visible.length === 0) {
     return (
-      <div className="flex h-40 flex-col items-center justify-center gap-2 text-fg/35">
+      <div className="flex h-40 flex-col items-center justify-center gap-2 text-muted-foreground">
         <HardDrive className="h-6 w-6" />
-        <p className="text-sm">Ничего не найдено</p>
+        <p className="text-sm">{t('common.empty')}</p>
       </div>
     )
   }

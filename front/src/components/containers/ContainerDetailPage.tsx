@@ -11,6 +11,7 @@ import { DetailNetworks } from './DetailNetworks'
 import { DetailOverview } from './DetailOverview'
 import { DetailFailure, DetailMissing, DetailSkeleton } from './DetailStates'
 import { DetailStatus } from './DetailStatus'
+import { t as tStatic } from '@/lib/i18n'
 
 interface ContainerDetailPageProps {
   containerId: string
@@ -23,7 +24,7 @@ interface ContainerDetailPageProps {
 function errorMessage(error: unknown): string {
   if (error instanceof Error) return error.message
 
-  return 'Неизвестная ошибка'
+  return tStatic('detail.unknownError')
 }
 
 export function ContainerDetailPage({

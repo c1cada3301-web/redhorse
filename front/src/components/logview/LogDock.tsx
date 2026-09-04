@@ -4,6 +4,7 @@ import type { LogSession } from '../../types'
 import type { LogSessionsApi } from '../../state/useLogSessions'
 import { IconButton } from '../ui/IconButton'
 import { LogPane } from './LogPane'
+import { useT } from '@/state/settings'
 
 const MIN_HEIGHT = 180
 const COLLAPSED_HEIGHT = 38
@@ -20,6 +21,7 @@ interface LogDockProps {
 }
 
 export function LogDock({ api }: LogDockProps) {
+  const t = useT()
   const docked = api.sessions.filter((session) => !session.floating)
 
   if (api.sessions.length === 0) return null
@@ -52,7 +54,7 @@ export function LogDock({ api }: LogDockProps) {
 
   return (
     <div
-      className="relative flex shrink-0 flex-col border-t border-fg/8 bg-[var(--color-ink-900)]/80 backdrop-blur-xl"
+      className="relative flex shrink-0 flex-col border-t border-border bg-[var(--color-ink-900)]/80 backdrop-blur-xl"
       style={{ height }}
     >
       <div
@@ -77,14 +79,14 @@ export function LogDock({ api }: LogDockProps) {
 
         <div className="ml-1 flex shrink-0 items-center gap-0.5">
           <IconButton
-            label="Одна панель (вкладки)"
+            label={t('logs.dock.tabs')}
             active={api.layout === 'tabs'}
             onClick={() => api.setLayout('tabs')}
           >
             <Rows3 className="h-4 w-4" />
           </IconButton>
           <IconButton
-            label="Плитка — все логи сразу"
+            label={t('logs.dock.tiles')}
             active={api.layout === 'grid'}
             onClick={() => api.setLayout('grid')}
           >
@@ -94,12 +96,12 @@ export function LogDock({ api }: LogDockProps) {
           <div className="mx-0.5 h-4 w-px bg-fg/8" />
 
           <IconButton
-            label={api.collapsed ? 'Развернуть панель' : 'Свернуть панель'}
+            label={api.collapsed ? t('logs.dock.expand') : t('logs.dock.collapse')}
             onClick={() => api.setCollapsed(!api.collapsed)}
           >
             {api.collapsed ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </IconButton>
-          <IconButton label="Закрыть все логи" tone="danger" onClick={api.closeAll}>
+          <IconButton label={t('logs.dock.closeAll')} tone="danger" onClick={api.closeAll}>
             <X className="h-4 w-4" />
           </IconButton>
         </div>
@@ -153,6 +155,7 @@ interface DockTabProps {
 }
 
 function DockTab({ session, active, onSelect, onClose }: DockTabProps) {
+  const t = useT()
   return (
     <div
       onClick={onSelect}
@@ -160,7 +163,7 @@ function DockTab({ session, active, onSelect, onClose }: DockTabProps) {
         'group flex h-6 shrink-0 cursor-pointer items-center gap-1.5 rounded-md border px-2 text-xs transition-colors',
         active
           ? 'border-[var(--color-ember-500)]/40 bg-[var(--color-ember-500)]/12 text-[var(--color-ember-300)]'
-          : 'border-fg/8 bg-fg/[0.03] text-fg/55 hover:text-fg/85',
+          : 'border-border bg-fg/[0.03] text-muted-foreground hover:text-foreground/90',
       ].join(' ')}
     >
       <span
@@ -170,7 +173,7 @@ function DockTab({ session, active, onSelect, onClose }: DockTabProps) {
         ].join(' ')}
       />
       <span className="max-w-40 truncate">{session.containerName}</span>
-      {session.floating && <span className="text-[10px] text-fg/30">окно</span>}
+      {session.floating && <span className="text-2xs text-muted-foreground">{t('logs.dock.window')}</span>}
       <button
         type="button"
         onClick={(event) => {

@@ -19,10 +19,15 @@ interface RequestOptions {
   body?: unknown
   query?: Record<string, string | number | boolean | undefined | null>
   signal?: AbortSignal
+  /**
+   * Не считать 401 потерей сессии. Нужно проверке «кто я» на старте:
+   * там ответ 401 — это штатное «ещё не вошли», а не разрыв сессии.
+   */
+  expectUnauthorized?: boolean
 }
 
 export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = 'GET', body, query, signal } = options
+  const { method = 'GET', body, query, signal, expectUnauthorized = false } = options
   const url = `${BASE}${path}${buildQuery(query)}`
 
   const response = await fetch(url, {
@@ -38,7 +43,7 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   if (!response.ok) {
     // Сессия истекла или отозвана — оболочка должна показать экран входа,
     // а не сыпать ошибками на каждом запросе.
-    if (response.status === 401) {
+    if (response.status === 401 && !expectUnauthorized) {
       window.dispatchEvent(new CustomEvent(UNAUTHORIZED_EVENT))
     }
     throw new ApiError(await readError(response), response.status)

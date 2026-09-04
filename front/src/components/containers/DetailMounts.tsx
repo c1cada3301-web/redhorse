@@ -1,6 +1,7 @@
 import { ArrowRight, HardDrive } from 'lucide-react'
 import type { MountPoint } from '../../api/types'
 import { CopyButton, Chip, DetailPanel, EMPTY_MARK, EmptyNote, plural } from './DetailPrimitives'
+import { useT } from '@/state/settings'
 
 const TYPE_LABEL: Record<string, string> = {
   bind: 'папка хоста',
@@ -10,20 +11,21 @@ const TYPE_LABEL: Record<string, string> = {
 }
 
 export function DetailMounts({ mounts }: { mounts: MountPoint[] }) {
+  const t = useT()
   return (
     <DetailPanel
-      title="Монтирования"
+      title={t('detail.mounts')}
       icon={<HardDrive className="h-4 w-4" />}
       hint={`${mounts.length} ${plural(mounts.length, ['точка', 'точки', 'точек'])}`}
     >
       {mounts.length === 0 ? (
-        <EmptyNote text="Ничего не смонтировано" />
+        <EmptyNote text={t('detail.noMounts')} />
       ) : (
         <div className="space-y-1">
           {mounts.map((mount) => (
             <div
               key={`${mount.destination}-${mount.source}`}
-              className="rounded-lg border border-fg/6 bg-fg/[0.015] px-3 py-2"
+              className="rounded-md bg-foreground/3 px-3 py-2"
             >
               <div className="flex items-center gap-2">
                 <Chip tone={mount.type === 'bind' ? 'warn' : 'sky'}>
@@ -31,7 +33,7 @@ export function DetailMounts({ mounts }: { mounts: MountPoint[] }) {
                 </Chip>
                 <Chip tone={mount.rw ? 'ok' : 'muted'}>{mount.rw ? 'rw' : 'ro'}</Chip>
                 {mount.mode !== '' && mount.mode !== (mount.rw ? 'rw' : 'ro') && (
-                  <span className="font-[family-name:var(--font-mono)] text-[10px] text-fg/25">
+                  <span className="font-[family-name:var(--font-mono)] text-2xs text-muted-foreground">
                     {mount.mode}
                   </span>
                 )}
@@ -40,18 +42,18 @@ export function DetailMounts({ mounts }: { mounts: MountPoint[] }) {
               <div className="mt-1 flex items-center gap-2">
                 <span
                   title={mount.source}
-                  className="min-w-0 flex-1 truncate font-[family-name:var(--font-mono)] text-[11px] text-fg/55"
+                  className="min-w-0 flex-1 truncate font-[family-name:var(--font-mono)] text-xs text-muted-foreground"
                 >
                   {mount.source === '' ? EMPTY_MARK : mount.source}
                 </span>
-                <ArrowRight className="h-3 w-3 shrink-0 text-fg/20" />
+                <ArrowRight className="h-3 w-3 shrink-0 text-muted-foreground" />
                 <span
                   title={mount.destination}
-                  className="min-w-0 flex-1 truncate font-[family-name:var(--font-mono)] text-[11px] text-fg/85"
+                  className="min-w-0 flex-1 truncate font-[family-name:var(--font-mono)] text-xs text-foreground/90"
                 >
                   {mount.destination}
                 </span>
-                <CopyButton value={mount.source} label="Скопировать источник" />
+                <CopyButton value={mount.source} label={t('detail.copySource')} />
               </div>
             </div>
           ))}

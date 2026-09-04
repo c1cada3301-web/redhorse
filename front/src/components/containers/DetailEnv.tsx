@@ -3,6 +3,7 @@ import { Eye, EyeOff, Search, Variable } from 'lucide-react'
 import type { EnvVar } from '../../api/types'
 import { HIDDEN_VALUE, isSensitiveEnv } from '../../lib/envSecrets'
 import { CopyButton, DetailPanel, EMPTY_MARK, EmptyNote, plural } from './DetailPrimitives'
+import { useT } from '@/state/settings'
 
 /** Поиск показываем только когда переменных много — иначе он лишний шум. */
 const SEARCH_THRESHOLD = 10
@@ -12,6 +13,7 @@ interface EnvRow extends EnvVar {
 }
 
 export function DetailEnv({ env }: { env: EnvVar[] }) {
+  const t = useT()
   const [revealAll, setRevealAll] = useState(false)
   // Значения скрыты по умолчанию — все, а не только распознанные как секреты.
   // Автоопределение ошибается в обе стороны, а окружение контейнера сплошь и
@@ -92,7 +94,7 @@ export function DetailEnv({ env }: { env: EnvVar[] }) {
 
   return (
     <DetailPanel
-      title="Переменные окружения"
+      title={t('detail.env')}
       icon={<Variable className="h-4 w-4" />}
       hint={hint}
       right={
@@ -105,58 +107,58 @@ export function DetailEnv({ env }: { env: EnvVar[] }) {
             aria-pressed={revealAll}
             title={
               sensitiveCount === 0
-                ? 'Чувствительных значений не найдено'
+                ? t('detail.noSecrets')
                 : hideAll
-                  ? 'Сначала выключите «Спрятать всё»'
+                  ? t('detail.hideAllFirst')
                   : revealAll
-                    ? 'Скрыть чувствительные значения'
-                    : 'Показать чувствительные значения'
+                    ? t('detail.hideSecretsHint')
+                    : t('detail.showSecretsHint')
             }
             className={[
-              'inline-flex h-7 items-center gap-1.5 rounded-md border px-2 text-[11px] transition-colors',
+              'inline-flex h-7 items-center gap-1.5 rounded-md border px-2 text-xs transition-colors',
               sensitiveCount === 0 || hideAll
-                ? 'cursor-not-allowed border-fg/8 bg-fg/[0.02] text-fg/25'
+                ? 'cursor-not-allowed border-border bg-fg/[0.02] text-muted-foreground'
                 : revealAll
                   ? 'border-[var(--color-ember-500)]/45 bg-[var(--color-ember-500)]/15 text-[var(--color-ember-300)]'
-                  : 'border-fg/10 bg-fg/5 text-fg/55 hover:border-[var(--color-ember-500)]/40 hover:text-[var(--color-ember-300)]',
+                  : 'border-border bg-fg/5 text-muted-foreground hover:border-border hover:text-foreground',
             ].join(' ')}
           >
             {revealAll ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-            {revealAll ? 'Скрыть секреты' : 'Показать секреты'}
+            {revealAll ? t('detail.hideSecrets') : t('detail.showSecrets')}
           </button>
 
           <button
             type="button"
             onClick={toggleHideAll}
             aria-pressed={hideAll}
-            title={hideAll ? 'Показать значения переменных' : 'Спрятать вообще все значения'}
+            title={hideAll ? t('detail.showAllHint') : t('detail.hideAllHint')}
             className={[
-              'inline-flex h-7 items-center gap-1.5 rounded-md border px-2 text-[11px] transition-colors',
+              'inline-flex h-7 items-center gap-1.5 rounded-md border px-2 text-xs transition-colors',
               hideAll
                 ? 'border-[var(--color-amber-ok)]/45 bg-[var(--color-amber-ok)]/15 text-[var(--color-amber-ok)]'
-                : 'border-fg/10 bg-fg/5 text-fg/55 hover:border-[var(--color-amber-ok)]/40 hover:text-[var(--color-amber-ok)]',
+                : 'border-border bg-fg/5 text-muted-foreground hover:border-[var(--color-amber-ok)]/40 hover:text-[var(--color-amber-ok)]',
             ].join(' ')}
           >
             <EyeOff className="h-3.5 w-3.5" />
-            {hideAll ? 'Показать всё' : 'Спрятать всё'}
+            {hideAll ? t('detail.showAll') : t('detail.hideAll')}
           </button>
         </div>
       }
     >
       {rows.length > SEARCH_THRESHOLD && (
-        <div className="mb-2 flex items-center gap-2 rounded-lg border border-fg/8 bg-bg/25 px-2.5 py-1.5">
-          <Search className="h-3.5 w-3.5 shrink-0 text-fg/30" />
+        <div className="mb-2 flex items-center gap-2 rounded-md bg-foreground/3 px-2.5 py-1.5">
+          <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Поиск по имени переменной"
-            className="min-w-0 flex-1 bg-transparent font-[family-name:var(--font-mono)] text-[12px] text-fg/80 outline-none placeholder:text-fg/25"
+            placeholder={t('detail.envSearch')}
+            className="min-w-0 flex-1 bg-transparent font-[family-name:var(--font-mono)] text-sm text-foreground/90 outline-none placeholder:text-muted-foreground"
           />
           {query !== '' && (
             <button
               type="button"
               onClick={() => setQuery('')}
-              className="text-[11px] text-fg/35 transition-colors hover:text-fg"
+              className="text-xs text-muted-foreground transition-colors hover:text-foreground"
             >
               сброс
             </button>
@@ -165,9 +167,9 @@ export function DetailEnv({ env }: { env: EnvVar[] }) {
       )}
 
       {rows.length === 0 ? (
-        <EmptyNote text="Переменных окружения нет" />
+        <EmptyNote text={t('detail.noEnv')} />
       ) : visible.length === 0 ? (
-        <EmptyNote text="Ничего не найдено" />
+        <EmptyNote text={t('common.empty')} />
       ) : (
         <div className="space-y-1">
           {visible.map((row) => (
@@ -194,24 +196,25 @@ interface EnvRowItemProps {
 }
 
 function EnvRowItem({ row, revealed, forceHidden, onToggle }: EnvRowItemProps) {
+  const t = useT()
   const empty = row.value === ''
   const masked = forceHidden ? !empty : row.sensitive && !revealed
   const shown = masked ? HIDDEN_VALUE : row.value
 
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-fg/6 bg-fg/[0.015] px-3 py-1.5 hover:bg-fg/[0.03]">
+    <div className="flex items-center gap-3 rounded-md bg-foreground/3 px-3 py-1.5 hover:bg-fg/[0.03]">
       <span
         title={row.key}
-        className="w-[220px] shrink-0 truncate font-[family-name:var(--font-mono)] text-[12px] text-fg/60"
+        className="w-[220px] shrink-0 truncate font-[family-name:var(--font-mono)] text-sm text-foreground/75"
       >
         {row.key}
       </span>
 
       <span
-        title={masked ? 'Значение скрыто' : row.value}
+        title={masked ? t('detail.valueHidden') : row.value}
         className={[
-          'min-w-0 flex-1 truncate font-[family-name:var(--font-mono)] text-[12px]',
-          empty ? 'text-fg/25' : masked ? 'text-[var(--color-amber-ok)]/80' : 'text-fg/85',
+          'min-w-0 flex-1 truncate font-[family-name:var(--font-mono)] text-sm',
+          empty ? 'text-muted-foreground' : masked ? 'text-[var(--color-amber-ok)]/80' : 'text-foreground/90',
         ].join(' ')}
       >
         {empty ? EMPTY_MARK : shown}
@@ -222,13 +225,13 @@ function EnvRowItem({ row, revealed, forceHidden, onToggle }: EnvRowItemProps) {
           type="button"
           onClick={onToggle}
           aria-pressed={revealed}
-          title={revealed ? 'Скрыть значение' : 'Показать значение'}
-          aria-label={revealed ? 'Скрыть значение' : 'Показать значение'}
+          title={revealed ? t('detail.hideValue') : t('detail.showValue')}
+          aria-label={revealed ? t('detail.hideValue') : t('detail.showValue')}
           className={[
             'inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors',
             revealed
               ? 'text-[var(--color-ember-300)] hover:bg-fg/10'
-              : 'text-fg/35 hover:bg-fg/10 hover:text-fg',
+              : 'text-muted-foreground hover:bg-fg/10 hover:text-foreground',
           ].join(' ')}
         >
           {revealed ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
@@ -236,7 +239,7 @@ function EnvRowItem({ row, revealed, forceHidden, onToggle }: EnvRowItemProps) {
       )}
 
       {/* Копируем настоящее значение даже под маской: пользователь нажал осознанно. */}
-      {!empty && <CopyButton value={row.value} label="Скопировать значение" />}
+      {!empty && <CopyButton value={row.value} label={t('detail.copyValue')} />}
     </div>
   )
 }

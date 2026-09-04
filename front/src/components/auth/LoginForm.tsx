@@ -1,7 +1,12 @@
 import { useState, type FormEvent } from 'react'
 import { Loader2, LockKeyhole, ShieldPlus } from 'lucide-react'
-import { bootstrap, login, type Account } from '../../api/auth'
-import { ApiError } from '../../api/client'
+import { bootstrap, login, type Account } from '@/api/auth'
+import { ApiError } from '@/api/client'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { useT } from '@/state/settings'
 
 const MIN_PASSWORD = 8
 
@@ -12,6 +17,7 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ mode, onSuccess }: LoginFormProps) {
+  const t = useT()
   const setup = mode === 'setup'
   const [username, setUsername] = useState(setup ? 'admin' : '')
   const [password, setPassword] = useState('')
@@ -25,11 +31,11 @@ export function LoginForm({ mode, onSuccess }: LoginFormProps) {
 
     if (setup) {
       if (password.length < MIN_PASSWORD) {
-        setError(`Пароль должен быть не короче ${MIN_PASSWORD} символов`)
+        setError(t('auth.error.short', { count: MIN_PASSWORD }))
         return
       }
       if (password !== repeat) {
-        setError('Пароли не совпадают')
+        setError(t('auth.error.mismatch'))
         return
       }
     }
@@ -40,7 +46,7 @@ export function LoginForm({ mode, onSuccess }: LoginFormProps) {
       onSuccess(account)
     } catch (cause) {
       setError(
-        cause instanceof ApiError ? cause.message : 'Сервер недоступен. Проверь, что API и база запущены.',
+        cause instanceof ApiError ? cause.message : t('auth.error.offline'),
       )
     } finally {
       setBusy(false)
@@ -48,85 +54,81 @@ export function LoginForm({ mode, onSuccess }: LoginFormProps) {
   }
 
   return (
-    <div className="grid min-h-screen place-items-center bg-bg px-4">
-      <form
-        onSubmit={submit}
-        className="w-full max-w-sm rounded-2xl border border-fg/10 bg-ink-900 p-7 shadow-2xl shadow-black/40"
-      >
-        <div className="mb-6 flex items-center gap-3">
-          <span className="grid size-10 place-items-center rounded-xl bg-ember-500/12 text-ember-400">
-            {setup ? <ShieldPlus size={19} /> : <LockKeyhole size={19} />}
-          </span>
-          <div className="min-w-0">
-            <div className="text-base font-semibold tracking-tight text-fg">
-              {setup ? 'Первый вход' : 'Dala'}
-            </div>
-            <div className="truncate text-xs text-fg/45">
-              {setup ? 'Создай администратора панели' : 'Войди, чтобы управлять Docker'}
+    <div className="grid min-h-screen place-items-center bg-background px-4">
+      <Card className="w-full max-w-sm shadow-2xl shadow-black/30">
+        <CardContent className="p-6">
+          <div className="mb-6 flex items-center gap-3">
+            <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-primary/12 text-primary">
+              {setup ? <ShieldPlus className="size-5" /> : <LockKeyhole className="size-5" />}
+            </span>
+            <div className="min-w-0">
+              <div className="text-xl font-semibold tracking-tight text-foreground">
+                {setup ? t('auth.setup.title') : 'Dala'}
+              </div>
+              <div className="truncate text-xs text-muted-foreground">
+                {setup ? t('auth.setup.subtitle') : t('auth.login.title')}
+              </div>
             </div>
           </div>
-        </div>
 
-        <label className="mb-4 block">
-          <span className="mb-1.5 block text-xs font-medium text-fg/55">Логин</span>
-          <input
-            value={username}
-            onChange={(event) => setUsername(event.target.value)}
-            autoComplete="username"
-            autoFocus={!setup}
-            required
-            className="w-full rounded-lg border border-fg/12 bg-fg/[0.03] px-3 py-2 text-sm text-body outline-none transition focus:border-ember-500/60 focus:bg-fg/[0.05]"
-          />
-        </label>
+          <form onSubmit={submit} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="username">{t('auth.username')}</Label>
+              <Input
+                id="username"
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+                autoComplete="username"
+                autoFocus={!setup}
+                required
+              />
+            </div>
 
-        <label className="block">
-          <span className="mb-1.5 block text-xs font-medium text-fg/55">Пароль</span>
-          <input
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            autoComplete={setup ? 'new-password' : 'current-password'}
-            required
-            className="w-full rounded-lg border border-fg/12 bg-fg/[0.03] px-3 py-2 text-sm text-body outline-none transition focus:border-ember-500/60 focus:bg-fg/[0.05]"
-          />
-        </label>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="password">{t('auth.password')}</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                autoComplete={setup ? 'new-password' : 'current-password'}
+                required
+              />
+            </div>
 
-        {setup && (
-          <label className="mt-4 block">
-            <span className="mb-1.5 block text-xs font-medium text-fg/55">Пароль ещё раз</span>
-            <input
-              type="password"
-              value={repeat}
-              onChange={(event) => setRepeat(event.target.value)}
-              autoComplete="new-password"
-              required
-              className="w-full rounded-lg border border-fg/12 bg-fg/[0.03] px-3 py-2 text-sm text-body outline-none transition focus:border-ember-500/60 focus:bg-fg/[0.05]"
-            />
-          </label>
-        )}
+            {setup && (
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="repeat">{t('auth.passwordRepeat')}</Label>
+                <Input
+                  id="repeat"
+                  type="password"
+                  value={repeat}
+                  onChange={(event) => setRepeat(event.target.value)}
+                  autoComplete="new-password"
+                  required
+                />
+              </div>
+            )}
 
-        {error !== null && (
-          <p role="alert" className="mt-4 rounded-lg bg-danger/10 px-3 py-2 text-xs text-danger">
-            {error}
-          </p>
-        )}
+            {error !== null && (
+              <p role="alert" className="rounded-md bg-destructive/10 px-2.5 py-2 text-xs text-destructive">
+                {error}
+              </p>
+            )}
 
-        <button
-          type="submit"
-          disabled={busy}
-          className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-ember-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-ember-400 disabled:opacity-50"
-        >
-          {busy && <Loader2 size={15} className="animate-spin" />}
-          {setup ? 'Создать и войти' : 'Войти'}
-        </button>
+            <Button type="submit" size="lg" disabled={busy} className="mt-1 w-full">
+              {busy && <Loader2 className="size-3.5 animate-spin" />}
+              {setup ? t('auth.submitSetup') : t('auth.submit')}
+            </Button>
+          </form>
 
-        {setup && (
-          <p className="mt-4 text-center text-[11px] leading-relaxed text-fg/35">
-            Учётная запись хранится в Postgres. Доступ к панели равен доступу к Docker-хосту —
-            пароль выбирай соответственно.
-          </p>
-        )}
-      </form>
+          {setup && (
+            <p className="mt-4 text-center text-2xs leading-relaxed text-muted-foreground">
+              {t('auth.setup.note')}
+            </p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }

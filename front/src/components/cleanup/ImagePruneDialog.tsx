@@ -1,5 +1,6 @@
 import * as Dialog from '@radix-ui/react-dialog'
 import { AlertTriangle, Check } from 'lucide-react'
+import { useT } from '@/state/settings'
 
 interface ImagePruneDialogProps {
   open: boolean
@@ -27,6 +28,7 @@ export function ImagePruneDialog({
   onConfirm,
   onOpenChange,
 }: ImagePruneDialogProps) {
+  const t = useT()
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
@@ -38,12 +40,12 @@ export function ImagePruneDialog({
             </span>
 
             <div className="min-w-0 flex-1">
-              <Dialog.Title className="text-[14px] font-medium text-fg">{title}</Dialog.Title>
-              <Dialog.Description className="mt-1 text-[12px] leading-relaxed text-fg/50">
+              <Dialog.Title className="text-lg font-medium text-foreground">{title}</Dialog.Title>
+              <Dialog.Description className="mt-1 text-sm leading-relaxed text-muted-foreground">
                 {description}
               </Dialog.Description>
 
-              <div className="mt-2 rounded-md border border-fg/8 bg-bg/30 px-2 py-1.5 font-[family-name:var(--font-mono)] text-[11px] leading-relaxed text-fg/70">
+              <div className="mt-2 rounded-md border border-border bg-bg/30 px-2 py-1.5 font-[family-name:var(--font-mono)] text-xs leading-relaxed text-foreground/75">
                 {subject}
               </div>
 
@@ -53,7 +55,7 @@ export function ImagePruneDialog({
                     'mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded border transition-colors',
                     allUnused
                       ? 'border-[var(--color-ember-500)] bg-[var(--color-ember-500)]/25 text-[var(--color-ember-300)]'
-                      : 'border-fg/20 bg-bg/30 text-transparent',
+                      : 'border-border bg-bg/30 text-transparent',
                   ].join(' ')}
                 >
                   <Check className="h-3 w-3" />
@@ -66,10 +68,10 @@ export function ImagePruneDialog({
                   className="sr-only"
                 />
 
-                <span className="text-[12px] leading-snug text-fg/60">
-                  Удалять все неиспользуемые образы, а не только без тега
-                  <span className="mt-0.5 block text-[11px] text-[var(--color-amber-ok)]/80">
-                    Уйдут и образы с тегами, если их не занял ни один контейнер — скачивать заново.
+                <span className="text-sm leading-snug text-foreground/75">
+                  {t('cleanup.images.allUnused')}
+                  <span className="mt-0.5 block text-xs text-[var(--color-amber-ok)]/80">
+                    {t('cleanup.images.allUnusedHint')}
                   </span>
                 </span>
               </label>
@@ -80,7 +82,7 @@ export function ImagePruneDialog({
             <Dialog.Close asChild>
               <button
                 type="button"
-                className="h-8 rounded-lg border border-fg/10 bg-fg/5 px-3 text-[12px] text-fg/70 transition-colors hover:text-fg"
+                className="h-8 rounded-lg border border-border bg-fg/5 px-3 text-sm text-foreground/75 transition-colors hover:text-foreground"
               >
                 Отмена
               </button>
@@ -92,7 +94,7 @@ export function ImagePruneDialog({
                 onConfirm()
                 onOpenChange(false)
               }}
-              className="h-8 rounded-lg border border-[var(--color-danger)]/45 bg-[var(--color-danger)]/15 px-3 text-[12px] text-[var(--color-danger)] transition-colors hover:bg-[var(--color-danger)]/25"
+              className="h-8 rounded-lg border border-[var(--color-danger)]/45 bg-[var(--color-danger)]/15 px-3 text-sm text-[var(--color-danger)] transition-colors hover:bg-[var(--color-danger)]/25"
             >
               Очистить
             </button>

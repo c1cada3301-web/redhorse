@@ -2,6 +2,7 @@ import { Component } from 'react'
 import type { ErrorInfo, ReactNode } from 'react'
 import { AlertTriangle, RotateCw } from 'lucide-react'
 import { pushError } from '../../lib/clientErrors'
+import { t } from '../../lib/i18n'
 
 interface ErrorBoundaryProps {
   children: ReactNode
@@ -45,14 +46,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         <div className="rh-panel w-full max-w-lg p-5">
           <div className="flex items-center gap-2 text-[var(--color-danger)]">
             <AlertTriangle className="h-5 w-5" />
-            <h1 className="text-[15px] font-medium text-fg">Интерфейс упал</h1>
+            <h1 className="text-lg font-medium text-foreground">{t('error.render.title')}</h1>
           </div>
 
-          <p className="mt-2 text-[12px] leading-relaxed text-fg/50">
-            Данные с Docker Engine продолжают работать — сломался только рендер.
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            {t('error.render.text')}
           </p>
 
-          <pre className="rh-scroll mt-3 max-h-64 overflow-auto rounded-lg border border-fg/8 bg-bg/30 p-3 font-[family-name:var(--font-mono)] text-[11px] whitespace-pre-wrap text-fg/60">
+          <pre className="rh-scroll mt-3 max-h-64 overflow-auto rounded-md bg-foreground/3 p-3 font-[family-name:var(--font-mono)] text-xs whitespace-pre-wrap text-foreground/75">
             {error.message}
             {error.stack !== undefined && `\n\n${error.stack}`}
           </pre>
@@ -60,10 +61,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           <button
             type="button"
             onClick={() => this.setState({ error: null })}
-            className="mt-4 flex h-8 items-center gap-2 rounded-lg border border-[var(--color-ember-500)]/45 bg-[var(--color-ember-500)]/15 px-3 text-[12px] text-[var(--color-ember-300)] transition-colors hover:bg-[var(--color-ember-500)]/25"
+            className="mt-4 flex h-8 items-center gap-2 rounded-lg border border-[var(--color-ember-500)]/45 bg-[var(--color-ember-500)]/15 px-3 text-sm text-[var(--color-ember-300)] transition-colors hover:bg-[var(--color-ember-500)]/25"
           >
             <RotateCw className="h-3.5 w-3.5" />
-            Попробовать снова
+            {t('error.render.retry')}
           </button>
         </div>
       </div>

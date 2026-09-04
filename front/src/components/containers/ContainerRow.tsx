@@ -4,6 +4,7 @@ import type { Container } from '../../types'
 import { formatBytes, formatPercent, formatRate, formatUptime, shortId } from '../../lib/format'
 import { Sparkline } from '../ui/Sparkline'
 import { IconButton } from '../ui/IconButton'
+import { useT } from '@/state/settings'
 import { ConfirmDialog } from '../ui/ConfirmDialog'
 import { StateBadge } from './StateBadge'
 
@@ -33,6 +34,7 @@ export function ContainerRow({
   onPause,
   onRemove,
 }: ContainerRowProps) {
+  const t = useT()
   const [confirming, setConfirming] = useState(false)
   const running = container.state === 'running'
   const memPercent = container.stats.memLimit > 0 ? (container.stats.mem / container.stats.memLimit) * 100 : 0
@@ -48,30 +50,30 @@ export function ContainerRow({
           onOpenDetails()
         }
       }}
-      title="Открыть детали контейнера"
-      className={`${ROW_GRID} cursor-pointer rounded-xl border border-fg/6 bg-fg/[0.015] px-3 py-2.5 text-left transition-colors hover:border-fg/12 hover:bg-fg/[0.035] focus-visible:border-[var(--color-ember-500)]/45 focus-visible:outline-none`}
+      title={t('containers.openDetails')}
+      className={`${ROW_GRID} cursor-pointer border-b border-border px-3 py-2.5 text-left transition-colors hover:bg-foreground/4 focus-visible:bg-foreground/5 focus-visible:outline-none`}
     >
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <span className="truncate text-[13px] font-medium text-fg">{container.name}</span>
+          <span className="truncate text-base font-medium text-foreground">{container.name}</span>
           {container.health === 'unhealthy' && (
-            <span className="rounded bg-[var(--color-danger)]/12 px-1 text-[9px] text-[var(--color-danger)]">
+            <span className="rounded bg-[var(--color-danger)]/12 px-1 text-2xs text-[var(--color-danger)]">
               unhealthy
             </span>
           )}
           {container.restarts > 3 && (
-            <span className="rounded bg-[var(--color-amber-ok)]/12 px-1 text-[9px] text-[var(--color-amber-ok)]">
+            <span className="rounded bg-[var(--color-amber-ok)]/12 px-1 text-2xs text-[var(--color-amber-ok)]">
               ×{container.restarts}
             </span>
           )}
         </div>
-        <div className="mt-0.5 flex items-center gap-2 truncate font-[family-name:var(--font-mono)] text-[11px] text-fg/35">
+        <div className="mt-0.5 flex items-center gap-2 truncate font-[family-name:var(--font-mono)] text-xs text-muted-foreground">
           <span className="truncate">{container.image}</span>
-          <span className="text-fg/15">·</span>
+          <span className="text-muted-foreground">·</span>
           <span>{shortId(container.id)}</span>
           {container.ports.length > 0 && (
             <>
-              <span className="text-fg/15">·</span>
+              <span className="text-muted-foreground">·</span>
               <span className="truncate text-[var(--color-sky-400)]/60">{container.ports[0]}</span>
             </>
           )}
@@ -106,11 +108,11 @@ export function ContainerRow({
         color="var(--color-amber-ok)"
       />
 
-      <div className="text-right font-[family-name:var(--font-mono)] text-[11px] text-fg/55">
+      <div className="text-right font-[family-name:var(--font-mono)] text-xs text-muted-foreground">
         {formatBytes(container.sizeRootFs)}
       </div>
 
-      <div className="text-right font-[family-name:var(--font-mono)] text-[11px] text-fg/45">
+      <div className="text-right font-[family-name:var(--font-mono)] text-xs text-muted-foreground">
         {formatUptime(container.startedAt)}
       </div>
 
@@ -123,35 +125,35 @@ export function ContainerRow({
           type="button"
           onClick={onOpenLogs}
           className={[
-            'mr-1 flex h-7 items-center gap-1.5 rounded-md border px-2 text-[11px] transition-colors',
+            'mr-1 flex h-7 items-center gap-1.5 rounded-md border px-2 text-xs transition-colors',
             logsOpen
               ? 'border-[var(--color-ember-500)]/45 bg-[var(--color-ember-500)]/15 text-[var(--color-ember-300)]'
-              : 'border-fg/10 bg-fg/5 text-fg/60 hover:border-[var(--color-ember-500)]/40 hover:text-[var(--color-ember-300)]',
+              : 'border-border bg-fg/5 text-foreground/75 hover:border-border hover:text-foreground',
           ].join(' ')}
         >
           <ScrollText className="h-3.5 w-3.5" />
-          Логи
+          {t('containers.action.logs')}
         </button>
 
         {running ? (
-          <IconButton label="Остановить" onClick={onStop}>
+          <IconButton label={t('containers.action.stop')} onClick={onStop}>
             <Square className="h-4 w-4" />
           </IconButton>
         ) : (
-          <IconButton label="Запустить" tone="accent" onClick={onStart}>
+          <IconButton label={t('containers.action.start')} tone="accent" onClick={onStart}>
             <Play className="h-4 w-4" />
           </IconButton>
         )}
 
-        <IconButton label="Пауза" onClick={onPause} disabled={!running}>
+        <IconButton label={t('containers.action.pause')} onClick={onPause} disabled={!running}>
           <Pause className="h-4 w-4" />
         </IconButton>
 
-        <IconButton label="Перезапустить" onClick={onRestart}>
+        <IconButton label={t('containers.action.restart')} onClick={onRestart}>
           <RotateCw className="h-4 w-4" />
         </IconButton>
 
-        <IconButton label="Удалить" tone="danger" onClick={() => setConfirming(true)}>
+        <IconButton label={t('containers.action.remove')} tone="danger" onClick={() => setConfirming(true)}>
           <Trash2 className="h-4 w-4" />
         </IconButton>
       </div>
@@ -159,11 +161,11 @@ export function ContainerRow({
       <ConfirmDialog
         open={confirming}
         onOpenChange={setConfirming}
-        title="Удалить контейнер?"
+        title={t('containers.remove.title')}
         description={
           running
-            ? 'Контейнер запущен — он будет остановлен принудительно. Данные в анонимных томах не удаляются.'
-            : 'Контейнер будет удалён. Данные в анонимных томах не удаляются.'
+            ? t('containers.remove.textRunning')
+            : t('containers.remove.text')
         }
         subject={`${container.name} · ${container.image}`}
         onConfirm={onRemove}
@@ -184,11 +186,11 @@ function MetricCell({ value, hint, series, color }: MetricCellProps) {
     <div className="flex items-center gap-2">
       <Sparkline values={series} color={color} width={44} height={22} />
       <div className="min-w-0 leading-tight">
-        <div className="truncate font-[family-name:var(--font-mono)] text-[11px] text-fg/75">
+        <div className="truncate font-[family-name:var(--font-mono)] text-xs text-foreground/75">
           {value}
         </div>
         {hint !== undefined && (
-          <div className="truncate font-[family-name:var(--font-mono)] text-[10px] text-fg/30">
+          <div className="truncate font-[family-name:var(--font-mono)] text-2xs text-muted-foreground">
             {hint}
           </div>
         )}

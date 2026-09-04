@@ -15,7 +15,8 @@ export function fetchAuthState(): Promise<AuthState> {
 }
 
 export function fetchMe(): Promise<Account> {
-  return request<Account>('/auth/me')
+  // На старте ответ 401 ожидаем: он означает «ещё не вошли».
+  return request<Account>('/auth/me', { expectUnauthorized: true })
 }
 
 export function login(username: string, password: string): Promise<Account> {

@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Check, Copy, X } from 'lucide-react'
+import { useT } from '@/state/settings'
 
 /** Общие мелочи детальной страницы: панель, поле, плитка, чип, копирование. */
 
 export const TONE_TEXT = {
-  default: 'text-fg/80',
-  muted: 'text-fg/30',
+  default: 'text-foreground/90',
+  muted: 'text-muted-foreground',
   accent: 'text-[var(--color-ember-300)]',
   ok: 'text-[var(--color-mint-400)]',
   warn: 'text-[var(--color-amber-ok)]',
@@ -50,8 +51,8 @@ export function DetailPanel({ title, icon, hint, right, children }: DetailPanelP
     <section className="rh-panel p-3">
       <header className="mb-2 flex min-h-7 items-center gap-2">
         <span className="text-[var(--color-ember-400)]">{icon}</span>
-        <h2 className="text-[12px] tracking-wide text-fg/70">{title}</h2>
-        {hint !== undefined && <span className="text-[11px] text-fg/30">{hint}</span>}
+        <h2 className="text-sm tracking-wide text-foreground/75">{title}</h2>
+        {hint !== undefined && <span className="text-xs text-muted-foreground">{hint}</span>}
         {right !== undefined && <div className="ml-auto flex items-center gap-1.5">{right}</div>}
       </header>
       {children}
@@ -72,12 +73,12 @@ export function DetailField({ label, value, mono = true, copyable = false, tone 
   const text = filled ? value : EMPTY_MARK
 
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-fg/6 bg-fg/[0.015] px-3 py-2">
-      <span className="w-[132px] shrink-0 text-[11px] text-fg/40">{label}</span>
+    <div className="flex items-center gap-3 rounded-md bg-foreground/3 px-3 py-2">
+      <span className="w-[132px] shrink-0 text-xs text-muted-foreground">{label}</span>
       <span
         title={filled ? value : undefined}
         className={[
-          'min-w-0 flex-1 truncate text-[12px]',
+          'min-w-0 flex-1 truncate text-sm',
           mono ? 'font-[family-name:var(--font-mono)]' : '',
           filled ? TONE_TEXT[tone] : TONE_TEXT.muted,
         ].join(' ')}
@@ -98,12 +99,12 @@ interface DetailTileProps {
 
 export function DetailTile({ label, value, hint, tone = 'default' }: DetailTileProps) {
   return (
-    <div className="rounded-lg border border-fg/6 bg-fg/[0.015] px-3 py-2">
-      <div className="text-[11px] text-fg/35">{label}</div>
-      <div className={`mt-0.5 truncate font-[family-name:var(--font-mono)] text-[15px] ${TONE_TEXT[tone]}`}>
+    <div className="rounded-md bg-foreground/3 px-3 py-2">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className={`mt-0.5 truncate font-[family-name:var(--font-mono)] text-lg ${TONE_TEXT[tone]}`}>
         {value}
       </div>
-      {hint !== undefined && <div className="truncate text-[11px] text-fg/30">{hint}</div>}
+      {hint !== undefined && <div className="truncate text-xs text-muted-foreground">{hint}</div>}
     </div>
   )
 }
@@ -111,7 +112,7 @@ export function DetailTile({ label, value, hint, tone = 'default' }: DetailTileP
 export function Chip({ children, tone = 'sky' }: { children: ReactNode; tone?: Tone }) {
   return (
     <span
-      className={`inline-flex items-center rounded bg-fg/6 px-1.5 py-0.5 font-[family-name:var(--font-mono)] text-[10px] ${TONE_TEXT[tone]}`}
+      className={`inline-flex items-center rounded bg-fg/6 px-1.5 py-0.5 font-[family-name:var(--font-mono)] text-2xs ${TONE_TEXT[tone]}`}
     >
       {children}
     </span>
@@ -119,11 +120,13 @@ export function Chip({ children, tone = 'sky' }: { children: ReactNode; tone?: T
 }
 
 export function EmptyNote({ text }: { text: string }) {
-  return <div className="flex h-16 items-center justify-center text-[12px] text-fg/25">{text}</div>
+  return <div className="flex h-16 items-center justify-center text-sm text-muted-foreground">{text}</div>
 }
 
 /** Кнопка копирования: галочка при успехе, крестик если буфер недоступен. */
-export function CopyButton({ value, label = 'Скопировать' }: { value: string; label?: string }) {
+export function CopyButton({ value, label }: { value: string; label?: string }) {
+  const t = useT()
+  const caption = label ?? t('detail.copy')
   const [status, setStatus] = useState<'idle' | 'done' | 'error'>('idle')
   const timer = useRef<number | null>(null)
 
@@ -147,7 +150,7 @@ export function CopyButton({ value, label = 'Скопировать' }: { value:
     )
   }, [reset, value])
 
-  const title = status === 'error' ? 'Буфер обмена недоступен' : status === 'done' ? 'Скопировано' : label
+  const title = status === 'error' ? t('detail.clipboardOff') : status === 'done' ? t('detail.copied') : caption
 
   return (
     <button
@@ -161,7 +164,7 @@ export function CopyButton({ value, label = 'Скопировать' }: { value:
           ? 'text-[var(--color-mint-400)]'
           : status === 'error'
             ? 'text-[var(--color-danger)]'
-            : 'text-fg/35 hover:bg-fg/10 hover:text-fg',
+            : 'text-muted-foreground hover:bg-fg/10 hover:text-foreground',
       ].join(' ')}
     >
       {status === 'done' ? (

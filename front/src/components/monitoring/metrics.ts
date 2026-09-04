@@ -5,6 +5,7 @@ export type MetricKey = 'cpu' | 'mem' | 'net' | 'blk'
 
 export interface MetricDef {
   key: MetricKey
+  /** Ключ перевода: подпись берётся при отрисовке. */
   label: string
   color: string
   /** Текущее значение метрики у контейнера. */
@@ -17,7 +18,7 @@ export interface MetricDef {
 export const METRICS: MetricDef[] = [
   {
     key: 'cpu',
-    label: 'CPU',
+    label: 'mon.metric.cpu',
     color: 'var(--color-ember-400)',
     value: (container) => container.stats.cpu,
     series: (container) => container.history.cpu,
@@ -25,7 +26,7 @@ export const METRICS: MetricDef[] = [
   },
   {
     key: 'mem',
-    label: 'Память',
+    label: 'mon.metric.mem',
     color: 'var(--color-sky-400)',
     value: (container) => container.stats.mem,
     series: (container) => container.history.mem,
@@ -33,7 +34,7 @@ export const METRICS: MetricDef[] = [
   },
   {
     key: 'net',
-    label: 'Сеть',
+    label: 'mon.metric.net',
     color: 'var(--color-mint-400)',
     value: (container) => container.stats.netRx + container.stats.netTx,
     series: (container) => container.history.net,
@@ -41,7 +42,7 @@ export const METRICS: MetricDef[] = [
   },
   {
     key: 'blk',
-    label: 'Диск',
+    label: 'mon.metric.blk',
     color: 'var(--color-amber-ok)',
     value: (container) => container.stats.blkRead + container.stats.blkWrite,
     series: (container) => container.history.blk,

@@ -6,6 +6,7 @@ import { DialogShell } from './DialogShell'
 import { JobConsole } from './JobConsole'
 import { errorText } from './errorText'
 import { GHOST_BUTTON, LABEL_CLASS, MONO_FIELD_CLASS, PRIMARY_BUTTON } from './styles'
+import { useT } from '@/state/settings'
 
 interface PullDialogProps {
   open: boolean
@@ -13,6 +14,7 @@ interface PullDialogProps {
 }
 
 export function PullDialog({ open, onOpenChange }: PullDialogProps) {
+  const t = useT()
   const [repository, setRepository] = useState('')
   const [tag, setTag] = useState('latest')
   const [jobId, setJobId] = useState<string | null>(null)
@@ -35,7 +37,7 @@ export function PullDialog({ open, onOpenChange }: PullDialogProps) {
     const trimmedRepository = repository.trim()
 
     if (trimmedRepository === '') {
-      setFormError('Укажите репозиторий, например alpine или ghcr.io/owner/app')
+      setFormError(t('pull.repoPlaceholder'))
       return
     }
 
@@ -58,7 +60,7 @@ export function PullDialog({ open, onOpenChange }: PullDialogProps) {
     <DialogShell
       open={open}
       onOpenChange={handleOpenChange}
-      title="Загрузка образа"
+      title={t('pull.title')}
       description={jobId === null ? 'docker pull с настроенного реестра' : `${repository.trim()}:${tag.trim()}`}
       width="640px"
       footer={
@@ -74,7 +76,7 @@ export function PullDialog({ open, onOpenChange }: PullDialogProps) {
               className={PRIMARY_BUTTON}
             >
               <Download className="h-3.5 w-3.5" />
-              {pull.isPending ? 'Запускаем…' : 'Загрузить'}
+              {pull.isPending ? t('pull.starting') : t('pull.submit')}
             </button>
           </>
         ) : (
@@ -132,13 +134,13 @@ export function PullDialog({ open, onOpenChange }: PullDialogProps) {
           </div>
 
           {formError !== null && (
-            <p className="rounded-lg border border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 px-3 py-2 text-[12px] text-[var(--color-danger)]">
+            <p className="rounded-lg border border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 px-3 py-2 text-sm text-[var(--color-danger)]">
               {formError}
             </p>
           )}
         </div>
       ) : (
-        <JobConsole stream={stream} runningLabel="Идёт загрузка…" height="38vh" />
+        <JobConsole stream={stream} runningLabel={t('pull.running')} height="38vh" />
       )}
     </DialogShell>
   )

@@ -6,6 +6,7 @@ import { filterLines } from '../../lib/logFilter'
 import { IconButton } from '../ui/IconButton'
 import { LogToolbar } from './LogToolbar'
 import { LogLines } from './LogLines'
+import { useT } from '@/state/settings'
 
 interface LogPaneProps {
   session: LogSession
@@ -40,6 +41,7 @@ export function LogPane({
   onAttach,
   header = true,
 }: LogPaneProps) {
+  const t = useT()
   const filtered = useMemo(
     () => filterLines(session.lines, session.options),
     [session.lines, session.options],
@@ -62,11 +64,11 @@ export function LogPane({
         'flex min-h-0 min-w-0 flex-col overflow-hidden rounded-xl border bg-[var(--color-ink-900)]/85',
         active
           ? 'border-[var(--color-ember-500)]/45 shadow-[0_0_0_1px_rgba(244,85,43,0.15)]'
-          : 'border-fg/8',
+          : 'border-border',
       ].join(' ')}
     >
       {header && (
-        <header className="flex h-9 shrink-0 items-center gap-2 border-b border-fg/6 bg-fg/[0.02] px-2">
+        <header className="flex h-9 shrink-0 items-center gap-2 border-b border-border bg-fg/[0.02] px-2">
           <span
             className={[
               'h-1.5 w-1.5 rounded-full',
@@ -75,33 +77,33 @@ export function LogPane({
                 : 'rh-pulse bg-[var(--color-mint-400)]',
             ].join(' ')}
           />
-          <h3 className="truncate text-xs font-medium text-fg/85">{session.containerName}</h3>
-          <span className="rounded bg-fg/6 px-1.5 py-0.5 font-[family-name:var(--font-mono)] text-[10px] text-fg/40">
-            {session.connection === 'open' ? 'logs -f' : session.loading ? 'загрузка…' : 'срез'}
+          <h3 className="truncate text-xs font-medium text-foreground/90">{session.containerName}</h3>
+          <span className="rounded bg-fg/6 px-1.5 py-0.5 font-[family-name:var(--font-mono)] text-2xs text-muted-foreground">
+            {session.connection === 'open' ? 'logs -f' : session.loading ? t('logs.pane.loading') : t('logs.pane.slice')}
           </span>
 
           <div className="ml-auto flex items-center gap-0.5">
             {variant === 'dock' && onDetach && (
-              <IconButton label="Открепить в отдельное окно" onClick={onDetach}>
+              <IconButton label={t('logs.pane.detach')} onClick={onDetach}>
                 <PictureInPicture2 className="h-4 w-4" />
               </IconButton>
             )}
             {variant === 'floating' && onAttach && (
-              <IconButton label="Вернуть в панель снизу" onClick={onAttach}>
+              <IconButton label={t('logs.pane.attach')} onClick={onAttach}>
                 <PinOff className="h-4 w-4" />
               </IconButton>
             )}
             {variant !== 'fullscreen' && onMaximize && (
-              <IconButton label="Во весь экран" onClick={onMaximize}>
+              <IconButton label={t('logs.pane.fullscreen')} onClick={onMaximize}>
                 <Maximize2 className="h-4 w-4" />
               </IconButton>
             )}
             {variant === 'fullscreen' && onRestore && (
-              <IconButton label="Свернуть из полноэкранного" onClick={onRestore}>
+              <IconButton label={t('logs.pane.exitFullscreen')} onClick={onRestore}>
                 <Minimize2 className="h-4 w-4" />
               </IconButton>
             )}
-            <IconButton label="Закрыть лог" tone="danger" onClick={onClose}>
+            <IconButton label={t('logs.pane.close')} tone="danger" onClick={onClose}>
               <X className="h-4 w-4" />
             </IconButton>
           </div>

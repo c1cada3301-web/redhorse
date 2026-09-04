@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import type { DockerNetwork } from '../../api/types'
 import { shortId } from '../../lib/format'
+import { useT } from '@/state/settings'
 
 export const NETWORK_GRID =
   'grid grid-cols-[minmax(200px,1.7fr)_96px_88px_minmax(150px,1fr)_116px_28px] items-center gap-3'
@@ -20,10 +21,11 @@ interface NetworkRowProps {
 }
 
 export function NetworkRow({ network, expanded, onToggle }: NetworkRowProps) {
+  const t = useT()
   const system = SYSTEM_NAMES.has(network.name)
 
   return (
-    <div className="rounded-xl border border-fg/6 bg-fg/[0.015] transition-colors hover:border-fg/12 hover:bg-fg/[0.035]">
+    <div className="border-b border-border transition-colors hover:bg-foreground/4">
       <button
         type="button"
         onClick={onToggle}
@@ -32,59 +34,59 @@ export function NetworkRow({ network, expanded, onToggle }: NetworkRowProps) {
       >
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className="truncate text-[13px] font-medium text-fg">{network.name}</span>
+            <span className="truncate text-base font-medium text-foreground">{network.name}</span>
 
             {network.internal && (
-              <span className="shrink-0 rounded bg-[var(--color-amber-ok)]/12 px-1 text-[9px] text-[var(--color-amber-ok)]">
+              <span className="shrink-0 rounded bg-[var(--color-amber-ok)]/12 px-1 text-2xs text-[var(--color-amber-ok)]">
                 internal
               </span>
             )}
 
             {system && (
-              <span className="shrink-0 rounded bg-fg/6 px-1 text-[9px] text-fg/35">системная</span>
+              <span className="shrink-0 rounded bg-fg/6 px-1 text-2xs text-muted-foreground">{t('networks.system')}</span>
             )}
           </div>
 
-          <div className="mt-0.5 truncate font-[family-name:var(--font-mono)] text-[11px] text-fg/35">
+          <div className="mt-0.5 truncate font-[family-name:var(--font-mono)] text-xs text-muted-foreground">
             {shortId(network.id)}
           </div>
         </div>
 
-        <div className="truncate font-[family-name:var(--font-mono)] text-[11px] text-[var(--color-sky-400)]/70">
+        <div className="truncate font-[family-name:var(--font-mono)] text-xs text-[var(--color-sky-400)]/70">
           {network.driver}
         </div>
 
-        <div className="truncate font-[family-name:var(--font-mono)] text-[11px] text-fg/45">
+        <div className="truncate font-[family-name:var(--font-mono)] text-xs text-muted-foreground">
           {network.scope}
         </div>
 
-        <div className="truncate font-[family-name:var(--font-mono)] text-[11px] text-fg/55">
-          {network.subnets.length === 0 ? <span className="text-fg/20">—</span> : network.subnets.join(', ')}
+        <div className="truncate font-[family-name:var(--font-mono)] text-xs text-muted-foreground">
+          {network.subnets.length === 0 ? <span className="text-muted-foreground">—</span> : network.subnets.join(', ')}
         </div>
 
-        <div className="font-[family-name:var(--font-mono)] text-[11px]">
+        <div className="font-[family-name:var(--font-mono)] text-xs">
           {network.members.length === 0 ? (
-            <span className="text-fg/25">пусто</span>
+            <span className="text-muted-foreground">{t('networks.empty')}</span>
           ) : (
             <span className="text-[var(--color-mint-400)]">{network.members.length}</span>
           )}
         </div>
 
-        <div className="flex justify-end text-fg/35">
+        <div className="flex justify-end text-muted-foreground">
           {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </div>
       </button>
 
       {expanded && (
-        <div className="rh-fade-in border-t border-fg/6 px-3 py-3">
+        <div className="rh-fade-in border-t border-border px-3 py-3">
           {network.members.length === 0 ? (
-            <p className="text-[12px] text-fg/35">В этой сети нет контейнеров</p>
+            <p className="text-sm text-muted-foreground">{t('networks.noContainers')}</p>
           ) : (
             <div className="flex flex-wrap gap-1.5">
               {network.members.map((name) => (
                 <span
                   key={name}
-                  className="rounded-md border border-[var(--color-mint-400)]/25 bg-[var(--color-mint-400)]/8 px-2 py-0.5 font-[family-name:var(--font-mono)] text-[11px] text-[var(--color-mint-400)]"
+                  className="rounded-md border border-[var(--color-mint-400)]/25 bg-[var(--color-mint-400)]/8 px-2 py-0.5 font-[family-name:var(--font-mono)] text-xs text-[var(--color-mint-400)]"
                 >
                   {name}
                 </span>

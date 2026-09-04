@@ -9,6 +9,7 @@ import {
   parseLocalDateTime,
   toLocalDateTimeValue,
 } from '../../lib/timeRange'
+import { useT } from '@/state/settings'
 
 interface TimeRangePickerProps {
   value: TimeRange
@@ -18,8 +19,8 @@ interface TimeRangePickerProps {
 const HOUR = 3_600_000
 
 const FIELD_CLASS = [
-  'h-7 w-full rounded-md border border-fg/8 bg-bg/30 px-1.5',
-  'font-[family-name:var(--font-mono)] text-[11px] text-fg/85 outline-none',
+  'h-7 w-full rounded-md border border-border bg-bg/30 px-1.5',
+  'font-[family-name:var(--font-mono)] text-xs text-foreground/90 outline-none',
   'transition-colors [color-scheme:dark] focus:border-[var(--color-ember-500)]/60',
 ].join(' ')
 
@@ -35,6 +36,7 @@ function initialBounds(range: TimeRange): { from: string; to: string } {
 }
 
 export function TimeRangePicker({ value, onChange }: TimeRangePickerProps) {
+  const t = useT()
   const [open, setOpen] = useState(false)
   const [bounds, setBounds] = useState(() => initialBounds(value))
   const [error, setError] = useState<string | null>(null)
@@ -64,12 +66,12 @@ export function TimeRangePicker({ value, onChange }: TimeRangePickerProps) {
     const to = parseLocalDateTime(bounds.to)
 
     if (from === null || to === null) {
-      setError('Заполните обе даты')
+      setError(t('logs.range.fillBoth'))
       return
     }
 
     if (from >= to) {
-      setError('«С» должно быть раньше «по»')
+      setError(t('logs.range.order'))
       return
     }
 
@@ -83,18 +85,18 @@ export function TimeRangePicker({ value, onChange }: TimeRangePickerProps) {
       <Popover.Trigger asChild>
         <button
           type="button"
-          title="Диапазон времени"
-          aria-label="Диапазон времени"
+          title={t('logs.range.title')}
+          aria-label={t('logs.range.title')}
           className={[
             'inline-flex h-7 shrink-0 items-center gap-1.5 rounded-md border px-2',
             'text-xs transition-colors duration-150',
             open || !live
               ? 'border-[var(--color-ember-500)]/45 bg-[var(--color-ember-500)]/15 text-[var(--color-ember-300)]'
-              : 'border-fg/8 bg-bg/30 text-fg/70 hover:border-fg/15 hover:text-fg',
+              : 'border-border bg-bg/30 text-foreground/75 hover:border-border hover:text-foreground',
           ].join(' ')}
         >
           <CalendarClock className="h-3.5 w-3.5 shrink-0" />
-          <span className="font-[family-name:var(--font-mono)] text-[11px] whitespace-nowrap">
+          <span className="font-[family-name:var(--font-mono)] text-xs whitespace-nowrap">
             {describeRange(value)}
           </span>
           {live && (
@@ -119,7 +121,7 @@ export function TimeRangePicker({ value, onChange }: TimeRangePickerProps) {
                   'rounded-md px-2 py-1 text-left text-xs transition-colors',
                   activeKey === preset.key
                     ? 'bg-[var(--color-ember-500)]/20 text-[var(--color-ember-300)]'
-                    : 'text-fg/65 hover:bg-fg/8 hover:text-fg',
+                    : 'text-foreground/75 hover:bg-fg/8 hover:text-foreground',
                 ].join(' ')}
               >
                 {preset.label}
@@ -130,10 +132,10 @@ export function TimeRangePicker({ value, onChange }: TimeRangePickerProps) {
           <div className="my-1.5 h-px bg-fg/8" />
 
           <div className="flex flex-col gap-1.5 px-1 pb-1">
-            <span className="text-[10px] tracking-wide text-fg/30 uppercase">Произвольное окно</span>
+            <span className="text-2xs tracking-wide text-muted-foreground uppercase">{t('logs.range.custom')}</span>
 
             <label className="flex items-center gap-1.5">
-              <span className="w-6 shrink-0 text-[11px] text-fg/40">с</span>
+              <span className="w-6 shrink-0 text-xs text-muted-foreground">{t('logs.range.from')}</span>
               <input
                 type="datetime-local"
                 value={bounds.from}
@@ -143,7 +145,7 @@ export function TimeRangePicker({ value, onChange }: TimeRangePickerProps) {
             </label>
 
             <label className="flex items-center gap-1.5">
-              <span className="w-6 shrink-0 text-[11px] text-fg/40">по</span>
+              <span className="w-6 shrink-0 text-xs text-muted-foreground">{t('logs.range.to')}</span>
               <input
                 type="datetime-local"
                 value={bounds.to}
@@ -153,14 +155,14 @@ export function TimeRangePicker({ value, onChange }: TimeRangePickerProps) {
             </label>
 
             {error !== null && (
-              <span className="text-[11px] text-[var(--color-danger)]">{error}</span>
+              <span className="text-xs text-[var(--color-danger)]">{error}</span>
             )}
 
             <button
               type="button"
               onClick={handleApply}
               className={[
-                'h-7 rounded-md bg-[var(--color-ember-500)]/85 text-xs font-medium text-fg',
+                'h-7 rounded-md bg-[var(--color-ember-500)]/85 text-xs font-medium text-foreground',
                 'transition-colors hover:bg-[var(--color-ember-500)]',
               ].join(' ')}
             >

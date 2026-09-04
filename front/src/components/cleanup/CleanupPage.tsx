@@ -32,6 +32,7 @@ import {
   totalCandidates,
   totalReclaimable,
 } from './groups'
+import { useT } from '@/state/settings'
 
 const ICONS: Record<PruneTarget, ReactNode> = {
   containers: <Boxes className="h-4 w-4" />,
@@ -47,6 +48,7 @@ const BANNER_MS = 6000
 type Scope = PruneTarget | 'all'
 
 export function CleanupPage() {
+  const t = useT()
   const preview = usePrunePreview()
   const disk = useDiskUsage()
   const prune = usePrune()
@@ -130,7 +132,7 @@ export function CleanupPage() {
   }
 
   if (preview.isPending) {
-    return <Centered icon={<Loader2 className="h-5 w-5 animate-spin" />} text="Считаем, что можно удалить…" />
+    return <Centered icon={<Loader2 className="h-5 w-5 animate-spin" />} text={t('cleanup.counting')} />
   }
 
   if (preview.data === undefined) {
@@ -142,7 +144,7 @@ export function CleanupPage() {
           <button
             type="button"
             onClick={() => void preview.refetch()}
-            className="mt-3 flex h-8 items-center gap-1.5 rounded-lg border border-fg/10 bg-fg/5 px-3 text-[12px] text-fg/70 transition-colors hover:text-fg"
+            className="mt-3 flex h-8 items-center gap-1.5 rounded-lg border border-border bg-fg/5 px-3 text-sm text-foreground/75 transition-colors hover:text-foreground"
           >
             <RefreshCw className="h-3.5 w-3.5" />
             Повторить
@@ -160,31 +162,31 @@ export function CleanupPage() {
 
       <div className="rh-panel flex flex-wrap items-end gap-4 px-4 py-3">
         <div>
-          <div className="flex items-center gap-2 text-fg/35">
+          <div className="flex items-center gap-2 text-muted-foreground">
             <span className="text-[var(--color-ember-400)]">
               <Trash2 className="h-4 w-4" />
             </span>
-            <span className="text-[11px]">Всего можно освободить</span>
+            <span className="text-xs">{t('cleanup.freeable')}</span>
           </div>
-          <div className="mt-1 font-[family-name:var(--font-mono)] text-[30px] leading-none text-[var(--color-ember-300)]">
+          <div className="mt-1 font-[family-name:var(--font-mono)] text-3xl leading-none text-[var(--color-ember-300)]">
             {formatBytes(total)}
           </div>
-          <div className="mt-1 text-[11px] text-fg/30">
-            {candidates > 0 ? `${candidates} объектов под удаление` : 'поимённых объектов нет'}
+          <div className="mt-1 text-xs text-muted-foreground">
+            {candidates > 0 ? t('cleanup.candidates', { count: candidates }) : t('cleanup.noNamed')}
           </div>
         </div>
 
         <div className="ml-2">
-          <div className="flex items-center gap-2 text-fg/35">
-            <span className="text-fg/30">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <span className="text-muted-foreground">
               <HardDrive className="h-4 w-4" />
             </span>
-            <span className="text-[11px]">Занято Docker сейчас</span>
+            <span className="text-xs">{t('cleanup.usedNow')}</span>
           </div>
-          <div className="mt-1 font-[family-name:var(--font-mono)] text-[20px] leading-none text-fg/80">
+          <div className="mt-1 font-[family-name:var(--font-mono)] text-2xl leading-none text-foreground/90">
             {disk.data === undefined ? '—' : formatBytes(occupied)}
           </div>
-          <div className="mt-1 text-[11px] text-fg/30">
+          <div className="mt-1 text-xs text-muted-foreground">
             {occupied > 0 ? `освободится ${((total / occupied) * 100).toFixed(0)}%` : '—'}
           </div>
         </div>
@@ -194,10 +196,10 @@ export function CleanupPage() {
           disabled={workGroups.length === 0 || locked}
           onClick={() => setPending('all')}
           className={[
-            'ml-auto flex h-9 items-center gap-2 rounded-lg border px-4 text-[13px] transition-colors',
+            'ml-auto flex h-9 items-center gap-2 rounded-lg border px-4 text-base transition-colors',
             workGroups.length > 0 && !locked
               ? 'border-[var(--color-ember-500)]/45 bg-[var(--color-ember-500)]/12 text-[var(--color-ember-300)] hover:bg-[var(--color-ember-500)]/22'
-              : 'cursor-not-allowed border-fg/8 bg-fg/[0.02] text-fg/25',
+              : 'cursor-not-allowed border-border bg-fg/[0.02] text-muted-foreground',
           ].join(' ')}
         >
           {running === 'all' ? (
@@ -212,7 +214,7 @@ export function CleanupPage() {
       {workGroups.length === 0 ? (
         <Centered
           icon={<Sparkles className="h-5 w-5 text-[var(--color-mint-400)]" />}
-          text="Чисто — удалять нечего. Ни висячих образов, ни забытых томов и сетей."
+          text={t('cleanup.clean')}
         />
       ) : (
         <>
@@ -247,7 +249,7 @@ export function CleanupPage() {
       <ConfirmDialog
         open={pending !== null && pending !== 'all' && pending !== 'images'}
         title={`Очистить: ${pendingGroup?.title.toLowerCase() ?? ''}`}
-        description="Удаление необратимо — Docker сотрёт перечисленные объекты без корзины."
+        description={t('cleanup.warning')}
         subject={pendingGroup === undefined ? '' : subjectOf(pendingGroup)}
         confirmLabel="Очистить"
         onConfirm={() => {
@@ -260,8 +262,8 @@ export function CleanupPage() {
 
       <ImagePruneDialog
         open={pending === 'all' || pending === 'images'}
-        title={pending === 'all' ? 'Очистить всё' : 'Очистить образы'}
-        description="Удаление необратимо — Docker сотрёт перечисленные объекты без корзины."
+        title={pending === 'all' ? t('cleanup.runAll') : t('cleanup.runImages')}
+        description={t('cleanup.warning')}
         subject={
           pending === 'all'
             ? `${describeGroups(groups)} · освободится ${formatBytes(total)}`
@@ -293,8 +295,8 @@ function Centered({ icon, text, action }: { icon: ReactNode; text: string; actio
   return (
     <div className="flex h-full min-h-[220px] items-center justify-center p-8">
       <div className="rh-panel flex max-w-md flex-col items-center px-8 py-7 text-center">
-        <span className="text-fg/45">{icon}</span>
-        <p className="mt-3 text-[13px] leading-relaxed text-fg/55">{text}</p>
+        <span className="text-muted-foreground">{icon}</span>
+        <p className="mt-3 text-base leading-relaxed text-muted-foreground">{text}</p>
         {action}
       </div>
     </div>

@@ -1,5 +1,6 @@
 import * as Dialog from '@radix-ui/react-dialog'
 import { AlertTriangle } from 'lucide-react'
+import { useT } from '@/state/settings'
 
 interface ConfirmDialogProps {
   open: boolean
@@ -7,6 +8,7 @@ interface ConfirmDialogProps {
   description: string
   /** Что именно затрагивается — имя контейнера, образа, тома. */
   subject?: string
+  /** По умолчанию — «Удалить» на языке интерфейса. */
   confirmLabel?: string
   tone?: 'danger' | 'default'
   onConfirm: () => void
@@ -18,11 +20,12 @@ export function ConfirmDialog({
   title,
   description,
   subject,
-  confirmLabel = 'Удалить',
+  confirmLabel,
   tone = 'danger',
   onConfirm,
   onOpenChange,
 }: ConfirmDialogProps) {
+  const t = useT()
   const accent =
     tone === 'danger'
       ? 'border-[var(--color-danger)]/45 bg-[var(--color-danger)]/15 text-[var(--color-danger)] hover:bg-[var(--color-danger)]/25'
@@ -43,13 +46,13 @@ export function ConfirmDialog({
             </span>
 
             <div className="min-w-0 flex-1">
-              <Dialog.Title className="text-[14px] font-medium text-fg">{title}</Dialog.Title>
-              <Dialog.Description className="mt-1 text-[12px] leading-relaxed text-fg/50">
+              <Dialog.Title className="text-lg font-medium text-fg">{title}</Dialog.Title>
+              <Dialog.Description className="mt-1 text-sm leading-relaxed text-fg/50">
                 {description}
               </Dialog.Description>
 
               {subject !== undefined && (
-                <div className="mt-2 truncate rounded-md border border-fg/8 bg-bg/30 px-2 py-1.5 font-[family-name:var(--font-mono)] text-[11px] text-fg/70">
+                <div className="mt-2 truncate rounded-md border border-fg/8 bg-bg/30 px-2 py-1.5 font-[family-name:var(--font-mono)] text-xs text-fg/70">
                   {subject}
                 </div>
               )}
@@ -60,9 +63,9 @@ export function ConfirmDialog({
             <Dialog.Close asChild>
               <button
                 type="button"
-                className="h-8 rounded-lg border border-fg/10 bg-fg/5 px-3 text-[12px] text-fg/70 transition-colors hover:text-fg"
+                className="h-8 rounded-lg border border-fg/10 bg-fg/5 px-3 text-sm text-fg/70 transition-colors hover:text-fg"
               >
-                Отмена
+                {t('common.cancel')}
               </button>
             </Dialog.Close>
 
@@ -72,9 +75,9 @@ export function ConfirmDialog({
                 onConfirm()
                 onOpenChange(false)
               }}
-              className={`h-8 rounded-lg border px-3 text-[12px] transition-colors ${accent}`}
+              className={`h-8 rounded-lg border px-3 text-sm transition-colors ${accent}`}
             >
-              {confirmLabel}
+              {confirmLabel ?? t('common.delete')}
             </button>
           </div>
         </Dialog.Content>

@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
 
 @theme {
   /* Фирменная палитра Dala: тёмная база + «раскалённый» акцент.
@@ -60,6 +61,122 @@
   --rh-area-fill: 0.1;
 }
 
+/* ---------------------------------------------------------------------------
+   Шкалы. До этого размеры и радиусы задавались числом в каждом месте вёрстки —
+   восемь размеров текста и пять радиусов вперемешку. Теперь значения живут
+   здесь, а вёрстка пользуется именами: text-sm, rounded-md.
+   Шкала плотная: это инженерная панель, а не лендинг.
+--------------------------------------------------------------------------- */
+@theme {
+  --text-2xs: 0.625rem;   /* 10px — служебные подписи, счётчики */
+  --text-2xs--line-height: 0.875rem;
+  --text-xs: 0.6875rem;   /* 11px — подписи колонок, вторичный текст */
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.75rem;     /* 12px — основной текст интерфейса */
+  --text-sm--line-height: 1.125rem;
+  --text-base: 0.8125rem; /* 13px — строки списков */
+  --text-base--line-height: 1.25rem;
+  --text-lg: 0.875rem;    /* 14px — заголовки блоков */
+  --text-lg--line-height: 1.375rem;
+  --text-xl: 1rem;        /* 16px — заголовок раздела */
+  --text-xl--line-height: 1.5rem;
+  --text-2xl: 1.25rem;    /* 20px — крупные числа на плитках */
+  --text-2xl--line-height: 1.75rem;
+  --text-3xl: 1.75rem;    /* 28px — единственный крупный показатель */
+  --text-3xl--line-height: 2.25rem;
+
+  --radius: 0.5rem;
+}
+
+/* ---------------------------------------------------------------------------
+   Семантические токены для компонентов. Имена — как у shadcn/ui, значения —
+   фирменные: ember остаётся акцентом, ink задаёт поверхности. Компоненты
+   ссылаются только на эти имена, поэтому смена темы не трогает их код.
+--------------------------------------------------------------------------- */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* Тёмная тема — база проекта. */
+:root {
+  --background: #07080b;
+  --foreground: #e6e9f0;
+  --card: #0b0d12;
+  --card-foreground: #e6e9f0;
+  --popover: #10131a;
+  --popover-foreground: #e6e9f0;
+  --primary: #f4552b;
+  --primary-foreground: #ffffff;
+  --secondary: #151922;
+  --secondary-foreground: #e6e9f0;
+  --muted: #151922;
+  /* Приглушённый текст — отдельный цвет, а не прозрачность: на разных
+     подложках одна и та же прозрачность даёт разный контраст. */
+  --muted-foreground: #8b93a3;
+  --accent: #1a1f2a;
+  --accent-foreground: #ffffff;
+  --destructive: #ff5a5a;
+  --destructive-foreground: #ffffff;
+  --success: #35d6a4;
+  --warning: #f5b544;
+  --info: #4aa8ff;
+  --border: rgb(255 255 255 / 0.09);
+  --input: rgb(255 255 255 / 0.12);
+  --ring: #f4552b;
+}
+
+/* Светлая тема: акценты притемнены — исходные на белом теряют контраст. */
+:root[data-theme='light'] {
+  --background: #ffffff;
+  --foreground: #161a22;
+  --card: #ffffff;
+  --card-foreground: #161a22;
+  --popover: #ffffff;
+  --popover-foreground: #161a22;
+  --primary: #d93d16;
+  --primary-foreground: #ffffff;
+  --secondary: #eef1f6;
+  --secondary-foreground: #161a22;
+  --muted: #eef1f6;
+  --muted-foreground: #5b6472;
+  --accent: #e7ebf2;
+  --accent-foreground: #0a0d14;
+  --destructive: #c62222;
+  --destructive-foreground: #ffffff;
+  --success: #07784f;
+  --warning: #b8750a;
+  --info: #0f5aad;
+  --border: rgb(10 13 20 / 0.1);
+  --input: rgb(10 13 20 / 0.14);
+  --ring: #d93d16;
+}
+
 @layer base {
   html,
   body,
@@ -114,15 +231,9 @@
 }
 
 .rh-panel {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--color-fg) 3.5%, transparent),
-    color-mix(in srgb, var(--color-fg) 1.2%, transparent)
-  );
-  border: 1px solid color-mix(in srgb, var(--color-fg) 8%, transparent);
-  border-radius: 14px;
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
 }
 
 @keyframes rh-pulse {
@@ -156,46 +267,12 @@
   animation: rh-fade-in 0.18s ease-out;
 }
 
-/* На белом фоне полупрозрачная панель почти не читается — делаем её плотнее. */
+/* Светлой теме нужна лёгкая тень: на белом одна рамка теряется. */
 :root[data-theme='light'] .rh-panel {
-  background: var(--color-ink-900);
-  border-color: color-mix(in srgb, var(--color-fg) 12%, transparent);
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-fg) 6%, transparent);
+  box-shadow: 0 1px 2px rgb(10 13 20 / 0.06);
 }
 
-/* Светлая тема: та же прозрачность читается хуже.
-   Белый на почти чёрном при 30% ещё различим, чёрный на белом — уже нет.
-   Поэтому нижние уровни приглушённого текста усиливаем; от 60% и выше
-   правка не нужна, там контраста хватает. Список уровней собран из вёрстки. */
-:root[data-theme='light'] {
-  .text-fg\/15 {
-    color: color-mix(in oklab, var(--color-fg) 41%, transparent);
-  }
-  .text-fg\/20 {
-    color: color-mix(in oklab, var(--color-fg) 49%, transparent);
-  }
-  .text-fg\/25 {
-    color: color-mix(in oklab, var(--color-fg) 57%, transparent);
-  }
-  .text-fg\/28 {
-    color: color-mix(in oklab, var(--color-fg) 61%, transparent);
-  }
-  .text-fg\/30 {
-    color: color-mix(in oklab, var(--color-fg) 64%, transparent);
-  }
-  .text-fg\/35 {
-    color: color-mix(in oklab, var(--color-fg) 72%, transparent);
-  }
-  .text-fg\/40 {
-    color: color-mix(in oklab, var(--color-fg) 80%, transparent);
-  }
-  .text-fg\/45 {
-    color: color-mix(in oklab, var(--color-fg) 88%, transparent);
-  }
-  .text-fg\/50 {
-    color: color-mix(in oklab, var(--color-fg) 95%, transparent);
-  }
-  .text-fg\/55 {
-    color: color-mix(in oklab, var(--color-fg) 95%, transparent);
-  }
-}
+/* Приглушённый текст теперь берётся из --muted-foreground: у каждой темы он
+   свой и подобран по контрасту. Раньше здесь лежал список из десятка правил,
+   вручную усиливавших text-fg/15…/55 для светлой темы — с семантическими
+   токенами он больше не нужен. */

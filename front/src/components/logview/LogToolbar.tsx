@@ -19,9 +19,10 @@ import type { TimeRange } from '../../lib/timeRange'
 import { IconButton } from '../ui/IconButton'
 import { countByLevel, linesToText } from '../../lib/logFilter'
 import { TimeRangePicker } from './TimeRangePicker'
+import { useT } from '@/state/settings'
 
 const LEVELS: { key: LogLevel; label: string; className: string }[] = [
-  { key: 'debug', label: 'DBG', className: 'text-fg/50' },
+  { key: 'debug', label: 'DBG', className: 'text-muted-foreground' },
   { key: 'info', label: 'INF', className: 'text-[var(--color-sky-400)]' },
   { key: 'warn', label: 'WRN', className: 'text-[var(--color-amber-ok)]' },
   { key: 'error', label: 'ERR', className: 'text-[var(--color-danger)]' },
@@ -48,6 +49,7 @@ export function LogToolbar({
   onChange,
   onClear,
 }: LogToolbarProps) {
+  const t = useT()
   const counts = countByLevel(allLines)
 
   // Выгружаем ровно то, что видно на экране: под маской — с маской.
@@ -69,21 +71,21 @@ export function LogToolbar({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5 border-b border-fg/6 bg-bg/20 px-2 py-1.5">
+    <div className="flex flex-wrap items-center gap-1.5 border-b border-border bg-bg/20 px-2 py-1.5">
       <div className="relative">
-        <Search className="pointer-events-none absolute top-1/2 left-2 h-3.5 w-3.5 -translate-y-1/2 text-fg/30" />
+        <Search className="pointer-events-none absolute top-1/2 left-2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
         <input
           value={options.search}
           onChange={(event) => onChange({ search: event.target.value })}
-          placeholder="grep по логу…"
-          className="h-7 w-44 rounded-md border border-fg/8 bg-bg/30 pr-6 pl-7 text-xs text-fg/85 outline-none placeholder:text-fg/25 focus:border-[var(--color-ember-500)]/60"
+          placeholder={t('logs.bar.grep')}
+          className="h-7 w-44 rounded-md border border-border bg-bg/30 pr-6 pl-7 text-xs text-foreground/90 outline-none placeholder:text-muted-foreground focus:border-[var(--color-ember-500)]/60"
         />
         {options.search !== '' && (
           <button
             type="button"
             onClick={() => onChange({ search: '' })}
-            className="absolute top-1/2 right-1 -translate-y-1/2 text-fg/35 hover:text-fg"
-            aria-label="Очистить поиск"
+            className="absolute top-1/2 right-1 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            aria-label={t('logs.bar.clearSearch')}
           >
             <X className="h-3.5 w-3.5" />
           </button>
@@ -92,7 +94,7 @@ export function LogToolbar({
 
       <TimeRangePicker value={range} onChange={onRangeChange} />
 
-      <div className="flex items-center gap-0.5 rounded-md border border-fg/8 bg-bg/25 p-0.5">
+      <div className="flex items-center gap-0.5 rounded-md border border-border bg-bg/25 p-0.5">
         {LEVELS.map((level) => (
           <button
             key={level.key}
@@ -100,10 +102,10 @@ export function LogToolbar({
             onClick={() => onChange({ levels: { ...options.levels, [level.key]: !options.levels[level.key] } })}
             title={`${level.label}: ${counts[level.key]}`}
             className={[
-              'rounded px-1.5 py-0.5 font-[family-name:var(--font-mono)] text-[10px] tracking-wide transition-colors',
+              'rounded px-1.5 py-0.5 font-[family-name:var(--font-mono)] text-2xs tracking-wide transition-colors',
               options.levels[level.key]
                 ? `bg-fg/8 ${level.className}`
-                : 'text-fg/20 line-through',
+                : 'text-muted-foreground line-through',
             ].join(' ')}
           >
             {level.label}
@@ -114,7 +116,7 @@ export function LogToolbar({
       <div className="mx-0.5 h-4 w-px bg-fg/8" />
 
       <IconButton
-        label={options.paused ? 'Возобновить поток' : 'Пауза потока'}
+        label={options.paused ? t('logs.bar.resume') : t('logs.bar.pause')}
         active={options.paused}
         onClick={() => onChange({ paused: !options.paused })}
       >
@@ -122,7 +124,7 @@ export function LogToolbar({
       </IconButton>
 
       <IconButton
-        label="Автопрокрутка вниз"
+        label={t('logs.bar.autoscroll')}
         active={options.follow}
         onClick={() => onChange({ follow: !options.follow })}
       >
@@ -130,7 +132,7 @@ export function LogToolbar({
       </IconButton>
 
       <IconButton
-        label="Перенос длинных строк"
+        label={t('logs.bar.wrap')}
         active={options.wrap}
         onClick={() => onChange({ wrap: !options.wrap })}
       >
@@ -138,7 +140,7 @@ export function LogToolbar({
       </IconButton>
 
       <IconButton
-        label="Метки времени"
+        label={t('logs.bar.timestamps')}
         active={options.showTimestamps}
         onClick={() => onChange({ showTimestamps: !options.showTimestamps })}
       >
@@ -146,7 +148,7 @@ export function LogToolbar({
       </IconButton>
 
       <IconButton
-        label={options.masked ? 'Показать секреты' : 'Скрыть секреты'}
+        label={options.masked ? t('logs.bar.showSecrets') : t('logs.bar.hideSecrets')}
         active={options.masked}
         onClick={() => onChange({ masked: !options.masked })}
       >
@@ -156,16 +158,16 @@ export function LogToolbar({
       <div className="mx-0.5 h-4 w-px bg-fg/8" />
 
       <IconButton
-        label="Мельче шрифт"
+        label={t('logs.bar.smaller')}
         onClick={() => onChange({ fontSize: Math.max(9, options.fontSize - 1) })}
       >
         <Minus className="h-4 w-4" />
       </IconButton>
-      <span className="w-6 text-center font-[family-name:var(--font-mono)] text-[11px] text-fg/40">
+      <span className="w-6 text-center font-[family-name:var(--font-mono)] text-xs text-muted-foreground">
         {options.fontSize}
       </span>
       <IconButton
-        label="Крупнее шрифт"
+        label={t('logs.bar.bigger')}
         onClick={() => onChange({ fontSize: Math.min(22, options.fontSize + 1) })}
       >
         <Plus className="h-4 w-4" />
@@ -173,17 +175,17 @@ export function LogToolbar({
 
       <div className="mx-0.5 h-4 w-px bg-fg/8" />
 
-      <IconButton label="Копировать в буфер" onClick={handleCopy}>
+      <IconButton label={t('logs.bar.copy')} onClick={handleCopy}>
         <Copy className="h-4 w-4" />
       </IconButton>
-      <IconButton label="Скачать .txt" onClick={handleDownload}>
+      <IconButton label={t('logs.bar.download')} onClick={handleDownload}>
         <Download className="h-4 w-4" />
       </IconButton>
-      <IconButton label="Очистить буфер" tone="danger" onClick={onClear}>
+      <IconButton label={t('logs.bar.clear')} tone="danger" onClick={onClear}>
         <Eraser className="h-4 w-4" />
       </IconButton>
 
-      <div className="ml-auto pr-1 font-[family-name:var(--font-mono)] text-[11px] text-fg/30">
+      <div className="ml-auto pr-1 font-[family-name:var(--font-mono)] text-xs text-muted-foreground">
         {filteredCount === allLines.length
           ? `${allLines.length} строк`
           : `${filteredCount} / ${allLines.length}`}

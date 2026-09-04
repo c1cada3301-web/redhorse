@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { LoginForm } from './LoginForm'
 import { UNAUTHORIZED_EVENT } from '../../api/client'
 import { fetchAuthState, fetchMe, type Account } from '../../api/auth'
+import { t } from '../../lib/i18n'
 
 type Phase = 'checking' | 'setup' | 'login' | 'ready'
 
@@ -59,8 +60,8 @@ export function AuthGate({ children }: AuthGateProps) {
 
   if (phase === 'checking') {
     return (
-      <div className="grid min-h-screen place-items-center bg-bg text-sm text-fg/40">
-        Проверяем сессию…
+      <div className="grid min-h-screen place-items-center bg-bg text-sm text-muted-foreground">
+        {t('auth.checking')}
       </div>
     )
   }
