@@ -1,6 +1,7 @@
 import { Component } from 'react'
 import type { ErrorInfo, ReactNode } from 'react'
 import { AlertTriangle, RotateCw } from 'lucide-react'
+import { pushError } from '../../lib/clientErrors'
 
 interface ErrorBoundaryProps {
   children: ReactNode
@@ -24,7 +25,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
     // eslint-disable-next-line no-console
-    console.error('Ошибка рендера RedHorse:', error, info.componentStack)
+    console.error('Ошибка рендера Dala:', error, info.componentStack)
+
+    pushError({
+      kind: 'render',
+      message: error.message,
+      // Стек компонентов полезнее стека вызовов: сразу видно, какой экран упал.
+      stack: [info.componentStack, error.stack].filter((part) => part).join('\n\n'),
+    })
   }
 
   render(): ReactNode {
@@ -41,12 +49,12 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           </div>
 
           <p className="mt-2 text-[12px] leading-relaxed text-fg/50">
-            Данные с Docker Engine продолжают работать — сломался только рендер. Подробности
-            в консоли браузера.
+            Данные с Docker Engine продолжают работать — сломался только рендер.
           </p>
 
-          <pre className="rh-scroll mt-3 max-h-48 overflow-auto rounded-lg border border-fg/8 bg-bg/30 p-3 font-[family-name:var(--font-mono)] text-[11px] text-fg/60">
+          <pre className="rh-scroll mt-3 max-h-64 overflow-auto rounded-lg border border-fg/8 bg-bg/30 p-3 font-[family-name:var(--font-mono)] text-[11px] whitespace-pre-wrap text-fg/60">
             {error.message}
+            {error.stack !== undefined && `\n\n${error.stack}`}
           </pre>
 
           <button

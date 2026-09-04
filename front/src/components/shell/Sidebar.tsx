@@ -6,6 +6,7 @@ import {
   HardDrive,
   LayoutDashboard,
   Network,
+  LogOut,
   Settings,
   Trash2,
 } from 'lucide-react'
@@ -43,9 +44,19 @@ interface SidebarProps {
   onNavigate: (key: NavKey) => void
   runningCount: number
   totalCount: number
+  /** Имя вошедшего пользователя. */
+  username: string
+  onSignOut: () => void
 }
 
-export function Sidebar({ current, onNavigate, runningCount, totalCount }: SidebarProps) {
+export function Sidebar({
+  current,
+  onNavigate,
+  runningCount,
+  totalCount,
+  username,
+  onSignOut,
+}: SidebarProps) {
   const { settings, update } = useSettings()
   const t = useT()
 
@@ -81,7 +92,7 @@ export function Sidebar({ current, onNavigate, runningCount, totalCount }: Sideb
         />
         {!collapsed && (
           <div className="min-w-0 leading-tight">
-            <div className="truncate text-sm font-semibold tracking-tight text-fg">RedHorse</div>
+            <div className="truncate text-sm font-semibold tracking-tight text-fg">Dala</div>
             <div className="truncate text-[10px] text-fg/35">{t('nav.tagline')}</div>
           </div>
         )}
@@ -139,6 +150,23 @@ export function Sidebar({ current, onNavigate, runningCount, totalCount }: Sideb
             {t('nav.runningOf', { running: runningCount, total: totalCount })}
           </div>
         )}
+      </div>
+
+      <div className={`mb-2 ${collapsed ? 'px-1.5' : 'px-2'}`}>
+        <button
+          type="button"
+          onClick={onSignOut}
+          title={collapsed ? `${username} — выйти` : 'Выйти'}
+          aria-label="Выйти"
+          className={[
+            'flex w-full items-center rounded-lg py-2 text-[13px] text-fg/50 transition-colors',
+            'hover:bg-fg/[0.03] hover:text-fg/80',
+            collapsed ? 'justify-center px-0' : 'gap-2.5 px-2.5',
+          ].join(' ')}
+        >
+          <LogOut className="h-4 w-4 shrink-0" />
+          {!collapsed && <span className="truncate">{username}</span>}
+        </button>
       </div>
     </aside>
   )

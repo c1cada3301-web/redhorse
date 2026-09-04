@@ -6,9 +6,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Настройки берутся из окружения, префикс RH_ (см. api/.env)."""
+    """Настройки берутся из окружения, префикс DALA_ (см. api/.env)."""
 
-    model_config = SettingsConfigDict(env_prefix="RH_", env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_prefix="DALA_", env_file=".env", extra="ignore")
 
     env: str = "production"
 
@@ -27,6 +27,25 @@ class Settings(BaseSettings):
 
     # Сколько завершённых сборок держим в памяти.
     build_history: int = 20
+
+    # --- база данных -------------------------------------------------------
+    database_url: str = "postgresql+asyncpg://dala:dala@db:5432/dala"
+
+    # --- авторизация -------------------------------------------------------
+    # Секрет подписи JWT. Пустой — сгенерируем случайный при старте, но тогда
+    # рестарт API разлогинивает всех: для постоянной работы задай DALA_JWT_SECRET.
+    jwt_secret: str = ""
+    jwt_ttl_hours: int = 12
+
+    # Имя cookie с токеном и её флаг Secure. По HTTP (localhost) Secure ставить
+    # нельзя — браузер такую cookie просто не сохранит.
+    session_cookie: str = "dala_session"
+    cookie_secure: bool = False
+
+    # Первый администратор создаётся, когда таблица пользователей пуста.
+    # Пустой пароль — сгенерируем случайный и один раз напечатаем в лог.
+    admin_user: str = "admin"
+    admin_password: str = ""
 
 
 @lru_cache

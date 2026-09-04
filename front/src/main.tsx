@@ -5,6 +5,9 @@ import './index.css'
 import App from './App.tsx'
 import { SettingsProvider } from './state/settings'
 import { ErrorBoundary } from './components/shell/ErrorBoundary'
+import { AuthGate } from './components/auth/AuthGate'
+import { ErrorLog } from './components/shell/ErrorLog'
+import { installClientErrorHandlers } from './lib/clientErrors'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -16,12 +19,16 @@ const queryClient = new QueryClient({
   },
 })
 
+// До первого рендера: иначе ошибки на старте приложения пройдут мимо журнала.
+installClientErrorHandlers()
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
+    <ErrorLog />
     <ErrorBoundary>
       <SettingsProvider>
         <QueryClientProvider client={queryClient}>
-          <App />
+          <AuthGate>{(account, signOut) => <App account={account} onSignOut={signOut} />}</AuthGate>
         </QueryClientProvider>
       </SettingsProvider>
     </ErrorBoundary>

@@ -1,6 +1,9 @@
 /** Базовый адрес API. В проде фронт и API за одним nginx, в дев-режиме проксирует Vite. */
 const BASE = '/api'
 
+/** Сессия отвалилась: слушает оболочка, чтобы вернуть экран входа. */
+export const UNAUTHORIZED_EVENT = 'dala:unauthorized'
+
 export class ApiError extends Error {
   readonly status: number
 
@@ -25,11 +28,19 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   const response = await fetch(url, {
     method,
     signal,
+    // Сессия живёт в httpOnly-cookie: её нельзя прочитать из JS, поэтому
+    // единственный способ авторизовать запрос — попросить браузер её приложить.
+    credentials: 'include',
     headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
     body: body === undefined ? undefined : JSON.stringify(body),
   })
 
   if (!response.ok) {
+    // Сессия истекла или отозвана — оболочка должна показать экран входа,
+    // а не сыпать ошибками на каждом запросе.
+    if (response.status === 401) {
+      window.dispatchEvent(new CustomEvent(UNAUTHORIZED_EVENT))
+    }
     throw new ApiError(await readError(response), response.status)
   }
 

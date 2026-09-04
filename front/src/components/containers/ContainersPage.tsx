@@ -5,6 +5,14 @@ import type { DockerApi } from '../../state/useDocker'
 import type { LogSessionsApi } from '../../state/useLogSessions'
 import { formatBytes } from '../../lib/format'
 import { ContainerRow, ROW_GRID } from './ContainerRow'
+import { FilterMenu } from './FilterMenu'
+import {
+  DEFAULT_FILTERS,
+  applyFilters,
+  collectOptions,
+  countActive,
+  type ContainerFilterState,
+} from './filters'
 
 const FILTERS: { key: ContainerState | 'all'; label: string }[] = [
   { key: 'all', label: 'Все' },
@@ -42,15 +50,16 @@ function matches(container: Container, needle: string): boolean {
 
 export function ContainersPage({ docker, logs, search, onOpenDetails }: ContainersPageProps) {
   const [filter, setFilter] = useState<ContainerState | 'all'>('all')
+  const [filters, setFilters] = useState<ContainerFilterState>(DEFAULT_FILTERS)
 
-  const visible = useMemo(
-    () =>
-      docker.containers.filter(
-        (container) =>
-          (filter === 'all' || container.state === filter) && matches(container, search),
-      ),
-    [docker.containers, filter, search],
-  )
+  const options = useMemo(() => collectOptions(docker.containers), [docker.containers])
+
+  const visible = useMemo(() => {
+    const byStateAndSearch = docker.containers.filter(
+      (container) => (filter === 'all' || container.state === filter) && matches(container, search),
+    )
+    return applyFilters(byStateAndSearch, filters)
+  }, [docker.containers, filter, search, filters])
 
   const running = docker.containers.filter((container) => container.state === 'running')
   const totalSize = docker.containers.reduce((sum, container) => sum + container.sizeRootFs, 0)
@@ -88,6 +97,8 @@ export function ContainersPage({ docker, logs, search, onOpenDetails }: Containe
           </button>
         ))}
 
+        <FilterMenu value={filters} onChange={setFilters} options={options} />
+
         <div className="ml-auto flex items-center gap-2">
           <span className="font-[family-name:var(--font-mono)] text-[11px] text-fg/30">
             всего на диске {formatBytes(totalSize)}
@@ -123,6 +134,15 @@ export function ContainersPage({ docker, logs, search, onOpenDetails }: Containe
           <div className="flex h-40 flex-col items-center justify-center gap-2 text-fg/35">
             <ScrollText className="h-6 w-6" />
             <p className="text-sm">Ничего не найдено</p>
+            {countActive(filters) > 0 && (
+              <button
+                type="button"
+                onClick={() => setFilters({ ...DEFAULT_FILTERS, sort: filters.sort, desc: filters.desc })}
+                className="text-[12px] text-[var(--color-ember-300)] transition-colors hover:text-[var(--color-ember-400)]"
+              >
+                Сбросить фильтры
+              </button>
+            )}
           </div>
         ) : (
           visible.map((container) => (

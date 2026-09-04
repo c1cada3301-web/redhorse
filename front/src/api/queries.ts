@@ -29,7 +29,7 @@ export const keys = {
   prunePreview: ['cleanup', 'preview'] as const,
 }
 
-/** Список контейнеров переспрашиваем: состояние меняется и снаружи RedHorse. */
+/** Список контейнеров переспрашиваем: состояние меняется и снаружи Dala. */
 const CONTAINERS_POLL_MS = 4000
 
 export function useContainersQuery(pollMs: number = CONTAINERS_POLL_MS) {

@@ -13,9 +13,10 @@ interface EnvRow extends EnvVar {
 
 export function DetailEnv({ env }: { env: EnvVar[] }) {
   const [revealAll, setRevealAll] = useState(false)
-  // Отдельный режим «спрятать всё»: пригодится, когда показываешь экран, а
-  // автоопределение до части значений не дотягивается.
-  const [hideAll, setHideAll] = useState(false)
+  // Значения скрыты по умолчанию — все, а не только распознанные как секреты.
+  // Автоопределение ошибается в обе стороны, а окружение контейнера сплошь и
+  // рядом открыто при демонстрации экрана. Показ — всегда осознанное действие.
+  const [hideAll, setHideAll] = useState(true)
   const [revealed, setRevealed] = useState<ReadonlySet<string>>(new Set())
   const [query, setQuery] = useState('')
 
@@ -128,7 +129,7 @@ export function DetailEnv({ env }: { env: EnvVar[] }) {
             type="button"
             onClick={toggleHideAll}
             aria-pressed={hideAll}
-            title="Спрятать вообще все значения — удобно, когда показываешь экран"
+            title={hideAll ? 'Показать значения переменных' : 'Спрятать вообще все значения'}
             className={[
               'inline-flex h-7 items-center gap-1.5 rounded-md border px-2 text-[11px] transition-colors',
               hideAll

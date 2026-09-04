@@ -1,4 +1,22 @@
 services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    # Пароль обязателен: без него compose откажется стартовать, а не поднимет
+    # базу управления Docker-хостом с паролем по умолчанию.
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?задай POSTGRES_USER в .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?задай POSTGRES_PASSWORD в .env}
+      POSTGRES_DB: ${POSTGRES_DB:?задай POSTGRES_DB в .env}
+    # Порт наружу не публикуется: база доступна только по внутренней сети compose.
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   web:
     build:
       context: ./front
@@ -21,8 +39,19 @@ services:
     expose:
       - "8000"
     environment:
-      - RH_ENV=production
+      - DALA_ENV=production
+      - DALA_DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      # Секрет подписи токенов. Без него сессии слетают при каждом рестарте.
+      - DALA_JWT_SECRET=${DALA_JWT_SECRET:?задай DALA_JWT_SECRET в .env}
+      - DALA_ADMIN_USER=${DALA_ADMIN_USER:-admin}
+      - DALA_ADMIN_PASSWORD=${DALA_ADMIN_PASSWORD:-}
     # Только чтение сокета нам не подходит — нужны start/stop и сборка образов.
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     user: "0:0"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db-data:

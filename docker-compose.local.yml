@@ -6,6 +6,27 @@
 # Фронт: http://localhost:3000   API: http://localhost:8000/docs
 
 services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-dala}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dala}
+      POSTGRES_DB: ${POSTGRES_DB:-dala}
+    # Наружу только с localhost. 5433, а не 5432: штатный порт обычно занят
+    # системным Postgres, и контейнер из-за этого не стартует.
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    # API стартует только когда база реально принимает подключения,
+    # иначе первый же запрос к ней падает на старте.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-dala} -d ${POSTGRES_DB:-dala}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   api:
     build:
       context: ./api
@@ -16,12 +37,23 @@ services:
     ports:
       - "127.0.0.1:8000:8000"
     environment:
-      - RH_ENV=development
+      - DALA_ENV=development
+      - DALA_DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-dala}:${POSTGRES_PASSWORD:-dala}@db:5432/${POSTGRES_DB:-dala}
+      # Пустой секрет — генерируется при старте: удобно в деве, но после
+      # рестарта все сессии слетают. Для постоянного входа задай его в .env.
+      - DALA_JWT_SECRET=${DALA_JWT_SECRET:-}
+      # Первый administrator создаётся при пустой таблице пользователей.
+      # Пароль пустой — сгенерируется и один раз напечатается в лог API.
+      - DALA_ADMIN_USER=${DALA_ADMIN_USER:-admin}
+      - DALA_ADMIN_PASSWORD=${DALA_ADMIN_PASSWORD:-}
     # Код монтируется поверх образа, --reload следит за изменениями.
     volumes:
       - ./api:/app
       - /var/run/docker.sock:/var/run/docker.sock
     user: "0:0"
+    depends_on:
+      db:
+        condition: service_healthy
     command: uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 
   web:
@@ -30,7 +62,7 @@ services:
       dockerfile: Dockerfile.dev
     restart: unless-stopped
     ports:
-      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:3003:3000"
     environment:
       - VITE_API_PROXY_TARGET=http://api:8000
       - CHOKIDAR_USEPOLLING=true
@@ -43,3 +75,4 @@ services:
 
 volumes:
   front-node-modules:
+  db-data:

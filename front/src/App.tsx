@@ -21,9 +21,15 @@ import { VolumesPage } from './components/volumes/VolumesPage'
 import { LogDock } from './components/logview/LogDock'
 import { FloatingLogWindow } from './components/logview/FloatingLogWindow'
 import { LogPane } from './components/logview/LogPane'
+import { logout, type Account } from './api/auth'
 
 
-function App() {
+interface AppProps {
+  account: Account
+  onSignOut: () => void
+}
+
+function App({ account, onSignOut }: AppProps) {
   const toasts = useToasts()
   const docker = useDocker({ onError: toasts.pushError })
   const logs = useLogSessions()
@@ -65,7 +71,7 @@ function App() {
 
   return (
     <div className="relative flex h-screen overflow-hidden bg-[var(--color-ink-950)]">
-      {/* Тёплое свечение в углу — фирменный акцент Redhorse */}
+      {/* Тёплое свечение в углу — фирменный акцент Dala */}
       <div className="pointer-events-none absolute -top-40 -left-32 h-96 w-96 rounded-full bg-[var(--color-ember-600)]/12 blur-[120px]" />
       <div className="pointer-events-none absolute top-1/3 -right-40 h-96 w-96 rounded-full bg-[var(--color-sky-400)]/6 blur-[120px]" />
 
@@ -77,6 +83,15 @@ function App() {
           }}
         runningCount={runningCount}
         totalCount={docker.containers.length}
+        username={account.username}
+        onSignOut={() => {
+          // Кэш чистим до выхода: иначе после следующего входа на экран
+          // на мгновение вернутся данные прошлой сессии.
+          void logout().finally(() => {
+            queryClient.clear()
+            onSignOut()
+          })
+        }}
       />
 
       <div className="relative flex min-w-0 flex-1 flex-col">
