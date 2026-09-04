@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router'
 import { useQueryClient, useIsFetching } from '@tanstack/react-query'
 import { useDocker } from './state/useDocker'
 import { useSystemInfo } from './api/queries'
@@ -38,13 +39,13 @@ function App({ account, onSignOut }: AppProps) {
   const fetching = useIsFetching()
   const systemInfo = useSystemInfo()
   const t = useT()
-  const [nav, setNav] = useState<NavKey>('containers')
-  // Открытый контейнер живёт рядом с разделом: React Router появится позже,
-  // до тех пор адрес в строке браузера не меняется.
-  const [detailId, setDetailId] = useState<string | null>(null)
-  // Форма создания живёт в том же разделе: отдельного адреса у страниц пока нет.
-  const [creating, setCreating] = useState(false)
+  const navigate = useNavigate()
+  const location = useLocation()
   const [search, setSearch] = useState('')
+
+  // Раздел выводим из адреса, а не держим отдельным состоянием: иначе кнопка
+  // «назад» и ссылка, присланная коллеге, показывают разные экраны.
+  const nav = (location.pathname.split('/')[1] || 'containers') as NavKey
 
   const totals = useMemo(() => {
     return docker.containers.reduce(
@@ -78,11 +79,6 @@ function App({ account, onSignOut }: AppProps) {
 
       <Sidebar
         current={nav}
-        onNavigate={(key) => {
-            setDetailId(null)
-            setCreating(false)
-            setNav(key)
-          }}
         runningCount={runningCount}
         totalCount={docker.containers.length}
         username={account.username}
@@ -112,59 +108,49 @@ function App({ account, onSignOut }: AppProps) {
         />
 
         <main className="min-h-0 flex-1">
-          {nav === 'containers' ? (
-            creating ? (
-              <CreateContainerPage
-                onCreated={(containerId) => {
-                  setCreating(false)
-                  setDetailId(containerId)
-                }}
-                onCancel={() => setCreating(false)}
-              />
-            ) : detailId !== null ? (
-              <ContainerDetailPage
-                containerId={detailId}
-                onBack={() => setDetailId(null)}
-                onOpenLogs={(containerId) => {
-                  const target = docker.containers.find((item) => item.id === containerId)
-                  if (target !== undefined) logs.open(target)
-                }}
-                onAction={(id, action) => {
-                  if (action === 'start') docker.start(id)
-                  else if (action === 'stop') docker.stop(id)
-                  else if (action === 'restart') docker.restart(id)
-                  else if (action === 'pause') docker.pause(id)
-                  else docker.kill(id)
-                }}
-                onRemove={(id) => {
-                  docker.remove(id)
-                  setDetailId(null)
-                }}
-              />
-            ) : (
-              <ContainersPage
-                docker={docker}
-                logs={logs}
-                search={search}
-                onOpenDetails={setDetailId}
-                onCreate={() => setCreating(true)}
-              />
-            )
-          ) : nav === 'dashboard' ? (
-            <DashboardPage docker={docker} onOpenLogs={logs.open} />
-          ) : nav === 'images' ? (
-            <ImagesPage search={search} />
-          ) : nav === 'monitoring' ? (
-            <MonitoringPage docker={docker} search={search} />
-          ) : nav === 'cleanup' ? (
-            <CleanupPage />
-          ) : nav === 'settings' ? (
-            <SettingsPage />
-          ) : nav === 'networks' ? (
-            <NetworksPage search={search} />
-          ) : (
-            <VolumesPage search={search} />
-          )}
+          <Routes>
+            <Route path="/" element={<Navigate to="/containers" replace />} />
+            <Route
+              path="/containers"
+              element={
+                <ContainersPage
+                  docker={docker}
+                  logs={logs}
+                  search={search}
+                  onOpenDetails={(id) => navigate(`/containers/${id}`)}
+                  onCreate={() => navigate('/containers/new')}
+                />
+              }
+            />
+            <Route
+              path="/containers/new"
+              element={
+                <CreateContainerPage
+                  onCreated={(containerId) => navigate(`/containers/${containerId}`)}
+                  onCancel={() => navigate('/containers')}
+                />
+              }
+            />
+            <Route
+              path="/containers/:containerId"
+              element={
+                <ContainerDetailRoute
+                  docker={docker}
+                  logs={logs}
+                  onBack={() => navigate('/containers')}
+                />
+              }
+            />
+            <Route path="/dashboard" element={<DashboardPage docker={docker} onOpenLogs={logs.open} />} />
+            <Route path="/images" element={<ImagesPage search={search} />} />
+            <Route path="/volumes" element={<VolumesPage search={search} />} />
+            <Route path="/networks" element={<NetworksPage search={search} />} />
+            <Route path="/monitoring" element={<MonitoringPage docker={docker} search={search} />} />
+            <Route path="/cleanup" element={<CleanupPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            {/* Неизвестный адрес — не белый экран, а список контейнеров. */}
+            <Route path="*" element={<Navigate to="/containers" replace />} />
+          </Routes>
         </main>
 
         <LogDock api={logs} />
@@ -206,6 +192,38 @@ function App({ account, onSignOut }: AppProps) {
         </div>
       )}
     </div>
+  )
+}
+
+interface ContainerDetailRouteProps {
+  docker: ReturnType<typeof useDocker>
+  logs: ReturnType<typeof useLogSessions>
+  onBack: () => void
+}
+
+function ContainerDetailRoute({ docker, logs, onBack }: ContainerDetailRouteProps) {
+  const { containerId = '' } = useParams()
+
+  return (
+    <ContainerDetailPage
+      containerId={containerId}
+      onBack={onBack}
+      onOpenLogs={(id) => {
+        const target = docker.containers.find((item) => item.id === id)
+        if (target !== undefined) logs.open(target)
+      }}
+      onAction={(id, action) => {
+        if (action === 'start') docker.start(id)
+        else if (action === 'stop') docker.stop(id)
+        else if (action === 'restart') docker.restart(id)
+        else if (action === 'pause') docker.pause(id)
+        else docker.kill(id)
+      }}
+      onRemove={(id) => {
+        docker.remove(id)
+        onBack()
+      }}
+    />
   )
 }
 

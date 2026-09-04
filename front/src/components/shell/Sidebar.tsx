@@ -11,6 +11,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { NavLink } from 'react-router'
 import { useSettings, useT } from '../../state/settings'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -43,7 +44,6 @@ const NAV: NavItem[] = [
 
 interface SidebarProps {
   current: NavKey
-  onNavigate: (key: NavKey) => void
   runningCount: number
   totalCount: number
   /** Имя вошедшего пользователя. */
@@ -53,7 +53,6 @@ interface SidebarProps {
 
 export function Sidebar({
   current,
-  onNavigate,
   runningCount,
   totalCount,
   username,
@@ -108,10 +107,11 @@ export function Sidebar({
           const label = t(`nav.${item.key}`)
 
           return (
-            <button
+            // Настоящая ссылка, а не кнопка: адрес можно скопировать,
+            // открыть в новой вкладке и переслать.
+            <NavLink
               key={item.key}
-              type="button"
-              onClick={() => onNavigate(item.key)}
+              to={`/${item.key}`}
               title={collapsed ? label : undefined}
               aria-label={label}
               className={[
@@ -127,7 +127,7 @@ export function Sidebar({
               )}
               <Icon className="h-4 w-4 shrink-0" />
               {!collapsed && <span className="truncate">{label}</span>}
-            </button>
+            </NavLink>
           )
         })}
       </nav>

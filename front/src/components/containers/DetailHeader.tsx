@@ -67,7 +67,7 @@ export function DetailHeader({ container, onBack, onOpenLogs, onAction, onRemove
         <div className="min-w-0 flex-1">
           <nav className="flex items-center gap-1 text-xs text-muted-foreground">
             <button type="button" onClick={onBack} className="transition-colors hover:text-foreground">
-              Контейнеры
+              {t('nav.containers')}
             </button>
             <ChevronRight className="h-3 w-3 text-muted-foreground" />
             <span className="truncate text-muted-foreground">{container.name}</span>

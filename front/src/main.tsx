@@ -1,5 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { BrowserRouter } from 'react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import './index.css'
 import App from './App.tsx'
@@ -31,7 +32,9 @@ createRoot(document.getElementById('root')!).render(
         <ErrorLog />
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
+            <BrowserRouter>
             <AuthGate>{(account, signOut) => <App account={account} onSignOut={signOut} />}</AuthGate>
+            </BrowserRouter>
           </TooltipProvider>
         </QueryClientProvider>
       </SettingsProvider>

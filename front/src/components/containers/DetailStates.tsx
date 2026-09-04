@@ -5,11 +5,13 @@ import { useT } from '@/state/settings'
 /** Загрузка, ошибка и «контейнера больше нет» — три экрана вместо страницы. */
 
 function Shell({ onBack, children }: { onBack: () => void; children: React.ReactNode }) {
+  const t = useT()
+
   return (
     <div className="rh-scroll h-full space-y-3 overflow-y-auto p-4">
       <div className="rh-panel flex items-center gap-3 p-3">
         <BackButton onBack={onBack} />
-        <span className="text-xs text-muted-foreground">Контейнеры</span>
+        <span className="text-xs text-muted-foreground">{t('nav.containers')}</span>
       </div>
       {children}
     </div>
