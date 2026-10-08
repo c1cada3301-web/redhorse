@@ -1,4 +1,4 @@
-"""Преобразование сырых структур Docker Engine в схемы Dala."""
+"""Преобразование сырых структур Docker Engine в схемы RedHorse."""
 
 from __future__ import annotations
 

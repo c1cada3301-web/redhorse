@@ -26,7 +26,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
     // eslint-disable-next-line no-console
-    console.error('Ошибка рендера Dala:', error, info.componentStack)
+    console.error('Ошибка рендера RedHorse:', error, info.componentStack)
 
     pushError({
       kind: 'render',

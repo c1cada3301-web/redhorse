@@ -3,10 +3,10 @@
 # Единый образ панели: фронт, API и файловая база в одном контейнере.
 # Ставится одной командой, как Portainer:
 #
-#   docker run -d --name dala -p 9443:9443 -p 9000:9000 \
+#   docker run -d --name redhorse -p 9443:9443 -p 9000:9000 \
 #     -v /var/run/docker.sock:/var/run/docker.sock \
-#     -v dala_data:/data \
-#     dala/dala:latest
+#     -v redhorse_data:/data \
+#     redhorse/redhorse:latest
 
 # --- сборка фронта ---------------------------------------------------------
 FROM node:22-alpine AS web
@@ -37,14 +37,14 @@ RUN python -m venv /opt/venv \
 # --- рантайм ---------------------------------------------------------------
 FROM python:3.13-slim
 
-LABEL org.opencontainers.image.title="Dala" \
+LABEL org.opencontainers.image.title="RedHorse" \
       org.opencontainers.image.description="Веб-панель управления Docker" \
-      org.opencontainers.image.source="https://github.com/dala/dala"
+      org.opencontainers.image.source="https://github.com/redhorse/redhorse"
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PATH="/opt/venv/bin:$PATH" \
-    DALA_ENV=production
+    REDHORSE_ENV=production
 
 COPY --from=deps /opt/venv /opt/venv
 

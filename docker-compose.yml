@@ -1,13 +1,13 @@
 # Прод-установка: один контейнер, как Portainer. Фронт, API и файловая база
-# внутри одного образа, данные и сертификат — в томе dala-data.
+# внутри одного образа, данные и сертификат — в томе redhorse-data.
 #
 #   docker compose up -d
 #
-# Внешний Postgres вместо файловой базы — раскомментируй DALA_DATABASE_URL.
+# Внешний Postgres вместо файловой базы — раскомментируй REDHORSE_DATABASE_URL.
 services:
-  dala:
+  redhorse:
     build: .
-    image: dala/dala:latest
+    image: redhorse/redhorse:latest
     restart: unless-stopped
     ports:
       - "9443:9443"   # HTTPS, самоподписанный сертификат
@@ -15,12 +15,12 @@ services:
     volumes:
       # Доступ к сокету равнозначен root на хосте — ради него панель и существует.
       - /var/run/docker.sock:/var/run/docker.sock
-      - dala-data:/data
+      - redhorse-data:/data
     environment:
       # Пусто — администратора создаёт первый вход в течение 5 минут после старта.
-      - DALA_ADMIN_USER=${DALA_ADMIN_USER:-admin}
-      - DALA_ADMIN_PASSWORD=${DALA_ADMIN_PASSWORD:-}
-      # - DALA_DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/dala
+      - REDHORSE_ADMIN_USER=${REDHORSE_ADMIN_USER:-admin}
+      - REDHORSE_ADMIN_PASSWORD=${REDHORSE_ADMIN_PASSWORD:-}
+      # - REDHORSE_DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/redhorse
 
 volumes:
-  dala-data:
+  redhorse-data:

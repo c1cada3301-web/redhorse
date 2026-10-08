@@ -65,7 +65,7 @@ export function LoginForm({ mode, setupClosed = false, onSuccess }: LoginFormPro
             </span>
             <div className="min-w-0">
               <div className="text-xl font-semibold tracking-tight text-foreground">
-                {setup ? t('auth.setup.title') : 'Dala'}
+                {setup ? t('auth.setup.title') : 'RedHorse'}
               </div>
               <div className="truncate text-xs text-muted-foreground">
                 {setup ? t('auth.setup.subtitle') : t('auth.login.title')}

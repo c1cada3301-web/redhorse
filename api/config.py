@@ -6,9 +6,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Настройки берутся из окружения, префикс DALA_ (см. api/.env)."""
+    """Настройки берутся из окружения, префикс REDHORSE_ (см. api/.env)."""
 
-    model_config = SettingsConfigDict(env_prefix="DALA_", env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_prefix="REDHORSE_", env_file=".env", extra="ignore")
 
     env: str = "production"
 
@@ -46,8 +46,8 @@ class Settings(BaseSettings):
 
     # --- база данных -------------------------------------------------------
     # По умолчанию — файл в /data: так панель поднимается одной командой,
-    # без отдельного сервера БД. Postgres подключается через DALA_DATABASE_URL.
-    database_url: str = "sqlite+aiosqlite:////data/dala.db"
+    # без отдельного сервера БД. Postgres подключается через REDHORSE_DATABASE_URL.
+    database_url: str = "sqlite+aiosqlite:////data/redhorse.db"
 
     # --- авторизация -------------------------------------------------------
     # Секрет подписи JWT. Пустой — создаётся при первом старте и хранится в базе.
@@ -56,7 +56,7 @@ class Settings(BaseSettings):
 
     # Имя cookie с токеном. Флаг Secure ставится сам, когда вход идёт по HTTPS;
     # cookie_secure=true требует его всегда (панель только за TLS-прокси).
-    session_cookie: str = "dala_session"
+    session_cookie: str = "redhorse_session"
     cookie_secure: bool = False
 
     # Первый администратор из окружения — когда таблица пользователей пуста.

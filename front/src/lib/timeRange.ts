@@ -39,7 +39,7 @@ const LIVE_LABELS: Readonly<Record<string, string>> = {
 /**
  * По умолчанию — всё время: у тихих сервисов за последние 15 минут часто
  * нет ни строки, и окно открывалось пустым. Объём всё равно ограничен
- * хвостом на бэкенде (DALA_LOG_DEFAULT_TAIL).
+ * хвостом на бэкенде (REDHORSE_LOG_DEFAULT_TAIL).
  */
 export const DEFAULT_RANGE: TimeRange = { mode: 'live', sinceMs: Number.POSITIVE_INFINITY }
 

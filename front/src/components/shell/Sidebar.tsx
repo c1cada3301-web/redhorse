@@ -94,7 +94,7 @@ export function Sidebar({
         />
         {!collapsed && (
           <div className="min-w-0 leading-tight">
-            <div className="truncate text-base font-semibold tracking-tight text-foreground">Dala</div>
+            <div className="truncate text-base font-semibold tracking-tight text-foreground">RedHorse</div>
             <div className="truncate text-2xs text-muted-foreground">{t('nav.tagline')}</div>
           </div>
         )}

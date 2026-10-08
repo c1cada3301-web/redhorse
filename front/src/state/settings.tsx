@@ -3,7 +3,9 @@ import type { ReactNode } from 'react'
 import { LANGUAGES, getDictionary, setCurrentLanguage, translate } from '../lib/i18n'
 import type { Language } from '../lib/i18n'
 
-const STORAGE_KEY = 'dala.settings'
+const STORAGE_KEY = 'redhorse.settings'
+// Ключ до переименования панели: читаем его, чтобы не сбросить настройки.
+const LEGACY_STORAGE_KEY = 'dala.settings'
 
 export type Theme = 'dark' | 'light' | 'system'
 
@@ -98,7 +100,8 @@ function loadSettings(): Settings {
   const fallback = defaultSettings()
 
   try {
-    const stored = window.localStorage.getItem(STORAGE_KEY)
+    const stored =
+      window.localStorage.getItem(STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_STORAGE_KEY)
     if (stored === null) return fallback
 
     const parsed: unknown = JSON.parse(stored)

@@ -2,7 +2,7 @@
 Точка входа образа: HTTP и HTTPS из одного процесса, как 9000 и 9443 у Portainer.
 
 HTTPS поднимается с самоподписанным сертификатом, созданным при первом старте
-и сохранённым в томе. Свой сертификат — через DALA_TLS_CERT и DALA_TLS_KEY.
+и сохранённым в томе. Свой сертификат — через REDHORSE_TLS_CERT и REDHORSE_TLS_KEY.
 """
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ from cryptography.x509.oid import NameOID
 
 from config import Settings, get_settings
 
-log = logging.getLogger("dala.serve")
+log = logging.getLogger("redhorse.serve")
 
 _CERT_DAYS = 3650
 
@@ -37,7 +37,7 @@ def self_signed(directory: Path) -> tuple[Path, Path]:
 
     directory.mkdir(parents=True, exist_ok=True)
     key = ec.generate_private_key(ec.SECP256R1())
-    name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "dala")])
+    name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "redhorse")])
     now = datetime.now(UTC)
 
     cert = (

@@ -2,7 +2,7 @@
 const BASE = '/api'
 
 /** Сессия отвалилась: слушает оболочка, чтобы вернуть экран входа. */
-export const UNAUTHORIZED_EVENT = 'dala:unauthorized'
+export const UNAUTHORIZED_EVENT = 'redhorse:unauthorized'
 
 export class ApiError extends Error {
   readonly status: number

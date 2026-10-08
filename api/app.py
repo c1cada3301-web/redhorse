@@ -39,7 +39,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
 _docs = {} if not settings.is_production else {"docs_url": None, "redoc_url": None, "openapi_url": None}
 
 app = FastAPI(
-    title="Dala",
+    title="RedHorse",
     description="Управление Docker: контейнеры, логи, образы.",
     version="0.1.0",
     lifespan=lifespan,
@@ -78,7 +78,7 @@ STATIC_DIR = (Path(__file__).parent / "static").resolve()
 def resolve_static(path: str, root: Path = STATIC_DIR) -> Path | None:
     """
     Файл статики по пути из адреса — или None, если путь ведёт за пределы
-    каталога. Без этой проверки запрос /..%2f..%2fdata/dala.db отдавал базу
+    каталога. Без этой проверки запрос /..%2f..%2fdata/redhorse.db отдавал базу
     вместе с секретом подписи сессий.
     """
     if path == "":

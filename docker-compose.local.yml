@@ -10,9 +10,9 @@ services:
     image: postgres:17-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-dala}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dala}
-      POSTGRES_DB: ${POSTGRES_DB:-dala}
+      POSTGRES_USER: ${POSTGRES_USER:-redhorse}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-redhorse}
+      POSTGRES_DB: ${POSTGRES_DB:-redhorse}
     # Наружу только с localhost. 5433, а не 5432: штатный порт обычно занят
     # системным Postgres, и контейнер из-за этого не стартует.
     ports:
@@ -22,7 +22,7 @@ services:
     # API стартует только когда база реально принимает подключения,
     # иначе первый же запрос к ней падает на старте.
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-dala} -d ${POSTGRES_DB:-dala}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-redhorse} -d ${POSTGRES_DB:-redhorse}"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -37,17 +37,17 @@ services:
     ports:
       - "127.0.0.1:8000:8000"
     environment:
-      - DALA_ENV=development
+      - REDHORSE_ENV=development
       # Фронт открыт на :3003 и ходит в API через прокси Vite — его Origin
       # отличается от Host API, поэтому разрешаем явно.
-      - DALA_TRUSTED_ORIGINS=["http://localhost:3003","http://127.0.0.1:3003"]
-      - DALA_DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-dala}:${POSTGRES_PASSWORD:-dala}@db:5432/${POSTGRES_DB:-dala}
+      - REDHORSE_TRUSTED_ORIGINS=["http://localhost:3003","http://127.0.0.1:3003"]
+      - REDHORSE_DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-redhorse}:${POSTGRES_PASSWORD:-redhorse}@db:5432/${POSTGRES_DB:-redhorse}
       # Пусто — секрет создаётся при первом старте и сохраняется в базе.
-      - DALA_JWT_SECRET=${DALA_JWT_SECRET:-}
+      - REDHORSE_JWT_SECRET=${REDHORSE_JWT_SECRET:-}
       # Первый administrator создаётся при пустой таблице пользователей.
       # Пароль пустой — сгенерируется и один раз напечатается в лог API.
-      - DALA_ADMIN_USER=${DALA_ADMIN_USER:-admin}
-      - DALA_ADMIN_PASSWORD=${DALA_ADMIN_PASSWORD:-}
+      - REDHORSE_ADMIN_USER=${REDHORSE_ADMIN_USER:-admin}
+      - REDHORSE_ADMIN_PASSWORD=${REDHORSE_ADMIN_PASSWORD:-}
     # Код монтируется поверх образа, --reload следит за изменениями.
     volumes:
       - ./api:/app

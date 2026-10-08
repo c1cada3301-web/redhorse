@@ -1,4 +1,4 @@
-# Dala — фронт
+# RedHorse — фронт
 
 Прототип интерфейса на React 19 + Vite + TypeScript + Tailwind v4.
 Данных с реального Docker пока нет: всё живое, но из моков (`src/lib/mockContainers.ts`,

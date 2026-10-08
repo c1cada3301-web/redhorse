@@ -29,7 +29,8 @@ export default defineConfig({
     watch: process.env.CHOKIDAR_USEPOLLING === 'true' ? { usePolling: true, interval: 300 } : undefined,
     proxy: {
       // ws: true обязателен, иначе не пройдут потоки логов и метрик.
-      '/api': { target: API_TARGET, changeOrigin: true, ws: true },
+      // xfwd: прокси передаёт X-Forwarded-Host, и API узнаёт в Origin свою же страницу.
+      '/api': { target: API_TARGET, changeOrigin: true, ws: true, xfwd: true },
     },
   },
 })
