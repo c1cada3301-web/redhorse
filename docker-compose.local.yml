@@ -38,6 +38,9 @@ services:
       - "127.0.0.1:8000:8000"
     environment:
       - DALA_ENV=development
+      # Фронт открыт на :3003 и ходит в API через прокси Vite — его Origin
+      # отличается от Host API, поэтому разрешаем явно.
+      - DALA_TRUSTED_ORIGINS=["http://localhost:3003","http://127.0.0.1:3003"]
       - DALA_DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-dala}:${POSTGRES_PASSWORD:-dala}@db:5432/${POSTGRES_DB:-dala}
       # Пусто — секрет создаётся при первом старте и сохраняется в базе.
       - DALA_JWT_SECRET=${DALA_JWT_SECRET:-}

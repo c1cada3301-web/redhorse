@@ -35,3 +35,15 @@ class Setting(Base):
 
     key: Mapped[str] = mapped_column(String(64), primary_key=True)
     value: Mapped[str] = mapped_column(String(512))
+
+
+class RevokedToken(Base):
+    """
+    Отозванные сессии. Токен сам по себе живёт до истечения срока, поэтому
+    выход записывает его jti сюда; запись удаляется, когда срок всё равно вышел.
+    """
+
+    __tablename__ = "revoked_tokens"
+
+    jti: Mapped[str] = mapped_column(String(64), primary_key=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)

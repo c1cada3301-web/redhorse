@@ -1,21 +1,16 @@
-# nowibe-core @ file:./shared
-# отключено: папка shared/ пуста и лежит вне контекста сборки (./api)
-
-fastapi
-uvicorn[standard]
-docker
-sqlalchemy[asyncio]
-asyncpg
-aiosqlite
-python-dotenv
-httpx[socks]
-bcrypt
-pywebpush
-pydantic
-pydantic-settings
-redis
-pillow
-openpyxl
-python-multipart
-python-jose[cryptography]
-python-Levenshtein
+# Только то, что реально импортируется. Версии закреплены: панель держит
+# Docker-сокет, и обновление зависимости должно быть осознанным шагом.
+fastapi==0.142.4
+uvicorn[standard]==0.54.0
+docker==7.2.0
+sqlalchemy[asyncio]==2.1.4
+asyncpg==0.32.0
+aiosqlite==0.22.1
+httpx==0.28.1
+bcrypt==5.0.0
+pydantic==2.13.5
+pydantic-settings==2.15.0
+# Токены сессий. python-jose заброшен и несёт CVE-2024-33663/33664.
+PyJWT==2.15.1
+# Самоподписанный сертификат для HTTPS-порта.
+cryptography==50.0.2

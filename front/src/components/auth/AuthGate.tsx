@@ -20,6 +20,7 @@ interface AuthGateProps {
 export function AuthGate({ children }: AuthGateProps) {
   const [phase, setPhase] = useState<Phase>('checking')
   const [account, setAccount] = useState<Account | null>(null)
+  const [setupOpen, setSetupOpen] = useState(true)
 
   const probe = useCallback(async () => {
     try {
@@ -33,6 +34,7 @@ export function AuthGate({ children }: AuthGateProps) {
 
     try {
       const state = await fetchAuthState()
+      setSetupOpen(state.setupOpen)
       setPhase(state.initialized ? 'login' : 'setup')
     } catch {
       // База недоступна — показываем вход: там будет видна ошибка сервера.
@@ -73,6 +75,7 @@ export function AuthGate({ children }: AuthGateProps) {
   return (
     <LoginForm
       mode={phase === 'setup' ? 'setup' : 'login'}
+      setupClosed={phase === 'setup' && !setupOpen}
       onSuccess={(me) => {
         setAccount(me)
         setPhase('ready')

@@ -2,18 +2,20 @@ from __future__ import annotations
 
 import logging
 import secrets
+import time
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
 import bcrypt
-from fastapi import Depends, HTTPException, Response, WebSocket, WebSocketException, status
+import jwt
+from fastapi import Depends, HTTPException, Request, Response, WebSocket, WebSocketException, status
 from starlette.requests import HTTPConnection
-from jose import JWTError, jwt
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import get_settings
-from database.models import Setting, User
+from database.models import RevokedToken, Setting, User
 from database.session import get_session, sessionmaker
 
 log = logging.getLogger(__name__)
@@ -80,6 +82,15 @@ def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode()[:72], bcrypt.gensalt()).decode()
 
 
+# Хеш-пустышка: вход с несуществующим логином тратит на bcrypt столько же
+# времени, сколько с существующим, и по задержке логины не перебрать.
+_DUMMY_HASH = bcrypt.hashpw(secrets.token_bytes(16), bcrypt.gensalt()).decode()
+
+
+def burn_password_check(password: str) -> None:
+    verify_password(password, _DUMMY_HASH)
+
+
 def verify_password(password: str, password_hash: str) -> bool:
     try:
         return bcrypt.checkpw(password.encode()[:72], password_hash.encode())
@@ -91,27 +102,39 @@ def verify_password(password: str, password_hash: str) -> bool:
 # --- токены ----------------------------------------------------------------
 
 
+@dataclass(frozen=True)
+class TokenClaims:
+    user_id: int
+    jti: str
+    expires_at: datetime
+
+
 def create_token(user: User) -> str:
     settings = get_settings()
     now = datetime.now(UTC)
     payload = {
         "sub": str(user.id),
         "name": user.username,
+        # Идентификатор сессии: по нему выход отзывает именно этот токен.
+        "jti": secrets.token_urlsafe(16),
         "iat": int(now.timestamp()),
         "exp": int((now + timedelta(hours=settings.jwt_ttl_hours)).timestamp()),
     }
     return jwt.encode(payload, secret(), algorithm=ALGORITHM)
 
 
-def set_session_cookie(response: Response, token: str) -> None:
+def set_session_cookie(request: Request, response: Response, token: str) -> None:
     settings = get_settings()
     response.set_cookie(
         settings.session_cookie,
         token,
         max_age=settings.jwt_ttl_hours * 3600,
         httponly=True,           # JS до токена не дотянется — XSS его не украдёт
-        samesite="lax",          # защита от межсайтовых POST-запросов
-        secure=settings.cookie_secure,
+        # strict, а не lax: «своим сайтом» браузер считает любой порт того же
+        # хоста, а там крутятся чужие контейнеры с веб-интерфейсами.
+        samesite="strict",
+        # По HTTPS — всегда Secure. По голому HTTP браузер такую cookie не сохранит.
+        secure=settings.cookie_secure or request.url.scheme == "https",
         path="/",
     )
 
@@ -120,15 +143,36 @@ def clear_session_cookie(response: Response) -> None:
     response.delete_cookie(get_settings().session_cookie, path="/")
 
 
-def _user_id_from_token(token: str) -> int | None:
+def decode_token(token: str) -> TokenClaims | None:
     try:
-        payload = jwt.decode(token, secret(), algorithms=[ALGORITHM])
-    except JWTError:
+        payload = jwt.decode(
+            token,
+            secret(),
+            algorithms=[ALGORITHM],
+            options={"require": ["sub", "jti", "exp"]},
+        )
+        return TokenClaims(
+            user_id=int(payload["sub"]),
+            jti=str(payload["jti"]),
+            expires_at=datetime.fromtimestamp(int(payload["exp"]), tz=UTC),
+        )
+    except (jwt.InvalidTokenError, TypeError, ValueError):
         return None
-    try:
-        return int(payload.get("sub", ""))
-    except (TypeError, ValueError):
-        return None
+
+
+async def revoke_token(session: AsyncSession, claims: TokenClaims) -> None:
+    """Записывает сессию в отозванные и попутно чистит те, что истекли сами."""
+    now = datetime.now(UTC)
+    await session.execute(delete(RevokedToken).where(RevokedToken.expires_at < now))
+
+    if await session.get(RevokedToken, claims.jti) is None:
+        session.add(RevokedToken(jti=claims.jti, expires_at=claims.expires_at))
+
+    await session.commit()
+
+
+async def is_revoked(session: AsyncSession, jti: str) -> bool:
+    return await session.get(RevokedToken, jti) is not None
 
 
 # --- зависимости -----------------------------------------------------------
@@ -154,9 +198,9 @@ async def current_user(
     user = None
 
     if token:
-        user_id = _user_id_from_token(token)
-        if user_id is not None:
-            user = await _load_active_user(session, user_id)
+        claims = decode_token(token)
+        if claims is not None and not await is_revoked(session, claims.jti):
+            user = await _load_active_user(session, claims.user_id)
 
     if user is None:
         if isinstance(connection, WebSocket):
@@ -168,6 +212,19 @@ async def current_user(
 
 
 # --- первичная настройка ---------------------------------------------------
+
+_started_at = time.monotonic()
+
+
+def mark_started() -> None:
+    """Отсчёт окна первичной настройки — от старта процесса."""
+    global _started_at
+    _started_at = time.monotonic()
+
+
+def setup_window_open() -> bool:
+    minutes = get_settings().setup_window_minutes
+    return minutes <= 0 or time.monotonic() - _started_at < minutes * 60
 
 
 async def users_exist(session: AsyncSession) -> bool:

@@ -13,10 +13,12 @@ const MIN_PASSWORD = 8
 interface LoginFormProps {
   /** setup — в базе ещё нет пользователей, создаём первого администратора. */
   mode: 'login' | 'setup'
+  /** Окно первичной настройки истекло: создать администратора можно только после перезапуска. */
+  setupClosed?: boolean
   onSuccess: (account: Account) => void
 }
 
-export function LoginForm({ mode, onSuccess }: LoginFormProps) {
+export function LoginForm({ mode, setupClosed = false, onSuccess }: LoginFormProps) {
   const t = useT()
   const setup = mode === 'setup'
   const [username, setUsername] = useState(setup ? 'admin' : '')
@@ -110,13 +112,19 @@ export function LoginForm({ mode, onSuccess }: LoginFormProps) {
               </div>
             )}
 
+            {setupClosed && (
+              <p role="alert" className="rounded-md bg-destructive/10 px-2.5 py-2 text-xs text-destructive">
+                {t('auth.setup.closed')}
+              </p>
+            )}
+
             {error !== null && (
               <p role="alert" className="rounded-md bg-destructive/10 px-2.5 py-2 text-xs text-destructive">
                 {error}
               </p>
             )}
 
-            <Button type="submit" size="lg" disabled={busy} className="mt-1 w-full">
+            <Button type="submit" size="lg" disabled={busy || setupClosed} className="mt-1 w-full">
               {busy && <Loader2 className="size-3.5 animate-spin" />}
               {setup ? t('auth.submitSetup') : t('auth.submit')}
             </Button>

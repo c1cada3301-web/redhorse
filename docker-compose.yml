@@ -1,59 +1,26 @@
+# Прод-установка: один контейнер, как Portainer. Фронт, API и файловая база
+# внутри одного образа, данные и сертификат — в томе dala-data.
+#
+#   docker compose up -d
+#
+# Внешний Postgres вместо файловой базы — раскомментируй DALA_DATABASE_URL.
 services:
-  db:
-    image: postgres:17-alpine
-    restart: unless-stopped
-    # Пароль обязателен: без него compose откажется стартовать, а не поднимет
-    # базу управления Docker-хостом с паролем по умолчанию.
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:?задай POSTGRES_USER в .env}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?задай POSTGRES_PASSWORD в .env}
-      POSTGRES_DB: ${POSTGRES_DB:?задай POSTGRES_DB в .env}
-    # Порт наружу не публикуется: база доступна только по внутренней сети compose.
-    volumes:
-      - db-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-
-  web:
-    build:
-      context: ./front
+  dala:
+    build: .
+    image: dala/dala:latest
     restart: unless-stopped
     ports:
-      - "80:80"
-    depends_on:
-      - api
-
-  api:
-    build:
-      context: ./api
-    env_file:
-      - ./api/.env
-    restart: unless-stopped
-    # Порт наружу НЕ публикуется. Аутентификации пока нет, а доступ к сокету
-    # равносилен root на хосте — открытый порт означал бы удалённое управление
-    # Docker без единой проверки. Снаружи доступен только nginx, он же проксирует
-    # /api по внутренней сети compose.
-    expose:
-      - "8000"
+      - "9443:9443"   # HTTPS, самоподписанный сертификат
+      - "9000:9000"   # HTTP; закрой, если панель смотрит наружу
+    volumes:
+      # Доступ к сокету равнозначен root на хосте — ради него панель и существует.
+      - /var/run/docker.sock:/var/run/docker.sock
+      - dala-data:/data
     environment:
-      - DALA_ENV=production
-      - DALA_DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
-      # Секрет подписи токенов. Пусто — панель создаст его сама при первом
-      # старте и сохранит в базе; задавать вручную нужно, только если хочется
-      # общий секрет на несколько независимых установок.
-      - DALA_JWT_SECRET=${DALA_JWT_SECRET:-}
+      # Пусто — администратора создаёт первый вход в течение 5 минут после старта.
       - DALA_ADMIN_USER=${DALA_ADMIN_USER:-admin}
       - DALA_ADMIN_PASSWORD=${DALA_ADMIN_PASSWORD:-}
-    # Только чтение сокета нам не подходит — нужны start/stop и сборка образов.
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    user: "0:0"
-    depends_on:
-      db:
-        condition: service_healthy
+      # - DALA_DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/dala
 
 volumes:
-  db-data:
+  dala-data:

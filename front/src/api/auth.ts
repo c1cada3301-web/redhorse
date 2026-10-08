@@ -8,6 +8,8 @@ export interface Account {
 export interface AuthState {
   /** false — в базе нет ни одного пользователя, нужен экран первичной настройки. */
   initialized: boolean
+  /** Окно создания первого администратора после старта ещё открыто. */
+  setupOpen: boolean
 }
 
 export function fetchAuthState(): Promise<AuthState> {
