@@ -39,7 +39,7 @@ FROM python:3.13-slim
 
 LABEL org.opencontainers.image.title="RedHorse" \
       org.opencontainers.image.description="Веб-панель управления Docker" \
-      org.opencontainers.image.source="https://github.com/redhorse/redhorse"
+      org.opencontainers.image.source="https://github.com/c1cada3301-web/redhorse"
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
