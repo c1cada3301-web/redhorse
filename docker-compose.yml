@@ -10,7 +10,9 @@ services:
     image: redhorse/redhorse:latest
     restart: unless-stopped
     ports:
-      - "9443:9443"   # HTTPS, самоподписанный сертификат
+      # HTTPS, самоподписанный сертификат. Только localhost — заходить через
+      # SSH-туннель; чтобы открыть наружу, убери 127.0.0.1.
+      - "127.0.0.1:9443:9443"
     volumes:
       # Доступ к сокету равнозначен root на хосте — ради него панель и существует.
       - /var/run/docker.sock:/var/run/docker.sock
