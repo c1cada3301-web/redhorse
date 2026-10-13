@@ -9,14 +9,24 @@ export interface PruneGroup {
   hint: string
   candidates: PruneCandidate[]
   count: number
+  /** Кандидаты, которые уйдут только с галочкой расширенной очистки. */
+  hidden: number
   size: number
   /** Кеш сборки поштучно не разбирается — только суммарный размер. */
   aggregateOnly: boolean
 }
 
+/** Расширенная очистка: то, что обычный prune Docker не трогает. */
+export interface PruneOptions {
+  taggedImages: boolean
+  namedVolumes: boolean
+}
+
+export const DEFAULT_PRUNE_OPTIONS: PruneOptions = { taggedImages: false, namedVolumes: false }
+
 const TITLES: Record<PruneTarget, string> = {
   containers: 'Контейнеры',
-  images: 'Образы без тега',
+  images: 'Образы',
   volumes: 'Тома',
   networks: 'Сети',
   builder: 'Кеш сборки',
@@ -25,7 +35,7 @@ const TITLES: Record<PruneTarget, string> = {
 const HINTS: Record<PruneTarget, string> = {
   containers: 'остановленные и завершённые',
   images: 'висячие слои <none>, не занятые контейнерами',
-  volumes: 'не подключены ни к одному контейнеру',
+  volumes: 'анонимные, не подключены ни к одному контейнеру',
   networks: 'без подключённых контейнеров',
   builder: 'Docker отдаёт только суммарный размер — поимённого списка слоёв нет',
 }
@@ -37,29 +47,39 @@ function sumSize(candidates: PruneCandidate[]): number {
   return candidates.reduce((sum, item) => sum + item.size, 0)
 }
 
-function listGroup(target: PruneTarget, candidates: PruneCandidate[]): PruneGroup {
+const EXTENDED_HINTS: Partial<Record<PruneTarget, string>> = {
+  images: 'все без контейнеров, в том числе с тегами',
+  volumes: 'все без контейнеров, в том числе именованные',
+}
+
+function listGroup(target: PruneTarget, all: PruneCandidate[], extended = false): PruneGroup {
+  // Список обязан совпадать с тем, что удалит Docker, — лишнее прячем, а не обещаем.
+  const candidates = extended ? all : all.filter((item) => item.extended !== true)
+
   return {
     target,
     title: TITLES[target],
-    hint: HINTS[target],
+    hint: (extended ? EXTENDED_HINTS[target] : undefined) ?? HINTS[target],
     candidates,
     count: candidates.length,
+    hidden: all.length - candidates.length,
     size: sumSize(candidates),
     aggregateOnly: false,
   }
 }
 
-export function buildGroups(preview: PrunePreview): PruneGroup[] {
+export function buildGroups(preview: PrunePreview, options: PruneOptions = DEFAULT_PRUNE_OPTIONS): PruneGroup[] {
   return [
     listGroup('containers', preview.containers),
-    listGroup('images', preview.images),
-    listGroup('volumes', preview.volumes),
+    listGroup('images', preview.images, options.taggedImages),
+    listGroup('volumes', preview.volumes, options.namedVolumes),
     listGroup('networks', preview.networks),
     {
       target: 'builder',
       title: TITLES.builder,
       hint: HINTS.builder,
       candidates: [],
+      hidden: 0,
       count: preview.builder.length,
       size: preview.builderSize,
       aggregateOnly: true,
@@ -67,9 +87,12 @@ export function buildGroups(preview: PrunePreview): PruneGroup[] {
   ]
 }
 
-/** Плитку имеет смысл жать, если есть что удалять: объекты или занятые байты. */
+/**
+ * Плитку имеет смысл жать, если есть что удалять: объекты или занятые байты.
+ * Скрытые кандидаты тоже считаются — иначе до галочки в диалоге не добраться.
+ */
 export function hasWork(group: PruneGroup): boolean {
-  return group.count > 0 || group.size > 0
+  return group.count > 0 || group.size > 0 || group.hidden > 0
 }
 
 export function totalReclaimable(groups: PruneGroup[]): number {

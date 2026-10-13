@@ -288,6 +288,9 @@ export const ru: Dictionary = {
   'cleanup.retry': 'Повторить',
   'cleanup.images.allUnused': 'Удалять все неиспользуемые образы, а не только без тега',
   'cleanup.images.allUnusedHint': 'Уйдут и образы с тегами, если их не занял ни один контейнер — скачивать заново.',
+  'cleanup.volumes.named': 'Удалять и именованные тома, а не только анонимные',
+  'cleanup.volumes.namedHint': 'Именованные тома обычно хранят данные баз и приложений — восстановить их будет неоткуда.',
+  'cleanup.extendedHidden': 'ещё {count} — по галочке в диалоге',
   'cleanup.candidates': '{count} объектов под удаление',
 
   // Образы, сборка, загрузка

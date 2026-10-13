@@ -181,7 +181,8 @@ async def tag_image(image_id: str, repository: str = Query(...), tag: str = Quer
 
 @router.delete("/prune", status_code=200)
 async def prune_images(dangling_only: bool = Query(True)) -> dict:
-    filters = {"dangling": True} if dangling_only else {}
+    # Без фильтра Docker удаляет только висячие — «все» включаются явным dangling=false.
+    filters = {"dangling": dangling_only}
 
     def run():
         return get_client().images.prune(filters=filters)

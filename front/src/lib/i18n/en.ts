@@ -288,6 +288,9 @@ export const en: Dictionary = {
   'cleanup.retry': 'Retry',
   'cleanup.images.allUnused': 'Remove all unused images, not only untagged ones',
   'cleanup.images.allUnusedHint': 'Tagged images go too if no container uses them — you will have to pull them again.',
+  'cleanup.volumes.named': 'Remove named volumes too, not only anonymous ones',
+  'cleanup.volumes.namedHint': 'Named volumes usually hold database and app data — there is no way to restore them.',
+  'cleanup.extendedHidden': '{count} more — tick the box in the dialog',
   'cleanup.candidates': '{count} objects to remove',
 
   // Images, build, pull

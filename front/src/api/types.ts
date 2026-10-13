@@ -156,6 +156,11 @@ export interface PruneCandidate {
   status?: string
   driver?: string
   mountpoint?: string
+  /**
+   * Уходит только при расширенной очистке: образ с тегом или именованный том.
+   * Обычный prune Docker их не трогает.
+   */
+  extended?: boolean
 }
 
 export interface PrunePreview {

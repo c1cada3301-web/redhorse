@@ -16,14 +16,15 @@ import {
 import { useDiskUsage, usePrune, usePrunePreview } from '../../api/queries'
 import type { PruneTarget } from '../../api/types'
 import { formatBytes } from '../../lib/format'
-import { ConfirmDialog } from '../ui/ConfirmDialog'
 import { CandidateList } from './CandidateList'
 import { CleanupTile } from './CleanupTile'
-import { ImagePruneDialog } from './ImagePruneDialog'
+import { PruneDialog } from './PruneDialog'
+import type { PruneDialogOption } from './PruneDialog'
 import { ResultBanner } from './ResultBanner'
 import type { CleanupOutcome } from './ResultBanner'
-import type { PruneGroup } from './groups'
+import type { PruneGroup, PruneOptions } from './groups'
 import {
+  DEFAULT_PRUNE_OPTIONS,
   PRUNE_ORDER,
   buildGroups,
   describeGroups,
@@ -56,13 +57,13 @@ export function CleanupPage() {
   const [expanded, setExpanded] = useState<ReadonlySet<PruneTarget>>(() => new Set())
   const [pending, setPending] = useState<Scope | null>(null)
   const [running, setRunning] = useState<Scope | null>(null)
-  const [allUnused, setAllUnused] = useState(false)
+  const [options, setOptions] = useState<PruneOptions>(DEFAULT_PRUNE_OPTIONS)
   const [result, setResult] = useState<CleanupOutcome | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const groups = useMemo(
-    () => (preview.data === undefined ? [] : buildGroups(preview.data)),
-    [preview.data],
+    () => (preview.data === undefined ? [] : buildGroups(preview.data, options)),
+    [preview.data, options],
   )
 
   const total = totalReclaimable(groups)
@@ -115,7 +116,8 @@ export function CleanupPage() {
           const acc = await accPromise
           const step = await prune.mutateAsync({
             target,
-            allUnused: target === 'images' ? allUnused : false,
+            allUnused:
+              (target === 'images' && options.taggedImages) || (target === 'volumes' && options.namedVolumes),
           })
 
           return { deleted: acc.deleted + step.deleted, reclaimed: acc.reclaimed + step.reclaimed }
@@ -246,23 +248,13 @@ export function CleanupPage() {
         </>
       )}
 
-      <ConfirmDialog
-        open={pending !== null && pending !== 'all' && pending !== 'images'}
-        title={`Очистить: ${pendingGroup?.title.toLowerCase() ?? ''}`}
-        description={t('cleanup.warning')}
-        subject={pendingGroup === undefined ? '' : subjectOf(pendingGroup)}
-        confirmLabel="Очистить"
-        onConfirm={() => {
-          if (pending !== null) void run(pending)
-        }}
-        onOpenChange={(open) => {
-          if (!open) setPending(null)
-        }}
-      />
-
-      <ImagePruneDialog
-        open={pending === 'all' || pending === 'images'}
-        title={pending === 'all' ? t('cleanup.runAll') : t('cleanup.runImages')}
+      <PruneDialog
+        open={pending !== null}
+        title={
+          pending === 'all'
+            ? t('cleanup.runAll')
+            : `Очистить: ${pendingGroup?.title.toLowerCase() ?? ''}`
+        }
         description={t('cleanup.warning')}
         subject={
           pending === 'all'
@@ -271,8 +263,7 @@ export function CleanupPage() {
               ? ''
               : subjectOf(pendingGroup)
         }
-        allUnused={allUnused}
-        onAllUnusedChange={setAllUnused}
+        options={dialogOptions(pending, options, setOptions, t)}
         onConfirm={() => {
           if (pending !== null) void run(pending)
         }}
@@ -282,6 +273,38 @@ export function CleanupPage() {
       />
     </div>
   )
+}
+
+/** Галочки расширенной очистки, относящиеся к выбранному охвату. */
+function dialogOptions(
+  scope: Scope | null,
+  options: PruneOptions,
+  setOptions: (update: (current: PruneOptions) => PruneOptions) => void,
+  t: ReturnType<typeof useT>,
+): PruneDialogOption[] {
+  const result: PruneDialogOption[] = []
+
+  if (scope === 'images' || scope === 'all') {
+    result.push({
+      key: 'images',
+      label: t('cleanup.images.allUnused'),
+      hint: t('cleanup.images.allUnusedHint'),
+      checked: options.taggedImages,
+      onChange: (value) => setOptions((current) => ({ ...current, taggedImages: value })),
+    })
+  }
+
+  if (scope === 'volumes' || scope === 'all') {
+    result.push({
+      key: 'volumes',
+      label: t('cleanup.volumes.named'),
+      hint: t('cleanup.volumes.namedHint'),
+      checked: options.namedVolumes,
+      onChange: (value) => setOptions((current) => ({ ...current, namedVolumes: value })),
+    })
+  }
+
+  return result
 }
 
 /** Точный предмет удаления для диалога: у кеша сборки счёта объектов нет. */

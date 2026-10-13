@@ -2,32 +2,29 @@ import * as Dialog from '@radix-ui/react-dialog'
 import { AlertTriangle, Check } from 'lucide-react'
 import { useT } from '@/state/settings'
 
-interface ImagePruneDialogProps {
+/** Галочка расширенной очистки: подпись, предупреждение и состояние. */
+export interface PruneDialogOption {
+  key: string
+  label: string
+  hint: string
+  checked: boolean
+  onChange: (value: boolean) => void
+}
+
+interface PruneDialogProps {
   open: boolean
   title: string
   description: string
   /** Точный перечень того, что уйдёт: количества и размеры. */
   subject: string
-  allUnused: boolean
-  onAllUnusedChange: (value: boolean) => void
+  /** Для образов и томов — переключатели «удалять больше, чем prune по умолчанию». */
+  options: readonly PruneDialogOption[]
   onConfirm: () => void
   onOpenChange: (open: boolean) => void
 }
 
-/**
- * Отдельный диалог для образов: помимо подтверждения нужен переключатель
- * «все неиспользуемые», которого нет в общем ConfirmDialog.
- */
-export function ImagePruneDialog({
-  open,
-  title,
-  description,
-  subject,
-  allUnused,
-  onAllUnusedChange,
-  onConfirm,
-  onOpenChange,
-}: ImagePruneDialogProps) {
+/** Подтверждение очистки: перечень удаляемого и, где есть, галочки расширенного режима. */
+export function PruneDialog({ open, title, description, subject, options, onConfirm, onOpenChange }: PruneDialogProps) {
   const t = useT()
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -49,32 +46,34 @@ export function ImagePruneDialog({
                 {subject}
               </div>
 
-              <label className="mt-3 flex cursor-pointer items-start gap-2">
-                <span
-                  className={[
-                    'mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded border transition-colors',
-                    allUnused
-                      ? 'border-[var(--color-ember-500)] bg-[var(--color-ember-500)]/25 text-[var(--color-ember-300)]'
-                      : 'border-border bg-bg/30 text-transparent',
-                  ].join(' ')}
-                >
-                  <Check className="h-3 w-3" />
-                </span>
-
-                <input
-                  type="checkbox"
-                  checked={allUnused}
-                  onChange={(event) => onAllUnusedChange(event.target.checked)}
-                  className="sr-only"
-                />
-
-                <span className="text-sm leading-snug text-foreground/75">
-                  {t('cleanup.images.allUnused')}
-                  <span className="mt-0.5 block text-xs text-[var(--color-amber-ok)]/80">
-                    {t('cleanup.images.allUnusedHint')}
+              {options.map((option) => (
+                <label key={option.key} className="mt-3 flex cursor-pointer items-start gap-2">
+                  <span
+                    className={[
+                      'mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded border transition-colors',
+                      option.checked
+                        ? 'border-[var(--color-ember-500)] bg-[var(--color-ember-500)]/25 text-[var(--color-ember-300)]'
+                        : 'border-border bg-bg/30 text-transparent',
+                    ].join(' ')}
+                  >
+                    <Check className="h-3 w-3" />
                   </span>
-                </span>
-              </label>
+
+                  <input
+                    type="checkbox"
+                    checked={option.checked}
+                    onChange={(event) => option.onChange(event.target.checked)}
+                    className="sr-only"
+                  />
+
+                  <span className="text-sm leading-snug text-foreground/75">
+                    {option.label}
+                    <span className="mt-0.5 block text-xs text-[var(--color-amber-ok)]/80">
+                      {option.hint}
+                    </span>
+                  </span>
+                </label>
+              ))}
             </div>
           </div>
 
@@ -84,7 +83,7 @@ export function ImagePruneDialog({
                 type="button"
                 className="h-8 rounded-lg border border-border bg-fg/5 px-3 text-sm text-foreground/75 transition-colors hover:text-foreground"
               >
-                Отмена
+                {t('common.cancel')}
               </button>
             </Dialog.Close>
 
@@ -96,7 +95,7 @@ export function ImagePruneDialog({
               }}
               className="h-8 rounded-lg border border-[var(--color-danger)]/45 bg-[var(--color-danger)]/15 px-3 text-sm text-[var(--color-danger)] transition-colors hover:bg-[var(--color-danger)]/25"
             >
-              Очистить
+              {t('cleanup.run')}
             </button>
           </div>
         </Dialog.Content>

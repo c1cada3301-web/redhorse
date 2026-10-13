@@ -38,6 +38,7 @@ export function CleanupTile({ group, icon, running, locked, onClean }: CleanupTi
 
       <p className="mt-0.5 line-clamp-2 min-h-[26px] text-xs leading-snug text-muted-foreground">
         {group.hint}
+        {group.hidden > 0 && ` · ${t('cleanup.extendedHidden', { count: group.hidden })}`}
       </p>
 
       <button
