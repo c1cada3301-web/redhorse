@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
+import { Loader2 } from 'lucide-react'
 import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router'
 import { useQueryClient, useIsFetching } from '@tanstack/react-query'
 import { useDocker } from './state/useDocker'
@@ -11,19 +12,22 @@ import { Sidebar } from './components/shell/Sidebar'
 import type { NavKey } from './components/shell/Sidebar'
 import { TopBar } from './components/shell/TopBar'
 import { ContainersPage } from './components/containers/ContainersPage'
-import { ContainerDetailPage } from './components/containers/ContainerDetailPage'
-import { CreateContainerPage } from './components/create/CreateContainerPage'
-import { DashboardPage } from './components/dashboard/DashboardPage'
-import { ImagesPage } from './components/images/ImagesPage'
-import { CleanupPage } from './components/cleanup/CleanupPage'
-import { MonitoringPage } from './components/monitoring/MonitoringPage'
-import { NetworksPage } from './components/networks/NetworksPage'
-import { SettingsPage } from './components/settings/SettingsPage'
-import { VolumesPage } from './components/volumes/VolumesPage'
 import { LogDock } from './components/logview/LogDock'
 import { FloatingLogWindow } from './components/logview/FloatingLogWindow'
 import { LogPane } from './components/logview/LogPane'
 import { logout, type Account } from './api/auth'
+
+// Список контейнеров — стартовый экран, он в основном бандле. Остальные разделы
+// грузятся при первом заходе: так первая отрисовка не ждёт графики, сборку и формы.
+const ContainerDetailPage = lazy(() => import('./components/containers/ContainerDetailPage').then((m) => ({ default: m.ContainerDetailPage })))
+const CreateContainerPage = lazy(() => import('./components/create/CreateContainerPage').then((m) => ({ default: m.CreateContainerPage })))
+const DashboardPage = lazy(() => import('./components/dashboard/DashboardPage').then((m) => ({ default: m.DashboardPage })))
+const ImagesPage = lazy(() => import('./components/images/ImagesPage').then((m) => ({ default: m.ImagesPage })))
+const CleanupPage = lazy(() => import('./components/cleanup/CleanupPage').then((m) => ({ default: m.CleanupPage })))
+const MonitoringPage = lazy(() => import('./components/monitoring/MonitoringPage').then((m) => ({ default: m.MonitoringPage })))
+const NetworksPage = lazy(() => import('./components/networks/NetworksPage').then((m) => ({ default: m.NetworksPage })))
+const SettingsPage = lazy(() => import('./components/settings/SettingsPage').then((m) => ({ default: m.SettingsPage })))
+const VolumesPage = lazy(() => import('./components/volumes/VolumesPage').then((m) => ({ default: m.VolumesPage })))
 
 
 interface AppProps {
@@ -108,6 +112,7 @@ function App({ account, onSignOut }: AppProps) {
         />
 
         <main className="min-h-0 flex-1">
+          <Suspense fallback={<PageFallback />}>
           <Routes>
             <Route path="/" element={<Navigate to="/containers" replace />} />
             <Route
@@ -151,6 +156,7 @@ function App({ account, onSignOut }: AppProps) {
             {/* Неизвестный адрес — не белый экран, а список контейнеров. */}
             <Route path="*" element={<Navigate to="/containers" replace />} />
           </Routes>
+          </Suspense>
         </main>
 
         <LogDock api={logs} />
@@ -191,6 +197,14 @@ function App({ account, onSignOut }: AppProps) {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+function PageFallback() {
+  return (
+    <div className="flex h-full items-center justify-center text-muted-foreground">
+      <Loader2 className="h-5 w-5 animate-spin" />
     </div>
   )
 }

@@ -12,6 +12,21 @@ export default defineConfig({
   resolve: {
     alias: { '@': path.resolve(import.meta.dirname, './src') },
   },
+  build: {
+    rolldownOptions: {
+      output: {
+        // Библиотеки меняются реже кода панели: отдельные чанки переживают
+        // пересборку в кеше браузера и качаются параллельно.
+        codeSplitting: {
+          groups: [
+            { name: 'react', test: /node_modules[\\/](react|react-dom|scheduler|react-router)[\\/]/, priority: 30 },
+            { name: 'radix', test: /node_modules[\\/]@radix-ui[\\/]/, priority: 20 },
+            { name: 'vendor', test: /node_modules[\\/]/, priority: 10 },
+          ],
+        },
+      },
+    },
+  },
   server: {
     host: true,
     port: 3000,
