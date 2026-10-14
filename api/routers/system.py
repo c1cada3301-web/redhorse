@@ -5,6 +5,7 @@ import logging
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
+from services.disk_usage import disk_usage as cached_disk_usage
 from services.docker_client import get_client
 from services.stats_hub import hub
 
@@ -62,7 +63,7 @@ async def info() -> dict:
 
 @router.get("/df")
 async def disk_usage() -> dict:
-    raw = await asyncio.to_thread(lambda: get_client().df())
+    raw = await cached_disk_usage()
 
     def total(key: str, field: str = "Size") -> int:
         return sum(int(item.get(field) or 0) for item in (raw.get(key) or []))
